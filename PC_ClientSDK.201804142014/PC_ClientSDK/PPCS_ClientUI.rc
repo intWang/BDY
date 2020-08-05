@@ -1,0 +1,233 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// 中文(简体，中国) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE LANG_CHINESE, SUBLANG_CHINESE_SIMPLIFIED
+#pragma code_page(936)
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)\r\n"
+    "LANGUAGE 4, 2\r\n"
+    "#pragma code_page(936)\r\n"
+    "#include ""res\\PPCS_ClientUI.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""     // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON                    "res\\PPCS_ClientUI.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOGEX 0, 0, 235, 55
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About PPCS_ClientUI"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
+    LTEXT           "PPCS_ClientUI Version 1.0",IDC_STATIC,40,10,119,8,SS_NOPREFIX
+    LTEXT           "Copyright (C) 2012",IDC_STATIC,40,25,119,8
+    DEFPUSHBUTTON   "OK",IDOK,178,7,50,16,WS_GROUP
+END
+
+IDD_PPCS_CLIENTUI_DIALOG DIALOGEX 0, 0, 601, 313
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | WS_MINIMIZEBOX | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "PPCS_ClientUI"
+FONT 8, "MS Shell Dlg", 0, 0, 0x1
+BEGIN
+    LTEXT           "",IDC_AVINFO,11,8,99,8
+    RTEXT           "PPCS_API ver:0.1.0.0",IDC_APIVER,498,4,94,8
+    CONTROL         "",IDC_VIDEO,"Static",SS_BLACKRECT,7,17,276,210
+    LTEXT           "UID:",IDC_STATIC,288,23,21,8
+    COMBOBOX        IDC_COMBO1,321,21,99,30,CBS_DROPDOWN | CBS_SORT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "Connect",IDC_START,429,20,42,14
+    PUSHBUTTON      "Disconnect",IDC_STOP,431,41,41,14
+    EDITTEXT        IDC_EDIT1,7,228,277,75,ES_MULTILINE | ES_AUTOVSCROLL | ES_READONLY | ES_WANTRETURN | WS_VSCROLL
+    CONTROL         "Audio",IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,361,42,30,10
+    CONTROL         "Video",IDC_CHECK2,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,397,42,30,10
+    LTEXT           "unknown",IDC_STATIC_STATUS,316,43,41,11
+    LTEXT           "Status:",IDC_STATIC,285,43,26,12
+    PUSHBUTTON      "获取视频参数",IDC_BUTTON1,289,79,58,15
+    PUSHBUTTON      "设置视频参数",IDC_BUTTON2,350,79,54,15
+    CONTROL         "4G状态",IDC_CHECK3,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,349,103,40,12
+    PUSHBUTTON      "获取4G状态",IDC_BUTTON3,289,101,53,14
+    PUSHBUTTON      "获取WiFi状态",IDC_BUTTON4,290,121,53,14
+    CONTROL         "WiFi状态",IDC_CHECK4,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,350,122,44,11
+    PUSHBUTTON      "搜索WiFi",IDC_BUTTON5,464,121,50,14
+    PUSHBUTTON      "设置WiFi",IDC_BUTTON6,401,121,52,14
+    LTEXT           "注意：先获取再设置！",IDC_STATIC,327,63,83,10
+    PUSHBUTTON      "局域网搜索",IDC_BUTTON7,290,141,46,15
+    PUSHBUTTON      "局域网设置",IDC_BUTTON8,345,141,50,15
+    PUSHBUTTON      "局域网重启",IDC_BUTTON9,404,141,49,14
+    PUSHBUTTON      "获取时间",IDC_BUTTON10,289,165,50,14
+    PUSHBUTTON      "设置时间",IDC_BUTTON11,347,165,46,14
+    PUSHBUTTON      "远程重启",IDC_BUTTON12,508,102,37,14
+    PUSHBUTTON      "获取图像参数",IDC_BUTTON13,411,79,57,15
+    PUSHBUTTON      "设置图像参数",IDC_BUTTON14,473,79,52,15
+    PUSHBUTTON      "获取设备信息",IDC_BUTTON15,531,79,52,13
+    PUSHBUTTON      "获取OSD",IDC_BUTTON_GET_OSD,290,188,47,16
+    PUSHBUTTON      "设置OSD",IDC_BUTTON_SET_OSD,525,187,48,16
+    PUSHBUTTON      "获取报警",IDC_BUTTON_GET_ALARM,289,212,48,16
+    PUSHBUTTON      "设置报警",IDC_BUTTON_SET_ALARM,525,212,49,16
+    CONTROL         "显示设备名",IDC_CHECK_DEV_NAME,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,349,189,59,15
+    LTEXT           "X:",IDC_STATIC,416,191,8,12
+    EDITTEXT        IDC_EDIT_DEV_NAME_OSD_X,427,189,36,12,ES_AUTOHSCROLL
+    LTEXT           "Y:",IDC_STATIC,471,191,8,10
+    EDITTEXT        IDC_EDIT_DEV_NAME_OSD_Y,484,189,28,13,ES_AUTOHSCROLL
+    CONTROL         "开启报警",IDC_CHECK_ENABLE_ALARM,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,349,213,47,14
+    CONTROL         "报警录像",IDC_CHECK_ALARM_RECORD,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,403,214,42,13
+    CONTROL         "报警抓拍",IDC_CHECK_ALARM_SNAPSHOT,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,458,215,49,12
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "TODO: <Company name>"
+            VALUE "FileDescription", "TODO: <File description>"
+            VALUE "FileVersion", "1.0.0.1"
+            VALUE "InternalName", "PPCS_ClientUI.exe"
+            VALUE "LegalCopyright", "TODO: (c) <Company name>.  All rights reserved."
+            VALUE "OriginalFilename", "PPCS_ClientUI.exe"
+            VALUE "ProductName", "TODO: <Product name>"
+            VALUE "ProductVersion", "1.0.0.1"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO
+BEGIN
+    IDD_ABOUTBOX, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 228
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_PPCS_CLIENTUI_DIALOG, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 592
+        BOTTOMMARGIN, 303
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE
+BEGIN
+    IDS_ABOUTBOX            "&About PPCS_ClientUI..."
+END
+
+#endif    // 中文(简体，中国) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_CHS)
+LANGUAGE 4, 2
+#pragma code_page(936)
+#include "res\PPCS_ClientUI.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"     // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
