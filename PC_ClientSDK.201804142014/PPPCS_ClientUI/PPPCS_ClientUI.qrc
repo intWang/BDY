@@ -1,0 +1,13 @@
+<RCC>
+    <qresource prefix="/Black">
+        <file>res/close.png</file>
+        <file>res/restore.png</file>
+        <file>res/maxmize.png</file>
+        <file>res/minimize.png</file>
+        <file>res/bk/bk_dialog.png</file>
+        <file>res/bk/bk_dialog_bt.png</file>
+    </qresource>
+    <qresource prefix="/qss">
+        <file>style_blk.qss</file>
+    </qresource>
+</RCC>
