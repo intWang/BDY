@@ -2,9 +2,8 @@
 #include <QPainter>
 
 BaseWidget::BaseWidget(QWidget *parent)
-    : QWidget(parent)
+    : MovelabelWidget<QWidget>(parent)
 {
-    ui.setupUi(this);
     setWindowFlags(Qt::FramelessWindowHint | windowFlags());
 }
 
@@ -25,26 +24,6 @@ void BaseWidget::SetAreaBk(const QColor& clrTop, const QColor& clrMid, const QCo
     m_clrMid = clrMid;
 }
 
-void BaseWidget::mousePressEvent(QMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton)
-    {
-        m_bPressed = true;
-        m_point = event->pos();
-    }
-}
-
-void BaseWidget::mouseMoveEvent(QMouseEvent *event)
-{
-    if (m_bPressed)
-        move(event->pos() - m_point + pos());
-}
-
-void BaseWidget::mouseReleaseEvent(QMouseEvent *event)
-{
-    Q_UNUSED(event);
-    m_bPressed = false;
-}
 
 void BaseWidget::paintEvent(QPaintEvent *event)
 {
@@ -68,6 +47,4 @@ void BaseWidget::paintEvent(QPaintEvent *event)
     {
         painter.fillRect(bottom, m_clrBottom);
     }
-
-
 }

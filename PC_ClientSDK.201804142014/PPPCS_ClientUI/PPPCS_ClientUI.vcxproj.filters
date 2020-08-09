@@ -58,6 +58,21 @@
     <ClCompile Include="MainViewWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PreviewWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PreviewPanel.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MovelabelWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="QtWidgetsClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="MainViewWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h">
@@ -72,12 +87,30 @@
     <QtMoc Include="MainFrame.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="BaseDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="PreviewPanel.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="QtWidgetsClass.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="MainViewWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="PPPCS_ClientUI.ui">
       <Filter>Form Files</Filter>
     </QtUic>
-    <QtUic Include="BaseWidget.ui">
+    <QtUic Include="PreviewPanel.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="QtWidgetsClass.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MainViewWidget.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -96,14 +129,26 @@
     <ClInclude Include="Interface\ILogger.h">
       <Filter>Interface</Filter>
     </ClInclude>
-    <ClInclude Include="BaseDialog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="Interface\IWndHoverCallback.h">
       <Filter>Interface</Filter>
     </ClInclude>
     <ClInclude Include="MainViewWnd.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PreviewWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="MovelabelWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="AreableWidget.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Interface\IWindowsDataCallBack.h">
+      <Filter>Interface</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

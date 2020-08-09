@@ -1,17 +1,20 @@
 #pragma once
-#include "BaseWidget.h"
 #include "CmdBar.h"
 #include "QtDefine.h"
-class BaseDialog :public BaseWidget
+#include "AreableWidget.h"
+class BaseDialog :public AreableWidget<QWidget>
 {
+    Q_OBJECT
+
     using QPixmapPtr = QPixmap * ;
 public:
     BaseDialog(QWidget *parent = Q_NULLPTR);
     ~BaseDialog();
-    QVBoxLayoutPtr GetLayout();
+    QGridLayoutPtr GetLayout();
 private:
     CmdBar::Ptr m_pTitleBar = nullptr;
-    QVBoxLayoutPtr m_pMainLayout = nullptr;
+    BottomBar::Ptr m_pBottomBar = nullptr;
+    QGridLayoutPtr m_pMainLayout = nullptr;
 protected:
 
 };

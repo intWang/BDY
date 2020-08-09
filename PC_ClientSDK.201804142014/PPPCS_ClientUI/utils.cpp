@@ -1,14 +1,26 @@
-#include "QtDefine.h"
+#include "utils.h"
 
-
-bool CheckPointer(std::initializer_list<void*> list)
+namespace utils
 {
-    for (auto ptr : list)
+    bool CheckPointer(std::initializer_list<void*> list)
     {
-        if (!ptr)
+        for (auto ptr : list)
         {
-            return false;
+            if (!ptr)
+            {
+                return false;
+            }
         }
+        return true;
     }
-    return true;
+    bool PtinWnd(QWidgetPtr pWidget)
+    {
+        if (pWidget)
+        {
+            QRect rcWnd = pWidget->geometry();
+            QPoint ptCursor = pWidget->mapFromGlobal(QCursor::pos());
+            return rcWnd.contains(ptCursor);
+        }
+        return false;
+    }
 }

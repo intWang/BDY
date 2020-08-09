@@ -25,3 +25,7 @@ private:
 };
 
 
+#define LogError(format, ...) qCritical(QString("%s %1").arg(format).toStdString().c_str(), __FUNCTION__,  __VA_ARGS__);
+#define LogInfo(format, ...) qInfo(QString("%s %1").arg(format).toStdString().c_str(), __FUNCTION__,  __VA_ARGS__);
+#define LogDebug(format, ...) qDebug(QString("%s %1").arg(format).toStdString().c_str(), __FUNCTION__,  __VA_ARGS__);
+#define LogWarning(format, ...) qWarning(QString("%s %1").arg(format).toStdString().c_str(), __FUNCTION__,  __VA_ARGS__);

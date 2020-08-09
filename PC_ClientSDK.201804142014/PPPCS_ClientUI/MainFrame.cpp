@@ -3,11 +3,11 @@
 MainFrame::MainFrame(QWidget *parent)
     :BaseDialog(parent)
 {
-    m_pMainView = MQ(MainViewWnd)(this);
+    m_pMainViewWiget = MQ(MainViewWidget)(this);
     auto pLayout = GetLayout();
-    pLayout->addWidget(new QWidget(this));
-    pLayout->addWidget(m_pMainView);
-    m_pMainView->show();
+    pLayout->addWidget(m_pMainViewWiget);
+    m_pMainViewWiget->show();
+    pLayout->setContentsMargins(10, 0, 10, 0);
     pLayout->update();
 }
 

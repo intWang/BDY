@@ -1,26 +1,29 @@
 #include "BaseDialog.h"
+#include "utils.h"
 BaseDialog::BaseDialog(QWidget *parent)
-    :BaseWidget(parent)
+    :AreableWidget<QWidget>(parent)
 {
     m_pTitleBar = MQ(CmdBar)(this);
+    m_pBottomBar = MQ(BottomBar)(this);
     auto pLayout = MQ(QVBoxLayout)(this);
-    m_pMainLayout = MQ(QVBoxLayout)(this);
+    m_pMainLayout = MQ(QGridLayout)(this);
 
-    if (!CheckPointer({ m_pTitleBar, pLayout, m_pMainLayout}))
+    if (!utils::CheckPointer({ m_pTitleBar, pLayout, m_pMainLayout}))
     {
-        qCritical("Error param %d %d %d", m_pTitleBar, pLayout, m_pMainLayout);
+        LogError("Error param %d %d %d %d", m_pTitleBar, pLayout, m_pMainLayout, m_pBottomBar);
     }
 
     installEventFilter(m_pTitleBar);
 
-    resize(800, 600);
+    resize(1200, 900);
     setWindowTitle("Custom Window");
     //setWindowIcon(QIcon(":/Images/logo
     SetArea(30, 30);
     pLayout->addWidget(m_pTitleBar);
     pLayout->addLayout(m_pMainLayout);
-    pLayout->addStretch();
+    pLayout->addWidget(m_pBottomBar);
     pLayout->setSpacing(0);
+    pLayout->setStretch(1,10);
     pLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(pLayout);
 }
@@ -30,7 +33,7 @@ BaseDialog::~BaseDialog()
 {
 }
 
-QVBoxLayoutPtr BaseDialog::GetLayout()
+QGridLayoutPtr BaseDialog::GetLayout()
 {
-    return dynamic_cast<QVBoxLayoutPtr>(m_pMainLayout);
+    return dynamic_cast<QGridLayoutPtr>(m_pMainLayout);
 }

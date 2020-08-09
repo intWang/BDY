@@ -25,9 +25,23 @@ private:
     QPushButtonPtr m_pCloseButton;
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
-    //virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
+    virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
     virtual bool eventFilter(QObject *watched, QEvent *event) override;
     virtual void mouseReleaseEvent(QMouseEvent *event) override;
 
 };
 
+class BottomBar :public QWidget
+{
+    Q_OBJECT
+public:
+
+    using Ptr = BottomBar * ;
+    explicit BottomBar(QWidget *parent = 0);
+    ~BottomBar();
+
+protected:
+
+    QLabelPtr m_pLabel = nullptr;
+
+};

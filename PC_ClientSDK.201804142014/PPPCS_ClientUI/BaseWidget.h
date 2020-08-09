@@ -1,10 +1,11 @@
 #pragma once
-
+//DO NOT USE
 #include <QWidget>
-#include "ui_BaseWidget.h"
 #include <QPoint>
 #include <QMouseEvent>
-class BaseWidget : public QWidget
+#include "QtDefine.h"
+#include "MovelabelWidget.h"
+class BaseWidget : public MovelabelWidget<QWidget>
 {
     Q_OBJECT
 
@@ -16,18 +17,12 @@ public:
     void SetAreaBk(const QColor& clrTop, const QColor& clrMid, const QColor& clrBottom);
 
 protected:
-    virtual void mousePressEvent(QMouseEvent *event) override;
-    virtual void mouseMoveEvent(QMouseEvent *event) override;
-    virtual void mouseReleaseEvent(QMouseEvent *event) override;
     virtual void paintEvent(QPaintEvent *event) override;
 
 private:
-    Ui::BaseWidget ui;
-    bool m_bPressed;
-    QPoint m_point;
     int m_heightTop = 0;
     int m_heightBottom = 0;
-    QColor m_clrTop = QColor(41, 44, 57);
-    QColor m_clrBottom = QColor(41, 44, 57);
-    QColor m_clrMid = QColor(30,34,51);
+    QColor m_clrTop = s_qcl292C39;
+    QColor m_clrBottom = s_qcl292C39;
+    QColor m_clrMid = s_qcl1E2233;
 };

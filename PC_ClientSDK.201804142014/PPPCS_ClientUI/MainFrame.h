@@ -1,6 +1,6 @@
 #pragma once
 #include "BaseDialog.h"
-#include "MainViewWnd.h"
+#include "MainViewWidget.h"
 class MainFrame:public BaseDialog
 {
     Q_OBJECT
@@ -9,6 +9,6 @@ public:
     ~MainFrame();
 
 private:
-    MainViewWnd::Ptr m_pMainView = nullptr;
+    MainViewWidget::Ptr m_pMainViewWiget = nullptr;
 };
 

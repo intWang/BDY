@@ -9,6 +9,8 @@
 #include <qt_windows.h>
 #endif
 
+#include "utils.h"
+
 CmdBar::CmdBar(QWidget *parent)
     : QWidget(parent)
 {
@@ -21,9 +23,9 @@ CmdBar::CmdBar(QWidget *parent)
     m_pCloseButton = MQ(QPushButton)(this);
     QHBoxLayoutPtr pLayout = MQ(QHBoxLayout)(this);
 
-    if (!CheckPointer({ m_pIconLabel, m_pTitleLabel, m_pMinimizeButton, m_pMaximizeButton, m_pCloseButton, pLayout }))
+    if (!utils::CheckPointer({ m_pIconLabel, m_pTitleLabel, m_pMinimizeButton, m_pMaximizeButton, m_pCloseButton, pLayout }))
     {
-        qCritical("Error param %d %d %d %d %d %d", m_pIconLabel, m_pTitleLabel, m_pMinimizeButton, m_pMaximizeButton, m_pCloseButton, pLayout);
+        LogError("Error param %d %d %d %d %d %d", m_pIconLabel, m_pTitleLabel, m_pMinimizeButton, m_pMaximizeButton, m_pCloseButton, pLayout);
     }
 
     m_pIconLabel->setFixedSize(20, 20);
@@ -134,6 +136,7 @@ bool CmdBar::eventFilter(QObject *watched, QEvent *event)
         updateMaximize();
         return true;
     }
+
     return QWidget::eventFilter(watched, event);
 }
 
@@ -158,9 +161,30 @@ void CmdBar::mousePressEvent(QMouseEvent *event)
 #endif
 }
 
-// void CmdBar::mouseDoubleClickEvent(QMouseEvent *event)
-// {
-//     Q_UNUSED(event);
-// 
-//     emit m_pMaximizeButton->clicked();
-// }
+void CmdBar::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event);
+
+    emit m_pMaximizeButton->clicked();
+}
+
+BottomBar::BottomBar(QWidget *parent /*= 0*/)
+    : QWidget(parent)
+{
+    setFixedHeight(30);
+    auto pLayout = MQ(QHBoxLayout)(this);
+    m_pLabel = MQ(QLabel)(this);
+    if (!utils::CheckPointer({ pLayout , m_pLabel }))
+    {
+        LogError("Error param %d %d ", pLayout, m_pLabel);
+    }
+    m_pLabel->setObjectName("whiteLabel");
+    m_pLabel->setText("Bottom data");
+    pLayout->addWidget(m_pLabel);
+    setLayout(pLayout);
+}
+
+BottomBar::~BottomBar()
+{
+
+}

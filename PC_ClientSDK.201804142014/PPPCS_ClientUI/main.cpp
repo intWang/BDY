@@ -3,6 +3,7 @@
 #include <QtWidgets/QApplication>
 #include "LogManager.h"
 #include <process.h>
+#include <QFile>
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -15,20 +16,20 @@ int main(int argc, char *argv[])
     QFile qss(":/qss/style_blk.qss");
     if (qss.open(QFile::ReadOnly))
     {
-        qDebug("open qss success");
+        LogDebug("open qss success");
         QString style = QLatin1String(qss.readAll());
         a.setStyleSheet(style);
         qss.close();
     }
     else
     {
-        qWarning("open qss failed");
+        LogWarning("open qss failed");
     }
 
     int processid = getpid();
-    qDebug("Start Process %d", processid);
+    LogInfo("Start Process %d", processid);
     MainFrame w;
     w.show();
-    qDebug("Quit Process %d", processid);
+    LogInfo("Quit Process %d", processid);
     return a.exec();
 }
