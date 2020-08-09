@@ -17,7 +17,7 @@
 
 #include "Picture.h"
 #include "wave_out.h"
-#include "H264CodecLib.h"
+//#include "H264CodecLib.h"
 
 #ifdef _DEBUG
 #define new DEBUG_NEW
@@ -205,7 +205,7 @@ BOOL CPPCS_ClientUIDlg::OnInitDialog()
 	//m_rectVideo.right=3*m_rectVideo.Height()/4;
 
 	Set_WIN_Params(INVALID_FILEDESC, 8000.0f, 16, 1);
-	m_nInitH264Decoder=InitCodec(1);
+	//m_nInitH264Decoder=InitCodec(1);
 
 	InitUI();
 
@@ -226,7 +226,7 @@ void CPPCS_ClientUIDlg::OnDestroy()
 
 	WIN_Audio_close();
 	if(m_nInitH264Decoder>=0) {
-		UninitCodec();
+		//UninitCodec();
 		m_nInitH264Decoder=-1;
 	}
 	if(m_pBufBmp24) {
@@ -527,7 +527,7 @@ void CPPCS_ClientUIDlg::myDoVideoData(CHAR *pData,int len)
 				while(nFrameSize>0){
 AGAIN_DECODER_NAL:
 					TRACE("H264Decode\n");
-					consumed_bytes=H264Decode(m_pBufBmp24, pFrame, nFrameSize, m_framePara, 1);
+					//consumed_bytes=H264Decode(m_pBufBmp24, pFrame, nFrameSize, m_framePara, 1);
 					if(consumed_bytes<0){
 						nFrameSize=0;
 						break;
@@ -627,7 +627,7 @@ void CPPCS_ClientUIDlg::OnBnClickedStart()
 		return;
 	}
 
-	IPCNetStartIPCNetSession((char*)csUID.GetBuffer(),"admin",&mIPCNetEventHandler);
+	IPCNetStartIPCNetSession((char*)csUID.GetBuffer(),"123456",&mIPCNetEventHandler);
 	csUID.ReleaseBuffer();
 }
 
@@ -844,7 +844,7 @@ void RebootDeviceOnCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton12()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID, csTmp;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -869,7 +869,7 @@ void GetBrightnessOnCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton13()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -884,7 +884,7 @@ void CPPCS_ClientUIDlg::OnBnClickedButton13()
 
 void CPPCS_ClientUIDlg::OnBnClickedButton14()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	//String str;
 	//mIPCNetCamColorCfg_st.toJSONString(str);
 	CString csUID;
@@ -914,7 +914,7 @@ void GetDevInfoOnCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton15()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -940,7 +940,7 @@ void GetMobileNetworkOnCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton3()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -954,7 +954,7 @@ void CPPCS_ClientUIDlg::OnBnClickedButton3()
 
 void CPPCS_ClientUIDlg::OnBnClickedCheck3()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -980,7 +980,7 @@ void OnCmdSearchWiFiResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton5()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1008,7 +1008,7 @@ void OnCmdGetWiFiNetworkResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton4()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1033,7 +1033,7 @@ void OnCmdSetWiFiNetworkResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton6()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1059,14 +1059,14 @@ void OnSearchDeviceResult(DevInfo*dev)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton7()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	IPCNetSearchDevice(OnSearchDeviceResult);
 }
 
 
 void CPPCS_ClientUIDlg::OnBnClickedButton8()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	//modify IP
 	DevInfo dev;//this element must be copied from the Search runtine! mIPv4Addr will be used as a pointer of SOCKADDR_IN of the target device
 	memcpy(&dev,&searchdev,sizeof(searchdev));
@@ -1076,7 +1076,7 @@ void CPPCS_ClientUIDlg::OnBnClickedButton8()
 
 void CPPCS_ClientUIDlg::OnBnClickedButton9()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	IPCNetRebootDeviceInLAN(searchdev.mIP);
 }
 
@@ -1093,7 +1093,7 @@ void OnCmdGetTimeCfgResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton10()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1123,7 +1123,7 @@ int translate_gmt(int time_zone)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButton11()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
@@ -1171,7 +1171,7 @@ void OnGetOSDCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButtonGetOsd()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1196,7 +1196,7 @@ void OnSetOSDCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButtonSetOsd()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1228,7 +1228,7 @@ void OnGetAlarmCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButtonGetAlarm()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1248,7 +1248,7 @@ void OnSetAlarmCmdResult(int cmd,const char*uuid,const char*json)
 }
 void CPPCS_ClientUIDlg::OnBnClickedButtonSetAlarm()
 {
-	// TODO: ÔÚ´ËÌí¼Ó¿Ø¼þÍ¨Öª´¦Àí³ÌÐò´úÂë
+	// TODO: ï¿½Ú´ï¿½ï¿½ï¿½Ó¿Ø¼ï¿½Í¨Öªï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	CString csUID;
 	GetDlgItemText(IDC_COMBO1, csUID);
 	if(csUID.IsEmpty()){
@@ -1260,11 +1260,11 @@ void CPPCS_ClientUIDlg::OnBnClickedButtonSetAlarm()
 	mIPCNETMoveAlarmCfg.PolicyInfo.RecordInfo.RecEnable=mEnableAlarmRecordChk.GetCheck()==BST_CHECKED;
 	mIPCNETMoveAlarmCfg.PolicyInfo.SnapInfo.PushEnable=mEnableAlarmSnapshotChk.GetCheck()==BST_CHECKED;
 
-	//È«ÆÁÇøÓò
+	//È«ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 	for(int i=0;i<mIPCNETMoveAlarmCfg.MoveInfo.AreaCount;i++)
 		mIPCNETMoveAlarmCfg.MoveInfo.Area[i]=1;
 
-	//ÎªÁË±£Ö¤±¨¾¯¿ªÆô£¬ÐèÒªÉèÖÃ¶ÔÓ¦µÄÖ´ÐÐÊ±¼ä£¬Ä¬ÈÏ¿ªÒ»¸öÈ«ÌìµÄ¾ÍÐÐÁË
+	//Îªï¿½Ë±ï¿½Ö¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Òªï¿½ï¿½ï¿½Ã¶ï¿½Ó¦ï¿½ï¿½Ö´ï¿½ï¿½Ê±ï¿½ä£¬Ä¬ï¿½Ï¿ï¿½Ò»ï¿½ï¿½È«ï¿½ï¿½Ä¾ï¿½ï¿½ï¿½ï¿½ï¿½
 	mIPCNETMoveAlarmCfg.Week[0]->Flag=1;
 	IPCNetTime_st *time=&mIPCNETMoveAlarmCfg.Week[0]->TimePeriod[0]->Start;
 	time->Hour=0;
