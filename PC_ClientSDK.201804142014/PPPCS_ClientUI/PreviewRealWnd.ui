@@ -1,23 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>PreviewPanel</class>
- <widget class="QWidget" name="PreviewPanel">
-  <property name="windowModality">
-   <enum>Qt::NonModal</enum>
-  </property>
-  <property name="enabled">
-   <bool>true</bool>
-  </property>
+ <class>PreviewRealWnd</class>
+ <widget class="QWidget" name="PreviewRealWnd">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>708</width>
-    <height>485</height>
+    <width>400</width>
+    <height>300</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>PreviewPanel</string>
+   <string>PreviewRealWnd</string>
   </property>
   <layout class="QVBoxLayout" name="mainLayout">
    <property name="spacing">

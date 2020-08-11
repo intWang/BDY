@@ -5,6 +5,10 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QGridLayout>
+#include <QLineEdit>
+#include <QTreeView>
+#include "LogManager.h"
+
 using QLabelPtr = QLabel*;
 using QPushButtonPtr = QPushButton*;
 using QObjectPtr = QObject *;
@@ -12,6 +16,10 @@ using QWidgetPtr = QWidget * ;
 using QHBoxLayoutPtr = QHBoxLayout * ;
 using QVBoxLayoutPtr = QVBoxLayout * ;
 using QGridLayoutPtr = QGridLayout * ;
+using QLayoutPtr = QLayout * ;
+using QLineEditPtr = QLineEdit * ;
+using QQWidgetPtr = QWidget * ;
+using QTreeViewPtr = QTreeView * ;
 
 
 class PreviewWnd;

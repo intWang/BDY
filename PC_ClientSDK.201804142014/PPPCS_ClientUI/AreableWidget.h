@@ -2,6 +2,7 @@
 #include <QPainter>
 #include <QPaintEvent>
 #include "QtDefine.h"
+#include "BarWidget.h"
 template <typename T>
 class AreableWidget :public T
 {
@@ -14,14 +15,32 @@ public:
 
 protected:
     virtual void paintEvent(QPaintEvent *event);
-
-private:
+    virtual BarWidget::Ptr GetTopWnd();
+    virtual BarWidget::Ptr GetBottomWnd();
+    virtual BarWidget::Ptr InitTopBar() { return GetTopWnd(); };
+    virtual BarWidget::Ptr InitBottomBar() { return GetBottomWnd(); };
+protected:
     int m_heightTop = 0;
     int m_heightBottom = 0;
     QColor m_clrTop = s_qcl292C39;
     QColor m_clrBottom = s_qcl292C39;
     QColor m_clrMid = s_qcl1E2233;
+
+    BarWidget::Ptr m_TopBar = nullptr;
+    BarWidget::Ptr m_BottomBar = nullptr;
 };
+
+template <typename T>
+BarWidget::Ptr AreableWidget<T>::GetBottomWnd()
+{
+    return m_BottomBar;
+}
+
+template <typename T>
+BarWidget::Ptr AreableWidget<T>::GetTopWnd()
+{
+    return m_TopBar;
+}
 
 template <typename T>
 void AreableWidget<T>::paintEvent(QPaintEvent *event)
@@ -61,6 +80,16 @@ void AreableWidget<T>::SetArea(int heightTop, int heightBottom)
 {
     m_heightTop = heightTop;
     m_heightBottom = heightBottom;
+    if (m_heightBottom && !m_BottomBar)
+    {
+        m_BottomBar = MQ(BarWidget)(this);
+        m_BottomBar->setFixedHeight(m_heightBottom);
+    }
+    if (m_heightTop && !m_TopBar)
+    {
+        m_TopBar = MQ(BarWidget)(this);
+        m_TopBar->setFixedHeight(m_heightTop);
+    }
 }
 
 template <typename T>

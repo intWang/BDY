@@ -87,25 +87,30 @@
     <ClCompile Include="BaseDialog.cpp" />
     <ClCompile Include="BaseWidget.cpp" />
     <ClCompile Include="CmdBar.cpp" />
+    <ClCompile Include="DevTreeWnd.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MainViewWidget.cpp" />
-    <ClCompile Include="MainViewWnd.cpp" />
     <ClCompile Include="MovelabelWidget.cpp" />
+    <ClCompile Include="OpenGLDrawWnd.cpp" />
     <ClCompile Include="PPPCS_ClientUI.cpp" />
     <ClCompile Include="PreviewPanel.cpp" />
+    <ClCompile Include="PreviewRealWnd.cpp" />
     <ClCompile Include="PreviewWnd.cpp" />
     <ClCompile Include="QtWidgetsClass.cpp" />
+    <ClCompile Include="BarWidget.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="DevTreeWnd.ui" />
     <QtUic Include="MainViewWidget.ui" />
     <QtUic Include="PPPCS_ClientUI.ui" />
     <QtUic Include="PreviewPanel.ui" />
+    <QtUic Include="PreviewRealWnd.ui" />
     <QtUic Include="QtWidgetsClass.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -118,18 +123,21 @@
     <QtMoc Include="PreviewPanel.h" />
     <ClInclude Include="AreableWidget.h" />
     <QtMoc Include="MainViewWidget.h" />
+    <QtMoc Include="DevTreeWnd.h" />
+    <ClInclude Include="Interface\IBarWidgetCallBack.h" />
     <ClInclude Include="Interface\IWindowsDataCallBack.h" />
     <ClInclude Include="MovelabelWidget.h" />
+    <QtMoc Include="PreviewRealWnd.h" />
+    <ClInclude Include="OpenGLDrawWnd.h" />
     <ClInclude Include="PreviewWnd.h" />
     <QtMoc Include="QtWidgetsClass.h" />
+    <ClInclude Include="BarWidget.h" />
     <ClInclude Include="utils.h" />
     <QtMoc Include="BaseDialog.h" />
     <ClInclude Include="Interface\ILogger.h" />
-    <ClInclude Include="Interface\IWndHoverCallback.h" />
     <ClInclude Include="LogManager.h" />
     <QtMoc Include="CmdBar.h" />
     <QtMoc Include="MainFrame.h" />
-    <ClInclude Include="MainViewWnd.h" />
     <ClInclude Include="QtDefine.h" />
   </ItemGroup>
   <ItemGroup>
