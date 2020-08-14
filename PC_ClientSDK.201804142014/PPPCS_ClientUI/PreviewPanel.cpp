@@ -7,10 +7,9 @@ PreviewPanel::PreviewPanel(QWidget *parent)
     ui.setupUi(this);
     SetArea(50,0);
     SetAreaBk(s_qcl444858, s_qcl292C39, s_qcl444858);
-    auto pTopBar = GetTopWnd();
+    auto pTopBar = InitTopBar();
     if (pTopBar)
     {
-        InitTopBar(pTopBar);
         ui.mainLayout->addWidget(pTopBar);
         //ui.mainLayout->addStretch();
     }
@@ -86,8 +85,9 @@ void PreviewPanel::OnScreenDevideChange(DevideScreen newMode)
 
 }
 
-void PreviewPanel::InitTopBar(BarWidget::Ptr pBarWidget)
+BarWidget::Ptr PreviewPanel::InitTopBar()
 {
+    auto pBarWidget = GetTopWnd();
     if (!pBarWidget)
     {
         LogError("Top Bar ptr is null!");
@@ -106,12 +106,13 @@ void PreviewPanel::InitTopBar(BarWidget::Ptr pBarWidget)
     }
     LogInfo("init top bar for mode %d", m_curPanelmode);
 
-    return;
+    return pBarWidget;
 }
 
-void PreviewPanel::InitBottomBar(BarWidget::Ptr pBarWidget)
+BarWidget::Ptr PreviewPanel::InitBottomBar()
 {
-
+    auto pBarWidget = GetBottomWnd();
+    return pBarWidget;
 }
 
 void PreviewPanel::InitTopBar4SnapMode(QHBoxLayoutPtr pBarLayout)

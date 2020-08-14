@@ -50,7 +50,7 @@
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <QtInstall>MSVC2017_x86</QtInstall>
-    <QtModules>core;gui;widgets</QtModules>
+    <QtModules>concurrent;core;gui;widgets</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -76,18 +76,25 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>./Dependencies/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>./Dependencies/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>IPCNetManager.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaseDialog.cpp" />
     <ClCompile Include="BaseWidget.cpp" />
     <ClCompile Include="CmdBar.cpp" />
+    <ClCompile Include="ConfigWidget.cpp" />
+    <ClCompile Include="DataStruct.cpp" />
     <ClCompile Include="DevTreeWnd.cpp" />
+    <ClCompile Include="HintServer.cpp" />
+    <ClCompile Include="IPCNetServer.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />
@@ -100,6 +107,10 @@
     <ClCompile Include="PreviewWnd.cpp" />
     <ClCompile Include="QtWidgetsClass.cpp" />
     <ClCompile Include="BarWidget.cpp" />
+    <ClCompile Include="ServerCallBackEngine.cpp" />
+    <ClCompile Include="ServiceEngine.cpp" />
+    <ClCompile Include="StroageManager.cpp" />
+    <ClCompile Include="Tasks.cpp" />
     <ClCompile Include="utils.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -124,14 +135,25 @@
     <ClInclude Include="AreableWidget.h" />
     <QtMoc Include="MainViewWidget.h" />
     <QtMoc Include="DevTreeWnd.h" />
+    <QtMoc Include="ConfigWidget.h" />
+    <ClInclude Include="DataStruct.h" />
+    <ClInclude Include="HintServer.h" />
     <ClInclude Include="Interface\IBarWidgetCallBack.h" />
+    <ClInclude Include="Interface\IServer.h" />
+    <ClInclude Include="Interface\IStroage.h" />
     <ClInclude Include="Interface\IWindowsDataCallBack.h" />
+    <ClInclude Include="Interface\Service.hpp" />
+    <ClInclude Include="IPCNetServer.h" />
     <ClInclude Include="MovelabelWidget.h" />
     <QtMoc Include="PreviewRealWnd.h" />
     <ClInclude Include="OpenGLDrawWnd.h" />
     <ClInclude Include="PreviewWnd.h" />
     <QtMoc Include="QtWidgetsClass.h" />
     <ClInclude Include="BarWidget.h" />
+    <ClInclude Include="ServerCallBackEngine.h" />
+    <ClInclude Include="ServiceEngine.h" />
+    <ClInclude Include="StroageManager.h" />
+    <ClInclude Include="Tasks.h" />
     <ClInclude Include="utils.h" />
     <QtMoc Include="BaseDialog.h" />
     <ClInclude Include="Interface\ILogger.h" />

@@ -1,5 +1,4 @@
 #include "utils.h"
-
 namespace utils
 {
     bool CheckPointer(std::initializer_list<void*> list)
@@ -22,5 +21,15 @@ namespace utils
             return rcWnd.contains(ptCursor);
         }
         return false;
+    }
+
+    QJsonValue GetValueFromJsonObj(const QJsonObject& obj, const QString& param)
+    {
+        if (obj.contains(param))
+        {
+            QJsonValue value = obj.value(param);
+            return value;
+        }
+        return QJsonValue();
     }
 }

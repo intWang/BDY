@@ -168,7 +168,7 @@ void CmdBar::mouseDoubleClickEvent(QMouseEvent *event)
     emit m_pMaximizeButton->clicked();
 }
 
-BottomBar::BottomBar(QWidget *parent /*= 0*/)
+HintBar::HintBar(QWidget *parent /*= 0*/)
     : QWidget(parent)
 {
     setFixedHeight(30);
@@ -181,10 +181,35 @@ BottomBar::BottomBar(QWidget *parent /*= 0*/)
     m_pLabel->setObjectName("whiteLabel");
     m_pLabel->setText("Bottom data");
     pLayout->addWidget(m_pLabel);
+    pLayout->setContentsMargins(10, 0, 0, 0);
     setLayout(pLayout);
+
+    m_pCBFunc = std::make_shared<ls::IHintCallBack::CallBackFunc>();
+    if (m_pCBFunc)
+    {
+        m_pCBFunc->funcOnUserHint = std::bind(&HintBar::OnUserHint, this, std::placeholders::_1, std::placeholders::_2);
+        auto pHintCallBack = g_pCallBack ? g_pCallBack->GetHintCallBack() : nullptr;
+        if (pHintCallBack)
+        {
+            pHintCallBack->Register(m_pCBFunc);
+        }
+    }
 }
 
-BottomBar::~BottomBar()
+HintBar::~HintBar()
 {
 
+}
+
+void HintBar::SetHint(const QString& strText, ls::HintLevel level)
+{
+    if (m_pLabel)
+    {
+        m_pLabel->setText(strText);
+    }
+}
+
+void HintBar::OnUserHint(const std::string& strHintInfo, ls::HintLevel level)
+{
+    SetHint(QString::fromStdString(strHintInfo), level);
 }

@@ -21,6 +21,8 @@ MainViewWidget::MainViewWidget(QWidget *parent)
     pLeftLayout->addWidget(pPreviewPanel);
     pRightLayout->addWidget(pTabWnd);
     pRightLayout->addWidget(pTreeView);
+    pRightLayout->setStretch(0, 2);
+    pRightLayout->setStretch(1, 3);
     setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
     LogInfo("MainViewWidget Created!");
 }

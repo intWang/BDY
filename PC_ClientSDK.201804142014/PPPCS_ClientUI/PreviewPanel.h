@@ -20,8 +20,8 @@ public:
 
     void OnScreenDevideChange(DevideScreen newMode);
 protected:
-    virtual void InitTopBar(BarWidget::Ptr pBarWidget);
-    virtual void InitBottomBar(BarWidget::Ptr pBarWidget);
+    virtual BarWidget::Ptr InitTopBar();
+    virtual BarWidget::Ptr InitBottomBar();
     void InitTopBar4SnapMode(QHBoxLayoutPtr pBarLayout);
     void InitTopBar4PreviewMode(QHBoxLayoutPtr pBarLayout);
     void InitPreviewRealWnds();

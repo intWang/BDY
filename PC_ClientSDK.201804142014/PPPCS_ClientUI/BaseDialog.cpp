@@ -4,7 +4,7 @@ BaseDialog::BaseDialog(QWidget *parent)
     :AreableWidget<QWidget>(parent)
 {
     m_pTitleBar = MQ(CmdBar)(this);
-    m_pBottomBar = MQ(BottomBar)(this);
+    m_pBottomBar = MQ(HintBar)(this);
     auto pLayout = MQ(QVBoxLayout)(this);
     m_pMainLayout = MQ(QGridLayout)(this);
 
@@ -15,8 +15,6 @@ BaseDialog::BaseDialog(QWidget *parent)
 
     installEventFilter(m_pTitleBar);
 
-    resize(1200, 900);
-    setWindowTitle("Custom Window");
     //setWindowIcon(QIcon(":/Images/logo
     SetArea(30, 30);
     pLayout->addWidget(m_pTitleBar);
@@ -36,4 +34,9 @@ BaseDialog::~BaseDialog()
 QGridLayoutPtr BaseDialog::GetLayout()
 {
     return dynamic_cast<QGridLayoutPtr>(m_pMainLayout);
+}
+
+HintBar::Ptr BaseDialog::GetBottomBar()
+{
+    return m_pBottomBar;
 }

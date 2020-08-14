@@ -4,6 +4,8 @@
 #include "LogManager.h"
 #include <process.h>
 #include <QFile>
+#include "IServer.h"
+
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -28,6 +30,17 @@ int main(int argc, char *argv[])
 
     int processid = getpid();
     LogInfo("Start Process %d", processid);
+
+    if (g_pEngine && g_pCallBack)
+    {
+        g_pEngine->initialize();
+        g_pCallBack->initialize();
+        LogInfo("g_pEngine  g_pCallBack initialized");
+    }
+    else
+    {
+        LogError("engine error %d %d ", g_pEngine, g_pCallBack);
+    }
     MainFrame w;
     w.show();
     LogInfo("Quit Process %d", processid);

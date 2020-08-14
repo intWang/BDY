@@ -23,3 +23,18 @@ PreviewRealWnd::PreviewRealWnd(QWidget *parent)
 PreviewRealWnd::~PreviewRealWnd()
 {
 }
+
+void PreviewRealWnd::StartPreview()
+{
+
+}
+
+void PreviewRealWnd::BindDevice(const DeviceData& deviceData)
+{
+    m_deviceData = deviceData;
+}
+
+void PreviewRealWnd::Clear()
+{
+
+}

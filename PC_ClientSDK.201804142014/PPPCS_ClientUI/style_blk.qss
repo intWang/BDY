@@ -170,6 +170,16 @@ QTabBar#tabBar::tab:selected {
         background: rgb(57, 58, 60);
 }
 
+
+/**********树************/
+QTreeView{
+	background: transparent;
+}
+
+QStandardItem[icon="connecting"]{
+	qproperty-icon: url(:/Black/res/restore);
+}
+
 /**********表头**********/
 QHeaderView{
         border: none;
@@ -581,13 +591,13 @@ QSpinBox::down-button:enabled:hover {
 }
 
 /**********标签**********/
-QLabel#grayLabel {
-        color: rgb(175, 175, 175);
+QLabel{
+        color: rgb(199, 202, 217);
+        font-size: 16px;
 }
 
-QLabel#whiteLabel{
-        color: rgb(199, 202, 217);
-        font-size: 20px;
+QLabel#grayLabel {
+        color: rgb(175, 175, 175);
 }
 
 QLabel#highlightLabel {
@@ -824,6 +834,22 @@ QPushButton#closeButton:pressed {
         background: rgb(241, 112, 122);
         image: url(:/Black/res/close);
 }
+
+QPushButton#closeButtonNor {
+        border-radius: none;
+        background: rgb(60, 60, 60);
+        image: url(:/Black/res/close);
+}
+QPushButton#closeButtonNor:hover {
+        background: rgb(232, 17, 35);
+        image: url(:/Black/res/close);
+}
+QPushButton#closeButtonNor:pressed {
+        background: rgb(55, 55, 55);
+        image: url(:/Black/res/close);
+}
+
+
 
 QPushButton#skinButton {
         border-radius: none;

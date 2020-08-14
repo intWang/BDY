@@ -1,8 +1,14 @@
 #include "MainFrame.h"
 #include <QHBoxLayout>
+
+ls::IServiceEngine::Ptr g_pEngine = ls::CreateServiceEngine();
+ls::ICallBackEngin::Ptr g_pCallBack = ls::CreateCallbackEngine();
+
 MainFrame::MainFrame(QWidget *parent)
     :BaseDialog(parent)
 {
+    setWindowTitle("Custom Window");
+    resize(1200, 900);
     m_pMainViewWiget = MQ(MainViewWidget)(this);
     auto pLayout = GetLayout();
     pLayout->addWidget(m_pMainViewWiget);
@@ -14,4 +20,14 @@ MainFrame::MainFrame(QWidget *parent)
 
 MainFrame::~MainFrame()
 {
+    if (g_pCallBack)
+    {
+        g_pCallBack->destroy();
+        g_pCallBack = nullptr;
+    }
+    if (g_pEngine)
+    {
+        g_pEngine->destroy();
+        g_pEngine = nullptr;
+    }
 }
