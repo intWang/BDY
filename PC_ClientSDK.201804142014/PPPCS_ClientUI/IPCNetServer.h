@@ -20,11 +20,17 @@ namespace ls
         virtual void VideoControl(std::string& strUid, bool bStatu, int param1 = 0) override;
         virtual void AudioControl(std::string& strUid, bool bStatu, int param1 = 0) override;
 
+        virtual void onStatus(const char* uuid, int status) override;
+        virtual void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp) override;
+        virtual void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp) override;
+        virtual void onJSONString(const char* uuid, int msg_type, const char* jsonstr) override;
+
     protected:
         void AddTask(ITask::Ptr ptask);
         ITask::Ptr PopTask();
         void Work();
     protected:
+        std::atomic<bool> m_Quit{ false };
         std::mutex m_mxTmp;
         std::thread m_thWork;
         std::condition_variable m_covQuit;
@@ -37,10 +43,14 @@ namespace ls
     {
     public:
         using Ptr = std::shared_ptr<IPCNetServerCallBack>;
-        virtual void OnDeviceConnected(const std::string& strDevJsonInfo) override;
 
         virtual void Register(CB::Ptr func) override;
         virtual void UnRegister(CB::Ptr func) override;
+
+        virtual void OnDeviceConnected(const std::string& strDevJsonInfo) override;
+        virtual void OnDeviceStatuChanged(const std::string& strUid, int nStatu) override;
+        virtual void OnVideo(const std::string& strUid, unsigned char*data, int len, long timestamp) override;
+
     protected:
         std::vector<IIPCNetServerCallBack::CallBackFunc::Ptr> m_CBFunc;
 

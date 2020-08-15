@@ -41,84 +41,88 @@ extern "C" void Log(const char* ptzFormat, ...);
 #define LOGI(format,...) TRACE(format,__VA_ARGS__);
 #define LOGW(format,...) TRACE(format,__VA_ARGS__);
 #define LOGE(format,...) TRACE(format,__VA_ARGS__);
+namespace PJson
+{
 
-class Object{
-public :
-	Object(){mcJSON=0;deletemcJSON=true;}
-	Object(cJSON *json){mcJSON=json;deletemcJSON=true;}
-	Object(cJSON *json,Boolean_t dc){mcJSON=json;deletemcJSON=dc;}
-	~Object(){if(mcJSON && deletemcJSON){cJSON_Delete(mcJSON);mcJSON=0;}}
-	int mType;//JSONObject:0 JSONArray:1
-	cJSON *mcJSON;
-	Boolean_t deletemcJSON;
-};
-class JSONObject;
-class JSONArray:public Object{
-public :
-	JSONArray();
-	JSONArray(const char*string);
-	JSONArray(cJSON *json);
-	JSONArray(cJSON *json,Boolean_t dc);
-	~JSONArray();
+    class Object {
+    public:
+        Object() { mcJSON = 0; deletemcJSON = true; }
+        Object(cJSON *json) { mcJSON = json; deletemcJSON = true; }
+        Object(cJSON *json, Boolean_t dc) { mcJSON = json; deletemcJSON = dc; }
+        ~Object() { if (mcJSON && deletemcJSON) { cJSON_Delete(mcJSON); mcJSON = 0; } }
+        int mType;//JSONObject:0 JSONArray:1
+        cJSON *mcJSON;
+        Boolean_t deletemcJSON;
+    };
+    class JSONObject;
+    class JSONArray :public Object {
+    public:
+        JSONArray();
+        JSONArray(const char*string);
+        JSONArray(cJSON *json);
+        JSONArray(cJSON *json, Boolean_t dc);
+        ~JSONArray();
 
-	JSONArray *putBoolean(int index, Boolean_t value);
-	JSONArray *put(int index, double value);
-	JSONArray *put(int index, int value);
-	JSONArray *put(int index, long value);
-	JSONArray *put(int index, String &value);
-	JSONArray *put(int index, Object &value);
-	//JSONArray *putBoolean(Boolean_t value);
-	//JSONArray *put(double value);
-	//JSONArray *put(int value);
-	//JSONArray *put(long value);
-	//JSONArray *put(String &value);
-	//JSONArray *put(Object &value);
+        JSONArray *putBoolean(int index, Boolean_t value);
+        JSONArray *put(int index, double value);
+        JSONArray *put(int index, int value);
+        JSONArray *put(int index, long value);
+        JSONArray *put(int index, String &value);
+        JSONArray *put(int index, Object &value);
+        //JSONArray *putBoolean(Boolean_t value);
+        //JSONArray *put(double value);
+        //JSONArray *put(int value);
+        //JSONArray *put(long value);
+        //JSONArray *put(String &value);
+        //JSONArray *put(Object &value);
 
-	JSONObject *getJSONObject(int index);
-	JSONArray *getJSONArray(int index);
-	int getString(int index,String&str);
-	int getInt(int index,int &value);
-	int getDouble(int index,double&value);
-	int getBoolean(int index,Boolean_t&value);
+        JSONObject *getJSONObject(int index);
+        JSONArray *getJSONArray(int index);
+        int getString(int index, String&str);
+        int getInt(int index, int &value);
+        int getDouble(int index, double&value);
+        int getBoolean(int index, Boolean_t&value);
 
-	int getLength();
-	int toString(String&str);
+        int getLength();
+        int toString(String&str);
 
-	Object *remove(int index);
-};
-class JSONObject:public Object{
-public :
-	JSONObject();
-	JSONObject(const char*string);
-	JSONObject(cJSON *json);
-	JSONObject(cJSON *json,Boolean_t dc);
-	~JSONObject();
+        Object *remove(int index);
+    };
+    class JSONObject :public Object {
+    public:
+        JSONObject();
+        JSONObject(const char*string);
+        JSONObject(cJSON *json);
+        JSONObject(cJSON *json, Boolean_t dc);
+        ~JSONObject();
 
-	JSONObject *put(const char* name, Boolean_t value);
-	JSONObject *put(const char* name, double value);
-	JSONObject *put(const char* name, int value);
-	JSONObject *put(const char* name, long value);
-	JSONObject *put(const char* name, const char* value);
-	JSONObject *put(const char* name, String&str);
-	JSONObject *put(String&str,const char* name);
-	JSONObject *put(const char* name, Object &value);
+        JSONObject *put(const char* name, Boolean_t value);
+        JSONObject *put(const char* name, double value);
+        JSONObject *put(const char* name, int value);
+        JSONObject *put(const char* name, long value);
+        JSONObject *put(const char* name, const char* value);
+        JSONObject *put(const char* name, String&str);
+        JSONObject *put(String&str, const char* name);
+        JSONObject *put(const char* name, Object &value);
 
-	JSONObject *getJSONObject(const char*name);
-	JSONArray *getJSONArray(const char*name);
-	int getString(const char*name,String&str);
-	int getInt(const char*name,int &value);
-	int getDouble(const char*name,double&value);
-	int getBoolean(const char*name,Boolean_t&value);
+        JSONObject *getJSONObject(const char*name);
+        JSONArray *getJSONArray(const char*name);
+        int getString(const char*name, String&str);
+        int getInt(const char*name, int &value);
+        int getDouble(const char*name, double&value);
+        int getBoolean(const char*name, Boolean_t&value);
 
-	//JSONObject& operator =(const JSONObject& str);
+        //JSONObject& operator =(const JSONObject& str);
 
-	int toString(String&str);
+        int toString(String&str);
 
-	Boolean_t isNull(const char* name);
-	Boolean_t has(const char* name);
-	Boolean_t isValid();
+        Boolean_t isNull(const char* name);
+        Boolean_t has(const char* name);
+        Boolean_t isValid();
 
-	Object* remove(const char* name);
-};
+        Object* remove(const char* name);
+    };
+
+}
 
 #endif

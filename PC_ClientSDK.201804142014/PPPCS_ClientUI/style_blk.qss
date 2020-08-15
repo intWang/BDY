@@ -14,6 +14,14 @@ QWidget#mainWindow {
         background: rgb(50, 50, 50);
 }
 
+#PreviewRealWnd[status="selected"]{
+		border: 2px solid rgb(222, 78, 29);
+}
+
+#PreviewRealWnd[status="unselected"]{
+		border: 2px solid rgb(36,36,36);
+}
+
 QWidget#messageWidget {
         background: rgba(68, 69, 73, 50%);
 }

@@ -43,6 +43,5 @@ int main(int argc, char *argv[])
     }
     MainFrame w;
     w.show();
-    LogInfo("Quit Process %d", processid);
     return a.exec();
 }

@@ -12,7 +12,7 @@ public:
 
     void SetArea(int heightTop, int heightBottom);
     void SetAreaBk(const QColor& clrTop, const QColor& clrMid, const QColor& clrBottom);
-
+    
 protected:
     virtual void paintEvent(QPaintEvent *event);
     virtual BarWidget::Ptr GetTopWnd();

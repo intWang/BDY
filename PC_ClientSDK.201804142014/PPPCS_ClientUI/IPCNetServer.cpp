@@ -1,32 +1,50 @@
 #include "IPCNetServer.h"
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 #include "QtDefine.h"
 #include "LogManager.h"
 #include "utils.h"
 #include "DataStruct.h"
 #include <mutex>
+#include "SEP2P_Error.h"
+#include "JSONStructProtocal.h"
+#include "JSONObject.hpp"
 namespace ls
 {
+    IPCNetServer::Ptr g_pIPCServer = nullptr;
+
     void onStatus(const char* uuid, int status)
     {
         LogInfo("onStatus %s %d", uuid, status);
+        if (g_pIPCServer)
+        {
+            g_pIPCServer->onStatus(uuid, status);
+        }
     }
 
     void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
     {
-
+        LogInfo("onVideoData %s %d %d %d", uuid, type, len, timestamp);
+        if (g_pIPCServer)
+        {
+            g_pIPCServer->onVideoData(uuid, type, data, len, timestamp);
+        }
     }
 
     void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
     {
-
+        LogInfo("onAudioData %s %d %d %d", uuid, type, len, timestamp);
+        if (g_pIPCServer)
+        {
+            g_pIPCServer->onAudioData(uuid, type, data, len, timestamp);
+        }
     }
 
     void onJSONString(const char* uuid, int msg_type, const char* jsonstr)
     {
-        LogInfo("OnJsonData %s %s", uuid, jsonstr);
+        LogInfo("OnJsonData %s %d %s", uuid, msg_type, jsonstr);
+        if (g_pIPCServer)
+        {
+            g_pIPCServer->onJSONString(uuid, msg_type, jsonstr);
+        }
     }
 
     IPCNetServer::Ptr CreateIPCNetServer()
@@ -42,10 +60,10 @@ namespace ls
 
     IPCNetServer::IPCNetServer()
     {
-        m_IPCNetEventHandler.onAudioData = onAudioData;
-        m_IPCNetEventHandler.onJSONString = onJSONString;
-        m_IPCNetEventHandler.onStatus = onStatus;
-        m_IPCNetEventHandler.onVideoData = onVideoData;
+        m_IPCNetEventHandler.onAudioData = ls::onAudioData;
+        m_IPCNetEventHandler.onJSONString = ls::onJSONString;
+        m_IPCNetEventHandler.onStatus = ls::onStatus;
+        m_IPCNetEventHandler.onVideoData = ls::onVideoData;
     }
 
 
@@ -55,19 +73,24 @@ namespace ls
 
     bool IPCNetServer::initialize()
     {
+        m_Quit.store(false);
         m_thWork = std::thread(&IPCNetServer::Work, this);
+        g_pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
         return true;
     }
 
     void IPCNetServer::destroy()
     {
+        m_Quit.store(true);
+
         LogInfo("IPCNetServer::destroy");
         std::unique_lock <std::mutex> lck(m_mxTmp);
         m_covQuit.notify_all();
-        if (m_thWork.joinable())
-        {
-            m_thWork.join();
-        }
+        m_thWork.detach();
+//         if (m_thWork.joinable())
+//         {
+ //            m_thWork.join();
+//         }
     }
 
     void IPCNetServer::ConnectDevice(std::string& strUid, std::string& strPwd)
@@ -94,6 +117,46 @@ namespace ls
         AddTask(pTask);
     }
 
+    void IPCNetServer::onStatus(const char* uuid, int status)
+    {
+        switch (status) {
+        case ERROR_SEP2P_SUCCESSFUL:
+            IPCNetGetBrightness(uuid);
+            break;
+        case ERROR_SEP2P_INVALID_ID:
+            break;
+        case ERROR_SEP2P_STATUS_INVALID_PASSWD:
+            break;
+        default:
+            break;
+        }
+
+        fireNotification(std::bind(&IIPCNetServerCallBack::OnDeviceStatuChanged, std::placeholders::_1, std::string(uuid), status));
+    }
+
+    void IPCNetServer::onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
+    {
+        //throw std::logic_error("The method or operation is not implemented.");
+        fireNotification(std::bind(&IIPCNetServerCallBack::OnVideo, std::placeholders::_1, std::string(uuid), data, len, timestamp));
+    }
+
+    void IPCNetServer::onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
+    {
+        throw std::logic_error("The method or operation is not implemented.");
+    }
+
+    void IPCNetServer::onJSONString(const char* uuid, int msg_type, const char* jsonstr)
+    {
+        switch (msg_type)
+        {
+        case REMOTE_MSG_RESP_LOGIN:
+            fireNotification(std::bind(&IIPCNetServerCallBack::OnDeviceConnected, std::placeholders::_1, std::string(jsonstr)));
+            break;
+        default:
+            break;
+        }
+    }
+
     void IPCNetServer::AddTask(ITask::Ptr pTask)
     {
         std::lock_guard<std::mutex> guard(m_mxTaskList);
@@ -112,11 +175,15 @@ namespace ls
     {
         LogInfo("IPCNetServer Start Work");
         IPCNetInitialize("");
-        std::unique_lock <std::mutex> lck(m_mxTmp);
 
-        auto waitREt = m_covQuit.wait_for(lck, std::chrono::milliseconds(1000));
-        while (waitREt == std::cv_status::timeout)
+        std::unique_lock <std::mutex> lck(m_mxTmp);
+        while (true)
         {
+            auto waitREt = m_covQuit.wait_for(lck, std::chrono::milliseconds(1000));
+            if (m_Quit.load())
+            {
+                break;
+            }
             while (m_queWorkList.size())
             {
                 ITask::Ptr pCurTask = PopTask();
@@ -125,7 +192,6 @@ namespace ls
                     pCurTask->Run();
                 }
             }
-            waitREt = m_covQuit.wait_for(lck, std::chrono::milliseconds(1000));
         }
 
         IPCNetDeInitial();
@@ -134,62 +200,79 @@ namespace ls
 
     void IPCNetServerCallBack::OnDeviceConnected(const std::string& strDevJsonInfo)
     {
-        LogInfo("recv device info %s", strDevJsonInfo.c_str());
         DeviceData stDeviceData;
-        QJsonParseError jsonError;
-        QJsonDocument doc;
-
-        doc.fromJson(QByteArray::fromStdString(strDevJsonInfo), &jsonError);
-        if (!doc.isNull() && (jsonError.error == QJsonParseError::NoError))
+        PJson::JSONObject jsdata(strDevJsonInfo.c_str());
+        if (jsdata.isValid())
         {
-            if (doc.isObject())
+            PJson::JSONObject *jsroot = jsdata.getJSONObject("dev_info");
+            if (jsroot)
             {
-                QJsonObject obj = doc.object();
-                stDeviceData.name = utils::GetValueFromJsonObj(obj, "name").toString().toStdString();
-                stDeviceData.p2p_uuid = utils::GetValueFromJsonObj(obj, "p2p_uuid").toString().toStdString();
-                stDeviceData.app_ver = utils::GetValueFromJsonObj(obj, "app_ver").toString().toStdString();
-                stDeviceData.sys_ver = utils::GetValueFromJsonObj(obj, "sys_ver").toString().toStdString();
-                stDeviceData.pid = utils::GetValueFromJsonObj(obj, "pid").toString().toStdString();
-                QJsonArray videoArray = utils::GetValueFromJsonObj(obj, "video_input").toArray();
-                int nSize = videoArray.size();
-                for (int i = 0; i < nSize; ++i)
+                jsroot->getString("name", stDeviceData.name);
+                jsroot->getString("p2p_uuid", stDeviceData.p2p_uuid);
+                jsroot->getString("app_ver", stDeviceData.app_ver);
+                jsroot->getString("sys_ver", stDeviceData.sys_ver);
+                jsroot->getString("pid", stDeviceData.pid);
+                PJson::JSONArray*jaVideoEncode = jsroot->getJSONArray("video_input");
+                if (jaVideoEncode)
                 {
-                    QJsonValue value = videoArray.at(i);
-                    if (value.isObject())
+                    int nSize = jaVideoEncode->getLength();
+                    for (int i = 0; i < nSize; ++i)
                     {
-                        VideoChannel videoChannel;
-                        QJsonObject videoObj = value.toObject();
-                        videoChannel.ch_no = utils::GetValueFromJsonObj(videoObj, "ch_no").toInt();
-                        videoChannel.audio_code_type = utils::GetValueFromJsonObj(videoObj, "audio_code_type").toInt();
-                        videoChannel.audio_sample_freq = utils::GetValueFromJsonObj(videoObj, "audio_sample_freq").toInt();
-                        QJsonArray reslArray = utils::GetValueFromJsonObj(videoObj, "Resl").toArray();
-                        if (reslArray.size() == 2)
+                        PJson::JSONObject *video_input = jaVideoEncode->getJSONObject(i);
+                        if (video_input)
                         {
-                            QJsonObject maxSize = reslArray.at(0).toObject();
-                            QJsonObject minSize = reslArray.at(1).toObject();
-                            videoChannel.width_max = utils::GetValueFromJsonObj(maxSize, "width").toInt();
-                            videoChannel.height_max = utils::GetValueFromJsonObj(maxSize, "height").toInt();
-                            videoChannel.width_min = utils::GetValueFromJsonObj(minSize, "height").toInt();;
-                            videoChannel.height_min = utils::GetValueFromJsonObj(minSize, "height").toInt();;
+                            VideoChannel videoChannel;
+                            video_input->getInt("ch_no", videoChannel.ch_no);
+                            video_input->getInt("audio_code_type", videoChannel.audio_code_type);
+                            video_input->getInt("audio_sample_freq", videoChannel.audio_sample_freq);
+
+                            PJson::JSONArray*reslArray = video_input->getJSONArray("Resl");
+                            if (reslArray)
+                            {
+                                if (reslArray->getLength() == 2)
+                                {
+                                    PJson::JSONObject* maxSize = reslArray->getJSONObject(0);
+                                    PJson::JSONObject* minSize = reslArray->getJSONObject(1);
+                                    if (maxSize)
+                                    {
+                                        maxSize->getInt("width", videoChannel.width_max);
+                                        maxSize->getInt("height", videoChannel.height_max);
+                                        delete maxSize;
+                                    }
+                                    if (minSize)
+                                    {
+                                        minSize->getInt("width", videoChannel.width_min);
+                                        minSize->getInt("height", videoChannel.height_min);
+                                        delete minSize;
+                                    }
+                                }
+                                delete reslArray;
+                            }
+                            video_input->getString("chann_name", videoChannel.chann_name);
+                            stDeviceData.video_input.push_back(videoChannel);
+                            delete video_input;
                         }
-                        videoChannel.chann_name = utils::GetValueFromJsonObj(obj, "chann_name").toString().toStdString();
-                        stDeviceData.video_input.push_back(videoChannel);
                     }
+                    delete jaVideoEncode;
                 }
             }
+            delete jsroot;
+            jsroot = nullptr;
         }
         else
         {
-            LogWarning("Parse json failed error %d", jsonError.error);
+            LogError("Parse Json Error %s", strDevJsonInfo.c_str());
         }
-
-        utils::TravelVector(m_CBFunc, [&stDeviceData](auto func) {
-            if (func && func->funcOnDeviceConnected)
-            {
-                func->funcOnDeviceConnected(stDeviceData);
-            }
-            return false;
-        });
+        if (stDeviceData.p2p_uuid.size())
+        {
+            utils::TravelVector(m_CBFunc, [&stDeviceData](auto func) {
+                if (func && func->funcOnDeviceConnected)
+                {
+                    func->funcOnDeviceConnected(stDeviceData);
+                }
+                return false;
+            });
+        }
     }
 
     void IPCNetServerCallBack::Register(CB::Ptr func)
@@ -213,4 +296,16 @@ namespace ls
             }
         }
     }
+
+    void IPCNetServerCallBack::OnDeviceStatuChanged(const std::string& strUid, int nStatu)
+    {
+        //throw std::logic_error("The method or operation is not implemented.");
+    }
+
+    void IPCNetServerCallBack::OnVideo(const std::string& strUid, unsigned char*data, int len, long timestamp)
+    {
+        //throw std::logic_error("The method or operation is not implemented.");
+        //h264 decode
+    }
+
 }

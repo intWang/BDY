@@ -6,7 +6,7 @@ PreviewPanel::PreviewPanel(QWidget *parent)
 {
     ui.setupUi(this);
     SetArea(50,0);
-    SetAreaBk(s_qcl444858, s_qcl292C39, s_qcl444858);
+    SetAreaBk(s_qcl444858, s_qcl1E2233, s_qcl444858);
     auto pTopBar = InitTopBar();
     if (pTopBar)
     {
@@ -18,6 +18,7 @@ PreviewPanel::PreviewPanel(QWidget *parent)
 
     m_pRealWnds->setHorizontalSpacing(10);
     m_pRealWnds->setVerticalSpacing(10);
+    m_pRealWnds->setContentsMargins(0, 10, 0, 0);
     ui.mainLayout->addLayout(m_pRealWnds);
     ui.mainLayout->setStretch(1, 1);
     InitPreviewRealWnds();
@@ -122,12 +123,21 @@ void PreviewPanel::InitTopBar4SnapMode(QHBoxLayoutPtr pBarLayout)
 
 void PreviewPanel::InitTopBar4PreviewMode(QHBoxLayoutPtr pBarLayout)
 {
-    auto pbtnDevideMode = MQ(QPushButton)(this);
+    m_pCbbDevideScreen = MQ(QComboBox)(this);
     auto pbtnFullScreen = MQ(QPushButton)(this);
 
-    pBarLayout->addWidget(pbtnDevideMode);
+    m_pCbbDevideScreen->addItem("1画面", DevideScreen::Screen_1X1);
+    m_pCbbDevideScreen->addItem("4画面", DevideScreen::Screen_2X2);
+    m_pCbbDevideScreen->addItem("9画面", DevideScreen::Screen_3X3);
+    m_pCbbDevideScreen->addItem("12画面", DevideScreen::Screen_3X4);
+
+    pBarLayout->addWidget(m_pCbbDevideScreen);
     pBarLayout->addStretch();
     pBarLayout->addWidget(pbtnFullScreen);
+
+    connect(m_pCbbDevideScreen, QOverload<int>::of(&QComboBox::activated), [this](int index) {
+        this->OnScreenDevideModeChange(index);
+    });
 }
 
 void PreviewPanel::InitPreviewRealWnds()
@@ -147,9 +157,98 @@ void PreviewPanel::PraperPreviewRealWnds(int nNums)
 
     while (nCurrent < nNums)
     {
-        auto pWnd = MQ(PreviewRealWnd)(this);
+        auto pWnd = new PreviewRealWnd(++nCurrent, this);
         m_vcPreviewRealWnds.push_back(pWnd);
+        connect(pWnd, &PreviewRealWnd::PreviewWndUserClick, this, &PreviewPanel::OnPreveiwWndSelChange);
         pWnd->hide();
-        ++nCurrent;
+    }
+}
+
+void PreviewPanel::SetSelectWnd(PreviewRealWnd::Ptr pSelWnd)
+{
+    if (pSelWnd)
+    {
+        if (m_pCurSelWnd && m_pCurSelWnd != pSelWnd)
+        {
+            m_pCurSelWnd->SetSelectStatu(false);
+        }
+
+        bool bOriginStatu = pSelWnd->GetSelectStatu();
+        if (bOriginStatu)
+        {
+            pSelWnd->SetSelectStatu(false);
+            m_pCurSelWnd = nullptr;
+        }
+        else
+        {
+            pSelWnd->SetSelectStatu(true);
+            m_pCurSelWnd = pSelWnd;
+        }
+    }
+    else
+    {
+        if (m_pCurSelWnd)
+        {
+            m_pCurSelWnd->SetSelectStatu(false);
+        }
+    }
+}
+
+void PreviewPanel::OnStartPreview(ChannelNode::Ptr pChannel)
+{
+    //Get a free wnd or get the  select wnd 
+    PreviewRealWnd::Ptr pTagetWnd = nullptr;
+    if (m_pCurSelWnd)
+    {
+        pTagetWnd = m_pCurSelWnd;
+    }
+    else
+    {
+        for (auto pWnd:m_vcPreviewRealWnds)
+        {
+            if (pWnd->isVisible() &&( pWnd->GetRuningStatu() == PreviewRealWnd::Status::Empty))
+            {
+                pTagetWnd = pWnd;
+                break;
+            }
+        }
+
+        if (!pTagetWnd)
+        {
+            time_t oldestBusyTime = time(0);
+            for (auto pWnd : m_vcPreviewRealWnds)
+            {
+                if (pWnd->isVisible() && (pWnd->GetBusyTime() < oldestBusyTime))
+                {
+                    pTagetWnd = pWnd;
+                }
+            }
+        }
+    }
+
+    SetSelectWnd(pTagetWnd);
+
+    if (pTagetWnd)
+    {
+        pTagetWnd->StartPreview(pChannel);
+    }
+    else
+    {
+        LogError("No wnd could use");
+    }
+}
+
+void PreviewPanel::OnPreveiwWndSelChange()
+{
+    auto pSelWnd = qobject_cast<PreviewRealWnd::Ptr>(sender());
+    SetSelectWnd(pSelWnd);
+}
+
+void PreviewPanel::OnScreenDevideModeChange(int nIndex)
+{
+    if (m_pCbbDevideScreen)
+    {
+        auto selData = m_pCbbDevideScreen->currentData();
+        OnScreenDevideChange((DevideScreen)selData.toInt());
     }
 }

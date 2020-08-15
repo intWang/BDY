@@ -92,7 +92,10 @@
     <ClCompile Include="CmdBar.cpp" />
     <ClCompile Include="ConfigWidget.cpp" />
     <ClCompile Include="DataStruct.cpp" />
+    <ClCompile Include="Dependencies\src\cJSON.c" />
+    <ClCompile Include="Dependencies\src\JSONObject.cpp" />
     <ClCompile Include="DevTreeWnd.cpp" />
+    <ClCompile Include="DrawWnd.cpp" />
     <ClCompile Include="HintServer.cpp" />
     <ClCompile Include="IPCNetServer.cpp" />
     <ClCompile Include="LogManager.cpp" />
@@ -137,6 +140,7 @@
     <QtMoc Include="DevTreeWnd.h" />
     <QtMoc Include="ConfigWidget.h" />
     <ClInclude Include="DataStruct.h" />
+    <ClInclude Include="DrawWnd.h" />
     <ClInclude Include="HintServer.h" />
     <ClInclude Include="Interface\IBarWidgetCallBack.h" />
     <ClInclude Include="Interface\IServer.h" />

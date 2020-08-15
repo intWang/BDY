@@ -101,3 +101,49 @@ void GroupNode::ReadDataJsonObj(QJsonObject& obj)
     emNodeType = (DevTreeNodeType)utils::GetValueFromJsonObj(obj, "emNodeType").toInt();
     strGroupName = utils::GetValueFromJsonObj(obj, "strGroupName").toString().toStdString();
 }
+
+ChannelNode::ChannelNode(int nDevID, const std::string& strDevUid, VideoChannel& stData)
+    :channelData(stData)
+{
+    strUID = strDevUid;
+    emNodeType = DevTreeNodeType::Channel;
+    nParentId = nDevID;
+    nNodeId = MAKECHANNELID(nDevID, stData.ch_no);
+}
+
+std::string ChannelNode::GetName()
+{
+    return channelData.chann_name;
+}
+
+QJsonObject ChannelNode::GenerateJsonObj()
+{
+    QJsonObject obj;
+    return obj;
+}
+
+void ChannelNode::ReadDataJsonObj(QJsonObject& obj)
+{
+}
+
+FrameData::FrameData(unsigned char* data, int len)
+{
+    AllocateBuf(len);
+    if (pBufData)
+    {
+        memcpy(pBufData, data, len * sizeof(unsigned char));
+    }
+}
+
+void FrameData::AllocateBuf(int len)
+{
+    pBufData = new unsigned char[len];
+}
+
+FrameData::~FrameData()
+{
+    if (pBufData)
+    {
+        delete[] pBufData;
+    }
+}

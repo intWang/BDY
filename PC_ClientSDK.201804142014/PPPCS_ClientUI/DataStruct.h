@@ -82,6 +82,21 @@ struct DevNode :public TreeNode
     void UpdateDevData(const DeviceData& data);
 };
 
+struct ChannelNode:public TreeNode
+{
+    VideoChannel channelData;
+    std::string strUID;
+
+    using Ptr = std::shared_ptr<ChannelNode>;
+    ChannelNode() = default;
+    ChannelNode(int nDevID, const std::string& strDevUid , VideoChannel& stData);
+
+    virtual ~ChannelNode() {}
+    virtual std::string GetName() override;
+    virtual QJsonObject GenerateJsonObj() override;
+    virtual void ReadDataJsonObj(QJsonObject& obj) override;
+};
+
 struct GroupNode :public TreeNode
 {
     using Ptr = std::shared_ptr<GroupNode>;
@@ -100,3 +115,29 @@ struct GroupNode :public TreeNode
     virtual void ReadDataJsonObj(QJsonObject& obj) override;
 };
 
+enum StreamDataType
+{
+    Video,
+    Audio,
+};
+struct StreamData
+{
+    using Ptr = std::shared_ptr<StreamData>;
+    StreamData() = default;
+    virtual ~StreamData() {};
+    StreamDataType emDataType;
+
+};
+
+struct FrameData :public StreamData
+{
+    using Ptr = std::shared_ptr<FrameData>;
+    FrameData() = default;
+    FrameData(unsigned char* data, int len);
+    void AllocateBuf(int len);
+    virtual ~FrameData();
+    unsigned char* pBufData = nullptr;
+    int nBuffLen;
+
+
+};

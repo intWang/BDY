@@ -51,15 +51,21 @@ namespace ls
     class IIPCNetServerCallBack :public ICallback
     {
     public:
+        //out
         struct CallBackFunc :public ICallback::CB
         {
             using Ptr = std::shared_ptr<CallBackFunc>;
             std::function<void(const DeviceData&)> funcOnDeviceConnected = nullptr;
+            std::function<void(const std::string&, int)> funcOnDeviceStatuChanged = nullptr;
+            std::function<void(const std::string&, FrameData::Ptr)> funcOnFrameData = nullptr;
             virtual ~CallBackFunc() {};
         };
 
         using Ptr = std::shared_ptr<IIPCNetServerCallBack>;
+        //in
         virtual void OnDeviceConnected(const std::string& strDevJsonInfo) = 0;
+        virtual void OnDeviceStatuChanged(const std::string& strUid, int nStatu) = 0;
+        virtual void OnVideo(const std::string& strUid, unsigned char*data, int len, long timestamp) = 0;
     private:
     };
 
@@ -89,6 +95,11 @@ namespace ls
         virtual void DisconnectDevice(std::string& strUid) = 0;
         virtual void VideoControl(std::string& strUid, bool bStatu, int param1 = 0) = 0;
         virtual void AudioControl(std::string& strUid, bool bStatu, int param1 = 0) = 0;
+
+        virtual void onStatus(const char* uuid, int status) = 0;
+        virtual void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp) = 0;
+        virtual void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp) = 0;
+        virtual void onJSONString(const char* uuid, int msg_type, const char* jsonstr) = 0;
     private:
     };
 

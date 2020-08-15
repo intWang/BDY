@@ -13,7 +13,7 @@
 #include <QJsonObject>
 #include <QFormLayout>
 #include <QCheckBox>
-
+#include <QComboBox>
 #include <string>
 #include <vector>
 using QLabelPtr = QLabel*;
@@ -31,6 +31,8 @@ using QStandardItemModelPtr = QStandardItemModel * ;
 using QStandardItemPtr = QStandardItem * ;
 using QFormLayoutPtr = QFormLayout * ;
 using QCheckBoxPtr = QCheckBox * ;
+using QComboBoxPtr = QComboBox * ;
+
 
 class PreviewWnd;
 using PreviewWndPtr = PreviewWnd * ;
@@ -43,7 +45,7 @@ using SPreviePanelPtr = std::shared_ptr<PreviePanel>;
 
 enum DevideScreen
 {
-    Screen_1X1,
+    Screen_1X1 = 0,
     Screen_2X2,
     Screen_3X3,
     Screen_3X4,
@@ -53,6 +55,7 @@ enum DevTreeNodeType
 {
     Group,
     Device,
+    Channel,
 };
 
 template<typename T>
@@ -71,16 +74,33 @@ auto makeQTObject(QObjectPtr pParent = nullptr) -> T*
 #define COLOR_TOP_444858 68,72,88
 #define COLOR_TOP_292C39 41,44,57
 #define COLOR_MID_1E2233 30,34,51
+#define COLOR_BORDER 66,172,230
+#define COLOR_TEXT_1 199,202,217 
 
 static QColor s_qcl444858(COLOR_TOP_444858);
 static QColor s_qcl292C39(COLOR_TOP_292C39);
 static QColor s_qcl1E2233(COLOR_MID_1E2233);
+static QColor s_qclBorder1(COLOR_BORDER);
+static QColor s_qclTEXT1(COLOR_TEXT_1);
 
 #define TREEROOTID 0
 #define BASEID 1
-#define BASESPACE_DEVICE 10000
+#define BASESPACE_DEVICE 1000
 #define MAKEDEVID(nGroupID, nDevIndex) (nGroupID*BASESPACE_DEVICE + nDevIndex)
+#define MAKECHANNELID(nDevID, nChannlIndex) (nDevID*100 + nChannlIndex)
 #define GETDEVID(nID) (nID%BASESPACE_DEVICE)
 #define GETGROUPID(nID) (nID/BASESPACE_DEVICE)
+
+#define MIN_GROUPID 1
+#define MAX_GROUPID 99
+#define MIN_DEVICEID 1001
+#define MAX_DEVICEID 99999
+#define MIN_CHANNELID 100101
+#define MAX_CHANNELID 9999999
+
+#define CHECKIDTYPE(nNodeID) (nNodeID<MAX_GROUPID?DevTreeNodeType::Group:(nNodeID<MIN_DEVICEID?DevTreeNodeType::Device:DevTreeNodeType::Channel))
+///GroupID 1~99
+///DevID 1001~ 99999
+///channelID 100101~9999999
 
 #define max(a, b) a>b?a:b

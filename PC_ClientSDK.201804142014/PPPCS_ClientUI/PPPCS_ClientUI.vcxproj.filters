@@ -29,6 +29,9 @@
     <Filter Include="Interface">
       <UniqueIdentifier>{85fc26f0-9a47-4c43-b849-767cf9379da0}</UniqueIdentifier>
     </Filter>
+    <Filter Include="ThirdPart">
+      <UniqueIdentifier>{b1dd16b8-e303-45cd-a363-6e22fbafd152}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -104,6 +107,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="Tasks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\src\cJSON.c">
+      <Filter>ThirdPart</Filter>
+    </ClCompile>
+    <ClCompile Include="Dependencies\src\JSONObject.cpp">
+      <Filter>ThirdPart</Filter>
+    </ClCompile>
+    <ClCompile Include="DrawWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -229,6 +241,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="Tasks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="DrawWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -18,12 +18,15 @@ MainViewWidget::MainViewWidget(QWidget *parent)
         LogError("Error param  %d %d ", pLeftLayout, pPreviewPanel);
     }
 
+    connect(pTreeView, &DevTreeWnd::ChannelNodeDBClick, pPreviewPanel, &PreviewPanel::OnStartPreview);
+
     pLeftLayout->addWidget(pPreviewPanel);
     pRightLayout->addWidget(pTabWnd);
     pRightLayout->addWidget(pTreeView);
     pRightLayout->setStretch(0, 2);
     pRightLayout->setStretch(1, 3);
     setWindowFlags(Qt::CustomizeWindowHint | Qt::FramelessWindowHint);
+
     LogInfo("MainViewWidget Created!");
 }
 

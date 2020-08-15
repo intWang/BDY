@@ -37,7 +37,7 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         }
     }
 
-    connect(this, &DevTreeWnd::OnAddNewGroup, this, [this](const QString& strGroupName, QStandardItemPtr pParent) {
+    connect(this, &DevTreeWnd::AddNewGroup, this, [this](const QString& strGroupName, QStandardItemPtr pParent) {
         int nParentID = TREEROOTID;
         if (pParent)
         {
@@ -50,7 +50,7 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         }
     });
 
-    connect(this, &DevTreeWnd::OnAddNewDevice, this, [this](const QString& strDeviceUid, const QString& strDevicePwd, QStandardItemPtr pParent) {
+    connect(this, &DevTreeWnd::AddNewDevice, this, [this](const QString& strDeviceUid, const QString& strDevicePwd, QStandardItemPtr pParent) {
         int nParentID = TREEROOTID;
         if (pParent)
         {
@@ -68,12 +68,15 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         this->m_pCurSelTreeItem = this->GetTreeItem(index);
     });
 
-    emit OnLoadedDevNumChange(0);
-    emit OnTotalDevNumChange(m_nTotalDevNum);
+    connect(m_pTree, &QTreeView::doubleClicked, this, &DevTreeWnd::OnTreeDBClicked);
+
+    emit LoadedDevNumChange(0);
+    emit TotalDevNumChange(m_nTotalDevNum);
 }
 
 DevTreeWnd::~DevTreeWnd()
 {
+    DisconnectDevice();
     SaveTreeData();
 }
 
@@ -113,14 +116,14 @@ BarWidget::Ptr DevTreeWnd::InitTopBar( )
             auto pLabelLoaded = MQ(QLabel)(this);
             auto pLabelTotal = MQ(QLabel)(this);
 
-            connect(this, &DevTreeWnd::OnLoadedDevNumChange, this, [pLabelLoaded](int nLoadedDevNum) {
+            connect(this, &DevTreeWnd::LoadedDevNumChange, this, [pLabelLoaded](int nLoadedDevNum) {
                 if (pLabelLoaded)
                 {
                     pLabelLoaded->setText(QString(QStringLiteral("已加载  %1 ")).arg(nLoadedDevNum));
                 }
             });
 
-            connect(this, &DevTreeWnd::OnTotalDevNumChange, this, [pLabelTotal](int nTotalDevNum) {
+            connect(this, &DevTreeWnd::TotalDevNumChange, this, [pLabelTotal](int nTotalDevNum) {
                 if (pLabelTotal)
                 {
                     pLabelTotal->setText(QString(QStringLiteral("总数  %1 ")).arg(nTotalDevNum));
@@ -403,13 +406,35 @@ void DevTreeWnd::UpdateTreeItem(QString strName, TreeNode::Ptr pNewData)
     {
         if (QStandardItemModel* treeModel = dynamic_cast<QStandardItemModel*>(m_pTree->model()))
         {
-            auto findResult = treeModel->findItems(strName);
+            auto findResult = treeModel->findItems(strName, Qt::MatchContains | Qt::MatchRecursive);
             for (auto item: findResult)
             {
                 int nID = item->data().toInt();
                 if (nID == pNewData->GetNodeID())
                 {
                     item->setText(QString::fromStdString(pNewData->GetName()));
+                    if ((pNewData->GetDataType() == DevTreeNodeType::Device) && !item->hasChildren())
+                    {
+                        auto pDevNode = std::dynamic_pointer_cast<DevNode>(pNewData);
+                        if (pDevNode)
+                        {
+                            for (auto channel : pDevNode->stDevice.video_input)
+                            {
+                                auto pChannelNode = std::make_shared<ChannelNode>(pDevNode->GetNodeID(), pDevNode->strUID, channel);
+                                if (pChannelNode)
+                                {
+                                    QStandardItemPtr pSubItem = new QStandardItem(QString::fromStdString(pChannelNode->GetName()));
+                                    pSubItem->setData(pChannelNode->GetNodeID());
+                                    item->appendRow(pSubItem);
+                                    {
+                                        m_mxChannelData.lock();
+                                        m_ChannelData.push_back(pChannelNode);
+                                    }
+                                }
+                            }
+                            m_pTree->expandAll();
+                        }
+                    }
                 }
             }
         }
@@ -452,20 +477,54 @@ TreeNode::Ptr DevTreeWnd::GetTreeItemByUid(const std::string& strUid)
     return pSearch;
 }
 
+TreeNode::Ptr DevTreeWnd::GetTreeItemByNodeId(int nNodeID)
+{
+    TreeNode::Ptr pSearch = nullptr;
+    utils::TravelVector(m_TreeData, [&nNodeID, &pSearch](TreeNode::Ptr pData) {
+        if (pData && pData->GetNodeID() == nNodeID)
+        {
+            pSearch = pData;
+            return true;
+        }
+        return false;
+    });
+    return pSearch;
+}
+
+ChannelNode::Ptr DevTreeWnd::GetChannelNodeByNodeId(int nNodeID)
+{
+    ChannelNode::Ptr pSearch = nullptr;
+    utils::TravelVector(m_ChannelData, [&nNodeID, &pSearch](ChannelNode::Ptr pData) {
+        if (pData && pData->GetNodeID() == nNodeID)
+        {
+            pSearch = pData;
+            return true;
+        }
+        return false;
+    });
+    return pSearch;
+}
+
 void DevTreeWnd::ConectDevice(DevNode::Ptr pNode)
 {
     auto pICPServer = g_pEngine?g_pEngine->GetIPCNetServer():nullptr;
     if (pICPServer)
     {
         pICPServer->ConnectDevice(pNode->strUID, pNode->strPwd);
+        m_mapConnectedDev[pNode->strUID] = "";
     }
 }
 
 void DevTreeWnd::DisconnectDevice()
 {
-    for (auto devUid: m_mapConnectedDev)
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
     {
-
+        for (auto devUid: m_mapConnectedDev)
+        {
+            std::string strUid = devUid.first;
+            pICPServer->DisconnectDevice(strUid);
+        }
     }
 }
 
@@ -481,11 +540,11 @@ void DevTreeWnd::OnDeviceConnectedCB(const DeviceData& devData)
             pDevNode->UpdateDevData(devData);
 
             UpdateTreeItem(QString::fromStdString(strOldName), pDevNode);
-            if (m_mapConnectedDev.find(pDevNode->strUID) == m_mapConnectedDev.end())
+            if (!m_mapConnectedDev[pDevNode->strUID].size() && devData.name.size())
             {
                 m_mapConnectedDev[pDevNode->strUID] = pDevNode->stDevice.name;
                 m_nLoadedDevNum++;
-                emit OnLoadedDevNumChange(m_nLoadedDevNum);
+                emit LoadedDevNumChange(m_nLoadedDevNum);
             }
         }
     }
@@ -509,13 +568,13 @@ void DevTreeWnd::OnDataConfiged(ConfigData::Ptr pData)
         case ConfigType::AddDevice:
         {
              auto pRealData = std::dynamic_pointer_cast<AddDeviceData>(pData);
-             emit OnAddNewDevice(QString::fromStdString(pRealData->strUID), QString::fromStdString(pRealData->strPwd), pParentItem);
+             emit AddNewDevice(QString::fromStdString(pRealData->strUID), QString::fromStdString(pRealData->strPwd), pParentItem);
         }
             break;
         case ConfigType::AddGroup:
         {
              auto pRealData = std::dynamic_pointer_cast<AddGroupData>(pData);
-             emit OnAddNewGroup(QString::fromStdString(pRealData->strGroupName), pParentItem);
+             emit AddNewGroup(QString::fromStdString(pRealData->strGroupName), pParentItem);
         }
             break;
         default:
@@ -549,5 +608,23 @@ void DevTreeWnd::OnClicked()
     else if (pButton == m_pAddGroupBtn)
     {
         this->CallConfigWnd(ConfigType::AddGroup);
+    }
+}
+
+void DevTreeWnd::OnTreeDBClicked(const QModelIndex& index)
+{
+    auto pSelItem = GetTreeItem(index);
+    if (pSelItem)
+    {
+        int nNodeID = pSelItem->data().toInt();
+        auto emNodeType = CHECKIDTYPE(nNodeID);
+        if (emNodeType == DevTreeNodeType::Channel)
+        {
+            auto pChannelNode = GetChannelNodeByNodeId(nNodeID);
+            if (pChannelNode)
+            {
+                emit ChannelNodeDBClick(pChannelNode);
+            }
+        }
     }
 }
