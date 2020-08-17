@@ -126,18 +126,22 @@ void ChannelNode::ReadDataJsonObj(QJsonObject& obj)
 {
 }
 
-FrameData::FrameData(unsigned char* data, int len)
+FrameData::FrameData(const unsigned char* data, int width, int height, int len)
 {
     AllocateBuf(len);
     if (pBufData)
     {
         memcpy(pBufData, data, len * sizeof(unsigned char));
     }
+
+    nPicWidth = width;
+    nPicHeight = height;
 }
 
 void FrameData::AllocateBuf(int len)
 {
     pBufData = new unsigned char[len];
+    nBuffLen = len;
 }
 
 FrameData::~FrameData()
@@ -145,5 +149,6 @@ FrameData::~FrameData()
     if (pBufData)
     {
         delete[] pBufData;
+        pBufData = nullptr;
     }
 }

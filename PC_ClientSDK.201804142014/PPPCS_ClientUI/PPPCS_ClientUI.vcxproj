@@ -83,7 +83,7 @@
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>./Dependencies/lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>IPCNetManager.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>IPCNetManager.lib;Decode.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -115,6 +115,7 @@
     <ClCompile Include="StroageManager.cpp" />
     <ClCompile Include="Tasks.cpp" />
     <ClCompile Include="utils.cpp" />
+    <ClCompile Include="YUV420P_Render.cpp" />
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h" />
@@ -134,13 +135,14 @@
     <QtMoc Include="BaseWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="YUV420P_Render.h" />
     <QtMoc Include="PreviewPanel.h" />
     <ClInclude Include="AreableWidget.h" />
     <QtMoc Include="MainViewWidget.h" />
     <QtMoc Include="DevTreeWnd.h" />
     <QtMoc Include="ConfigWidget.h" />
     <ClInclude Include="DataStruct.h" />
-    <ClInclude Include="DrawWnd.h" />
+    <QtMoc Include="DrawWnd.h" />
     <ClInclude Include="HintServer.h" />
     <ClInclude Include="Interface\IBarWidgetCallBack.h" />
     <ClInclude Include="Interface\IServer.h" />

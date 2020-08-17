@@ -5,6 +5,7 @@
 #include <condition_variable>
 #include <queue>
 #include "Tasks.h"
+#include "Decode.h"
 namespace ls
 {
     class IPCNetServer :public Service<IIPCNetServer, IIPCNetServerCallBack>
@@ -31,6 +32,7 @@ namespace ls
         void Work();
     protected:
         std::atomic<bool> m_Quit{ false };
+        std::vector<std::string> m_RuningVideoTask;
         std::mutex m_mxTmp;
         std::thread m_thWork;
         std::condition_variable m_covQuit;
@@ -43,16 +45,21 @@ namespace ls
     {
     public:
         using Ptr = std::shared_ptr<IPCNetServerCallBack>;
-
+        using WeakPtr = std::weak_ptr<IPCNetServerCallBack>;
         virtual void Register(CB::Ptr func) override;
         virtual void UnRegister(CB::Ptr func) override;
 
         virtual void OnDeviceConnected(const std::string& strDevJsonInfo) override;
         virtual void OnDeviceStatuChanged(const std::string& strUid, int nStatu) override;
         virtual void OnVideo(const std::string& strUid, unsigned char*data, int len, long timestamp) override;
-
+        virtual void OnDecodeCallBack(DeocdHandl handle, const unsigned char* pBuf, int width, int height, int len);
+    protected:
+        void PrepareDecoder(const std::string& strUid);
+        void DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len);
     protected:
         std::vector<IIPCNetServerCallBack::CallBackFunc::Ptr> m_CBFunc;
+        std::map<std::string, DeocdHandl> m_videoDecoder;
+        std::map<DeocdHandl, std::string> m_decoderUser;
 
     };
 

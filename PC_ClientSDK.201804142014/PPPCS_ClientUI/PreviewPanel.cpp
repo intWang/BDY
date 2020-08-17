@@ -198,11 +198,12 @@ void PreviewPanel::OnStartPreview(ChannelNode::Ptr pChannel)
 {
     //Get a free wnd or get the  select wnd 
     PreviewRealWnd::Ptr pTagetWnd = nullptr;
-    if (m_pCurSelWnd)
+    if (m_pCurSelWnd && (m_pCurSelWnd->GetRuningStatu() == PreviewRealWnd::Status::Empty))
     {
         pTagetWnd = m_pCurSelWnd;
     }
-    else
+
+    if(!pTagetWnd)
     {
         for (auto pWnd:m_vcPreviewRealWnds)
         {
@@ -212,16 +213,16 @@ void PreviewPanel::OnStartPreview(ChannelNode::Ptr pChannel)
                 break;
             }
         }
+    }
 
-        if (!pTagetWnd)
+    if (!pTagetWnd)
+    {
+        time_t oldestBusyTime = time(0);
+        for (auto pWnd : m_vcPreviewRealWnds)
         {
-            time_t oldestBusyTime = time(0);
-            for (auto pWnd : m_vcPreviewRealWnds)
+            if (pWnd->isVisible() && (pWnd->GetBusyTime() < oldestBusyTime))
             {
-                if (pWnd->isVisible() && (pWnd->GetBusyTime() < oldestBusyTime))
-                {
-                    pTagetWnd = pWnd;
-                }
+                pTagetWnd = pWnd;
             }
         }
     }

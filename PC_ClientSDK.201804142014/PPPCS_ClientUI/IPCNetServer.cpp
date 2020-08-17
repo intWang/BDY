@@ -9,41 +9,82 @@
 #include "JSONObject.hpp"
 namespace ls
 {
-    IPCNetServer::Ptr g_pIPCServer = nullptr;
 
+#include <objbase.h>
+#define GUID_LEN 64
+
+    static std::string generate()
+    {
+        char buf[GUID_LEN] = { 0 };
+        GUID guid;
+
+        if (CoCreateGuid(&guid))
+        {
+            return std::move(std::string(""));
+        }
+
+        sprintf_s(buf,
+            "%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",
+            guid.Data1, guid.Data2, guid.Data3,
+            guid.Data4[0], guid.Data4[1], guid.Data4[2],
+            guid.Data4[3], guid.Data4[4], guid.Data4[5],
+            guid.Data4[6], guid.Data4[7]);
+
+        return std::move(std::string(buf));
+    }
+
+    std::string strTmpPath = "C:\\Users\\xiaohwa2\\AppData\\Local\\Temp\\PPCS_Client\\Pic\\";
+    std::string strUID = generate();
+
+    void SaveBuf(const unsigned char* pData, int len, const char* filename)
+    {
+        FILE *f;
+        int i;
+        fopen_s(&f, filename, "a");
+        if (f)
+        {
+            fwrite(pData, len, 1, f);
+            fclose(f);
+        }
+    }
+
+    IIPCNetServer::WeakPtr g_pIPCServer;
+    IIPCNetServerCallBack::WeakPtr g_pIPCServerCB;
     void onStatus(const char* uuid, int status)
     {
         LogInfo("onStatus %s %d", uuid, status);
-        if (g_pIPCServer)
+        if (auto pIPCServer = g_pIPCServer.lock())
         {
-            g_pIPCServer->onStatus(uuid, status);
+            pIPCServer->onStatus(uuid, status);
         }
     }
 
     void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
     {
-        LogInfo("onVideoData %s %d %d %d", uuid, type, len, timestamp);
-        if (g_pIPCServer)
+        //LogInfo("onVideoData %s %d %d %d", uuid, type, len, timestamp);
+        if (auto pIPCServer = g_pIPCServer.lock())
         {
-            g_pIPCServer->onVideoData(uuid, type, data, len, timestamp);
+            pIPCServer->onVideoData(uuid, type, data, len, timestamp);
         }
+//         static std::string strFilename = strTmpPath + strUID;
+//         SaveBuf(data, len, strFilename.c_str());
     }
 
     void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
     {
         LogInfo("onAudioData %s %d %d %d", uuid, type, len, timestamp);
-        if (g_pIPCServer)
+        if (auto pIPCServer = g_pIPCServer.lock())
         {
-            g_pIPCServer->onAudioData(uuid, type, data, len, timestamp);
+            pIPCServer->onAudioData(uuid, type, data, len, timestamp);
         }
     }
 
     void onJSONString(const char* uuid, int msg_type, const char* jsonstr)
     {
         LogInfo("OnJsonData %s %d %s", uuid, msg_type, jsonstr);
-        if (g_pIPCServer)
+        if (auto pIPCServer = g_pIPCServer.lock())
         {
-            g_pIPCServer->onJSONString(uuid, msg_type, jsonstr);
+            pIPCServer->onJSONString(uuid, msg_type, jsonstr);
         }
     }
 
@@ -75,7 +116,7 @@ namespace ls
     {
         m_Quit.store(false);
         m_thWork = std::thread(&IPCNetServer::Work, this);
-        g_pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+        g_pIPCServer = std::dynamic_pointer_cast<IIPCNetServer>(shared_from_this());
         return true;
     }
 
@@ -107,8 +148,32 @@ namespace ls
 
     void IPCNetServer::VideoControl(std::string& strUid, bool bStatu, int param1 /*= 0*/)
     {
-        ITask::Ptr pTask = std::make_shared<VideoTask>(strUid, bStatu, param1);
-        AddTask(pTask);
+        bool bRunTask = false;
+        auto iterFind = std::find(m_RuningVideoTask.begin(), m_RuningVideoTask.end(), strUid);
+        if (bStatu)
+        {
+            if (iterFind != m_RuningVideoTask.end())
+            {
+                LogInfo("Already has video task %s ", strUid.c_str());
+                return;
+            }
+            m_RuningVideoTask.push_back(strUid);
+            bRunTask = true;
+        }
+        else
+        {
+            if (iterFind != m_RuningVideoTask.end())
+            {
+                m_RuningVideoTask.erase(iterFind);
+            }
+            bRunTask = true;
+        }
+
+        if (bRunTask)
+        {
+            ITask::Ptr pTask = std::make_shared<VideoTask>(strUid, bStatu, param1);
+            AddTask(pTask);
+        }
     }
 
     void IPCNetServer::AudioControl(std::string& strUid, bool bStatu, int param1 /*= 0*/)
@@ -198,6 +263,8 @@ namespace ls
         LogInfo("IPCNetServer End Work");
     }
 
+
+
     void IPCNetServerCallBack::OnDeviceConnected(const std::string& strDevJsonInfo)
     {
         DeviceData stDeviceData;
@@ -265,6 +332,7 @@ namespace ls
         }
         if (stDeviceData.p2p_uuid.size())
         {
+            PrepareDecoder(stDeviceData.p2p_uuid);
             utils::TravelVector(m_CBFunc, [&stDeviceData](auto func) {
                 if (func && func->funcOnDeviceConnected)
                 {
@@ -306,6 +374,49 @@ namespace ls
     {
         //throw std::logic_error("The method or operation is not implemented.");
         //h264 decode
+        if (m_videoDecoder.find(strUid) != m_videoDecoder.end())
+        {
+            Decode_PushData(m_videoDecoder[strUid], data, len);
+        }
+    }
+
+    void IPCNetServerCallBack::OnDecodeCallBack(DeocdHandl handle, const unsigned char* pBuf, int width, int height, int len)
+    {
+        DispatchVideoData(m_decoderUser[handle], pBuf, width, height, len);
+    }
+
+    void IPCNetServerCallBack::DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len)
+    {
+        FrameData::Ptr pFrameData = std::make_shared<FrameData>(data, width, height, len);
+        utils::TravelVector(m_CBFunc, [strUid, pFrameData](auto func) {
+            if (func && func->funcOnFrameData)
+            {
+                func->funcOnFrameData(strUid, pFrameData);
+            }
+            return false;
+        });
+    }
+
+    void DecodeCallBack(DeocdHandl handle, const unsigned char* pBuf, int width, int height, int len)
+    {
+        if (auto pIPCServerCB = g_pIPCServerCB.lock())
+        {
+            pIPCServerCB->OnDecodeCallBack(handle, pBuf, width, height, len);
+        }
+    }
+
+    void IPCNetServerCallBack::PrepareDecoder(const std::string& strUid)
+    {
+        g_pIPCServerCB = std::dynamic_pointer_cast<IIPCNetServerCallBack>(shared_from_this());
+        if (m_videoDecoder.find(strUid) == m_videoDecoder.end())
+        {
+            auto decoderHandle = Decode_CreateHandle(DecodeCallBack);
+            if (decoderHandle != 0)
+            {
+                m_videoDecoder[strUid] = decoderHandle;
+                m_decoderUser[decoderHandle] = strUid;
+            }
+        }
     }
 
 }

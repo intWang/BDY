@@ -28,32 +28,41 @@ PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
         m_CallBackFunc->funcOnFrameData = std::bind(&PreviewRealWnd::OnFrameData, this, std::placeholders::_1, std::placeholders::_2);
     }
 
+    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+    if (pIPCCallBack)
+    {
+        pIPCCallBack->Register(m_CallBackFunc);
+    }
+
     SetRuningStatu(Status::Empty);
 }
 
 PreviewRealWnd::~PreviewRealWnd()
 {
+    StopPreview();
+    Clear();
 }
 
-void PreviewRealWnd::OnFrameData(std::string strUid, FrameData::Ptr pFrame)
+void PreviewRealWnd::OnFrameData(const std::string& strUid, FrameData::Ptr pFrame)
 {
-    SetRuningStatu(Status::InPreview);
-    //TODO
+    if (m_DrawWnd && m_pChannel &&( strUid == m_pChannel->strUID))
+    {
+        SetRuningStatu(Status::InPreview);
+        m_DrawWnd->InputFrameData(pFrame);
+    }
 }
 
 void PreviewRealWnd::StartPreview(ChannelNode::Ptr pChannel)
 {
-    if (m_CallBackFunc && pChannel)
+    if (GetRuningStatu() == Status::InPreview)
+    {
+        StopPreview();
+    }
+    if (pChannel)
     {
         SetRuningStatu(Status::StartingPreview);
         LogInfo("start preview %s", pChannel->strUID.c_str());
         m_pChannel = pChannel;
-        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
-        if (pIPCCallBack)
-        {
-            pIPCCallBack->Register(m_CallBackFunc);
-        }
-
         auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
         if (pIPCServer)
         {
@@ -64,14 +73,8 @@ void PreviewRealWnd::StartPreview(ChannelNode::Ptr pChannel)
 
 void PreviewRealWnd::StopPreview()
 {
-    if (m_CallBackFunc && m_pChannel && (GetRuningStatu() == Status::InPreview || GetRuningStatu() == Status::StartingPreview))
+    if (m_pChannel && (GetRuningStatu() == Status::InPreview || GetRuningStatu() == Status::StartingPreview))
     {
-        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
-        if (pIPCCallBack)
-        {
-            pIPCCallBack->UnRegister(m_CallBackFunc);
-        }
-
         auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
         if (pIPCServer)
         {
@@ -83,7 +86,15 @@ void PreviewRealWnd::StopPreview()
 
 void PreviewRealWnd::Clear()
 {
-
+    if (m_CallBackFunc)
+    {
+        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+        if (pIPCCallBack)
+        {
+            pIPCCallBack->UnRegister(m_CallBackFunc);
+        }
+        m_CallBackFunc = nullptr;
+    }
 }
 
 void PreviewRealWnd::SetSelectStatu(bool bSelect)

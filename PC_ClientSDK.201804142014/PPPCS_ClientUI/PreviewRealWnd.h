@@ -23,8 +23,7 @@ public:
     PreviewRealWnd(int nIndex, QWidget *parent = Q_NULLPTR);
     ~PreviewRealWnd();
 
-    //CALLBACK
-    void OnFrameData(std::string strUid, FrameData::Ptr pFrame);
+    void OnFrameData(const std::string& strUid, FrameData::Ptr pFrame);
 
     void StartPreview(ChannelNode::Ptr pChannel);
     void StopPreview();

@@ -133,11 +133,11 @@ struct FrameData :public StreamData
 {
     using Ptr = std::shared_ptr<FrameData>;
     FrameData() = default;
-    FrameData(unsigned char* data, int len);
+    FrameData(const unsigned char* data, int width, int height, int len);
     void AllocateBuf(int len);
     virtual ~FrameData();
     unsigned char* pBufData = nullptr;
     int nBuffLen;
-
-
+    int nPicWidth;
+    int nPicHeight;
 };

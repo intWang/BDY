@@ -118,6 +118,9 @@
     <ClCompile Include="DrawWnd.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="YUV420P_Render.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h">
@@ -151,6 +154,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="ConfigWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="DrawWnd.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>
@@ -243,7 +249,7 @@
     <ClInclude Include="Tasks.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="DrawWnd.h">
+    <ClInclude Include="YUV420P_Render.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

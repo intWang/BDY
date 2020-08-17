@@ -4,6 +4,7 @@
 #include <functional>
 #include "DataStruct.h"
 //Local Service
+#include "DeocodeDataDefine.h"
 namespace ls
 {
     class ICallback :public std::enable_shared_from_this<ICallback>
@@ -62,10 +63,12 @@ namespace ls
         };
 
         using Ptr = std::shared_ptr<IIPCNetServerCallBack>;
+        using WeakPtr = std::weak_ptr<IIPCNetServerCallBack>;
         //in
         virtual void OnDeviceConnected(const std::string& strDevJsonInfo) = 0;
         virtual void OnDeviceStatuChanged(const std::string& strUid, int nStatu) = 0;
         virtual void OnVideo(const std::string& strUid, unsigned char*data, int len, long timestamp) = 0;
+        virtual void OnDecodeCallBack(DeocdHandl handle, const unsigned char* pBuf, int width, int height, int len) = 0;
     private:
     };
 
@@ -90,6 +93,7 @@ namespace ls
     {
     public:
         using Ptr = std::shared_ptr<IIPCNetServer>;
+        using WeakPtr = std::weak_ptr<IIPCNetServer>;
 
         virtual void ConnectDevice(std::string& strUid, std::string& strPwd) = 0;
         virtual void DisconnectDevice(std::string& strUid) = 0;
