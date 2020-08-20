@@ -1,7 +1,8 @@
 #pragma once
 
 #include "AreableWidget.h"
-
+#include "MovelabelWidget.h"
+#include "IHttpSupport.h"
 enum ConfigType
 {
     AddDevice,
@@ -21,7 +22,9 @@ struct AddDeviceData :public ConfigData
 {
     using Ptr = std::shared_ptr<AddDeviceData>;
     std::string strUID;
+    std::string strShortUID;
     std::string strPwd;
+    std::string strDevName;
     AddDeviceData()
         :ConfigData()
     {
@@ -47,8 +50,10 @@ struct AddGroupData:public ConfigData
     }
 };
 
+class QNetworkAccessManager;
+class QNetworkReply;
 
-class ConfigWidget:public AreableWidget<QWidget>
+class ConfigWidget:public MovelabelWidget<AreableWidget<QWidget>>
 {
     Q_OBJECT
 public:
@@ -62,8 +67,13 @@ private:
     ConfigData::Ptr m_pCurData = nullptr;
 
     QLineEditPtr m_pInputUID = nullptr;
+    QLineEditPtr m_pInputName = nullptr;
     QLineEditPtr m_pInputPwd = nullptr;
     QLineEditPtr m_pInputGroupName = nullptr;
+
+    QPushButtonPtr m_pbtnOK = nullptr;
+    QPushButtonPtr m_pbtnCancel = nullptr;
+    bool m_bRequesting = false;
 protected:
     virtual BarWidget::Ptr InitTopBar() override;
 
@@ -76,5 +86,12 @@ protected:
 
     void OnOk();
     void OnCancel();
+
+    void RequestLongCode(std::string& strShortCode);
+
+protected slots:
+    void OnHttpReplyFinished(QNetworkReply* replay);
+protected:
+    QNetworkAccessManager *m_pManager = nullptr;
 };
 

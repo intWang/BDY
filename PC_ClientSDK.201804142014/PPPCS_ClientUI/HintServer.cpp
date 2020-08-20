@@ -41,6 +41,7 @@ namespace ls
 
     void HintCallBack::OnUserHint(const std::string& strHintInfo, HintLevel level)
     {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
         for (auto func : m_CBFunc)
         {
             if (func && func->funcOnUserHint)
@@ -52,6 +53,7 @@ namespace ls
 
     void HintCallBack::Register(CB::Ptr func)
     {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
         auto pCBFunc = std::dynamic_pointer_cast<IHintCallBack::CallBackFunc>(func);
         if (pCBFunc)
         {
@@ -61,14 +63,12 @@ namespace ls
 
     void HintCallBack::UnRegister(CB::Ptr func)
     {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
         auto pCBFunc = std::dynamic_pointer_cast<IHintCallBack::CallBackFunc>(func);
-        for (auto iterFunc = m_CBFunc.begin(); iterFunc != m_CBFunc.end(); ++iterFunc)
+        auto iterFind = std::find(m_CBFunc.begin(), m_CBFunc.end(), func);
+        if (iterFind != m_CBFunc.end())
         {
-            if (*iterFunc == pCBFunc)
-            {
-                m_CBFunc.erase(iterFunc);
-                break;
-            }
+            m_CBFunc.erase(iterFind);
         }
     }
 }

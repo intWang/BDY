@@ -121,6 +121,12 @@
     <ClCompile Include="YUV420P_Render.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="MessageBoxWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTPSupport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h">
@@ -159,6 +165,9 @@
     <QtMoc Include="DrawWnd.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="MessageBoxWnd.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="PPPCS_ClientUI.ui">
@@ -177,6 +186,9 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="DevTreeWnd.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="MessageBoxWnd.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -250,6 +262,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="YUV420P_Render.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="IHttpSupport.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="HTTPSupport.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

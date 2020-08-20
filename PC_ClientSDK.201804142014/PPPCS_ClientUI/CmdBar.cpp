@@ -66,6 +66,27 @@ CmdBar::~CmdBar()
 {
 }
 
+void CmdBar::setMinimizeVisible(bool bVisiable)
+{
+    if (m_pMinimizeButton)
+    {
+        m_pMinimizeButton->hide();
+    }
+}
+
+void CmdBar::setMaximizeVisible(bool bVisiable)
+{
+    if (m_pMaximizeButton)
+    {
+        m_pMaximizeButton->hide();
+    }
+}
+
+void CmdBar::setWidgetResizable(bool bVisiable)
+{
+    
+}
+
 void CmdBar::onClicked()
 {
     QPushButton *pButton = qobject_cast<QPushButton *>(sender());
@@ -179,7 +200,7 @@ HintBar::HintBar(QWidget *parent /*= 0*/)
         LogError("Error param %d %d ", pLayout, m_pLabel);
     }
     m_pLabel->setObjectName("whiteLabel");
-    m_pLabel->setText("Bottom data");
+    //m_pLabel->setText("Bottom data");
     pLayout->addWidget(m_pLabel);
     pLayout->setContentsMargins(10, 0, 0, 0);
     setLayout(pLayout);

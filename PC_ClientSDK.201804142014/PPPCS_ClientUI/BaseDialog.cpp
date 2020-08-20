@@ -1,12 +1,12 @@
 #include "BaseDialog.h"
 #include "utils.h"
 BaseDialog::BaseDialog(QWidget *parent)
-    :AreableWidget<QWidget>(parent)
+    :AreableWidget<QDialog>(parent)
 {
     m_pTitleBar = MQ(CmdBar)(this);
     m_pBottomBar = MQ(HintBar)(this);
     auto pLayout = MQ(QVBoxLayout)(this);
-    m_pMainLayout = MQ(QGridLayout)(this);
+    m_pMainLayout = MQ(QVBoxLayout)(this);
 
     if (!utils::CheckPointer({ m_pTitleBar, pLayout, m_pMainLayout}))
     {
@@ -31,12 +31,36 @@ BaseDialog::~BaseDialog()
 {
 }
 
-QGridLayoutPtr BaseDialog::GetLayout()
+QVBoxLayoutPtr BaseDialog::GetLayout()
 {
-    return dynamic_cast<QGridLayoutPtr>(m_pMainLayout);
+    return dynamic_cast<QVBoxLayoutPtr>(m_pMainLayout);
 }
 
 HintBar::Ptr BaseDialog::GetBottomBar()
 {
     return m_pBottomBar;
+}
+
+void BaseDialog::setMinimizeVisible(bool bVisiable)
+{
+    if (m_pTitleBar)
+    {
+        m_pTitleBar->setMinimizeVisible(bVisiable);
+    }
+}
+
+void BaseDialog::setMaximizeVisible(bool bVisiable)
+{
+    if (m_pTitleBar)
+    {
+        m_pTitleBar->setMaximizeVisible(bVisiable);
+    }
+}
+
+void BaseDialog::setWidgetResizable(bool bVisiable)
+{
+    if (m_pTitleBar)
+    {
+        m_pTitleBar->setWidgetResizable(bVisiable);
+    }
 }

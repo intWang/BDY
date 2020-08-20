@@ -12,10 +12,11 @@ namespace ls
         virtual void destroy() override;
         virtual IIPCNetServer::Ptr GetIPCNetServer() override;
         virtual IHintServer::Ptr GetHintServer() override;
-
+        virtual IHttpSupport::Ptr GetHttpSupport() override;
     protected:
-        IIPCNetServer::Ptr m_pIPCNetServer;
-        IHintServer::Ptr m_pHintServer;
+        IIPCNetServer::Ptr m_pIPCNetServer = nullptr;
+        IHintServer::Ptr m_pHintServer = nullptr;
+        IHttpSupport::Ptr m_pHttpSupport = nullptr;
     };
 }
 

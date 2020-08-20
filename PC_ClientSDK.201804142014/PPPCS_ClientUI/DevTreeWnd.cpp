@@ -10,7 +10,7 @@
 #include "utils.h"
 #include "IServer.h"
 #include "ConfigWidget.h"
-
+#include "MessageBoxWnd.h"
 DevTreeWnd::DevTreeWnd(QWidget *parent)
     : AreableWidget<QWidget>(parent)
 {
@@ -50,16 +50,29 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         }
     });
 
-    connect(this, &DevTreeWnd::AddNewDevice, this, [this](const QString& strDeviceUid, const QString& strDevicePwd, QStandardItemPtr pParent) {
+    connect(this, &DevTreeWnd::AddNewDevice, this, [this](const QString& strDeviceUid, const QString& strDevicePwd
+        , const QString& strDeviceName, QStandardItemPtr pParent) {
         int nParentID = TREEROOTID;
         if (pParent)
         {
             nParentID = pParent->data().toInt();
         }
-        TreeNode::Ptr pData = std::make_shared<DevNode>(strDeviceUid.toStdString(), strDevicePwd.toStdString(), nParentID);
+
+        auto pCheckDev = GetTreeItemByUid(strDeviceUid.toStdString());
+        if (pCheckDev)
+        { 
+            QString strInfo = QStringLiteral("设备 ") + strDeviceName + "[" + strDeviceUid + "]"
+                + QStringLiteral(" 已添加, 本次操作无效！");
+            msg::showInformation(this, QStringLiteral("警告"), strInfo);
+            return;
+        }
+        TreeNode::Ptr pData = std::make_shared<DevNode>(strDeviceUid.toStdString(), strDevicePwd.toStdString()
+            , strDeviceName.toStdString(), nParentID);
         if (pData)
         {
             this->AddItemToTree(pData, pParent);
+            SetTotalDevNum(++m_nTotalDevNum);
+            ConectDevice(std::dynamic_pointer_cast<DevNode>(pData));
         }
     });
 
@@ -71,7 +84,6 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
     connect(m_pTree, &QTreeView::doubleClicked, this, &DevTreeWnd::OnTreeDBClicked);
 
     emit LoadedDevNumChange(0);
-    emit TotalDevNumChange(m_nTotalDevNum);
 }
 
 DevTreeWnd::~DevTreeWnd()
@@ -158,9 +170,13 @@ BarWidget::Ptr  DevTreeWnd::InitBottomBar()
 
             connect(pBtnAddDevice, &QPushButton::clicked, this, &DevTreeWnd::OnClicked);
             connect(pBtnAddGroup, &QPushButton::clicked, this, &DevTreeWnd::OnClicked);
+            connect(pBtnDelete, &QPushButton::clicked, this, &DevTreeWnd::OnClicked);
 
             m_pAddDeviceBtn = pBtnAddDevice;
             m_pAddGroupBtn = pBtnAddGroup;
+            m_pDeleteBtn = pBtnDelete;
+
+            m_pDeleteBtn->setEnabled(false);
         }
     }
     return pBarWidget;
@@ -188,6 +204,7 @@ QLayoutPtr DevTreeWnd::InitCenterCtl()
     m_pTree->setModel(model);
     m_pTree->setHeaderHidden(true);
     m_pTree->setAutoFillBackground(true);
+    //m_pTree->setEditTriggers(QAbstractItemView::NoEditTriggers);
     BuildTree(model);
 
     return pCenterLayout;
@@ -222,8 +239,8 @@ void DevTreeWnd::BuildSubTree(QStandardItemPtr pParent)
         pParent->appendRow(pSubItem);
         if (pSubData->GetDataType() == DevTreeNodeType::Device)
         {
-            m_nTotalDevNum++;
             ConectDevice(std::dynamic_pointer_cast<DevNode>(pSubData));
+            SetTotalDevNum(++m_nTotalDevNum);
         }
     }
 }
@@ -249,6 +266,12 @@ void DevTreeWnd::AddItemToTree(TreeNode::Ptr pNew, QStandardItemPtr pParent /*= 
         m_Group[pNew->GetParent()].push_back(pNew->GetNodeID());
         m_TreeData.push_back(pNew);
     }
+}
+
+void DevTreeWnd::SetTotalDevNum(int nNum)
+{
+    emit TotalDevNumChange(nNum);
+    m_nTotalDevNum = nNum;
 }
 
 void DevTreeWnd::SaveTreeData()
@@ -306,10 +329,7 @@ void DevTreeWnd::LoadTreeData()
         LogError("Open failed %s", strDBFile.toStdString().c_str());
         return;
     }
-    QByteArray byteArray;
-    QTextStream out(&dataFile);
-    out.setCodec("UTF-8");
-    out >> byteArray;
+    QByteArray byteArray = dataFile.readAll();
     dataFile.flush();
     dataFile.close();
 
@@ -412,29 +432,7 @@ void DevTreeWnd::UpdateTreeItem(QString strName, TreeNode::Ptr pNewData)
                 int nID = item->data().toInt();
                 if (nID == pNewData->GetNodeID())
                 {
-                    item->setText(QString::fromStdString(pNewData->GetName()));
-                    if ((pNewData->GetDataType() == DevTreeNodeType::Device) && !item->hasChildren())
-                    {
-                        auto pDevNode = std::dynamic_pointer_cast<DevNode>(pNewData);
-                        if (pDevNode)
-                        {
-                            for (auto channel : pDevNode->stDevice.video_input)
-                            {
-                                auto pChannelNode = std::make_shared<ChannelNode>(pDevNode->GetNodeID(), pDevNode->strUID, channel);
-                                if (pChannelNode)
-                                {
-                                    QStandardItemPtr pSubItem = new QStandardItem(QString::fromStdString(pChannelNode->GetName()));
-                                    pSubItem->setData(pChannelNode->GetNodeID());
-                                    item->appendRow(pSubItem);
-                                    {
-                                        m_mxChannelData.lock();
-                                        m_ChannelData.push_back(pChannelNode);
-                                    }
-                                }
-                            }
-                            m_pTree->expandAll();
-                        }
-                    }
+                    //////update tree ui
                 }
             }
         }
@@ -481,20 +479,6 @@ TreeNode::Ptr DevTreeWnd::GetTreeItemByNodeId(int nNodeID)
 {
     TreeNode::Ptr pSearch = nullptr;
     utils::TravelVector(m_TreeData, [&nNodeID, &pSearch](TreeNode::Ptr pData) {
-        if (pData && pData->GetNodeID() == nNodeID)
-        {
-            pSearch = pData;
-            return true;
-        }
-        return false;
-    });
-    return pSearch;
-}
-
-ChannelNode::Ptr DevTreeWnd::GetChannelNodeByNodeId(int nNodeID)
-{
-    ChannelNode::Ptr pSearch = nullptr;
-    utils::TravelVector(m_ChannelData, [&nNodeID, &pSearch](ChannelNode::Ptr pData) {
         if (pData && pData->GetNodeID() == nNodeID)
         {
             pSearch = pData;
@@ -568,7 +552,8 @@ void DevTreeWnd::OnDataConfiged(ConfigData::Ptr pData)
         case ConfigType::AddDevice:
         {
              auto pRealData = std::dynamic_pointer_cast<AddDeviceData>(pData);
-             emit AddNewDevice(QString::fromStdString(pRealData->strUID), QString::fromStdString(pRealData->strPwd), pParentItem);
+             emit AddNewDevice(QString::fromStdString(pRealData->strUID), QString::fromStdString(pRealData->strPwd)
+                 , QString::fromStdString(pRealData->strDevName), pParentItem);
         }
             break;
         case ConfigType::AddGroup:
@@ -609,6 +594,11 @@ void DevTreeWnd::OnClicked()
     {
         this->CallConfigWnd(ConfigType::AddGroup);
     }
+    else if(pButton == m_pDeleteBtn)
+    {
+
+        //showQuestion(this, QStringLiteral("确认删除吗"));
+    }
 }
 
 void DevTreeWnd::OnTreeDBClicked(const QModelIndex& index)
@@ -617,13 +607,41 @@ void DevTreeWnd::OnTreeDBClicked(const QModelIndex& index)
     if (pSelItem)
     {
         int nNodeID = pSelItem->data().toInt();
-        auto emNodeType = CHECKIDTYPE(nNodeID);
-        if (emNodeType == DevTreeNodeType::Channel)
+        if (auto pNode = GetTreeItemByNodeId(nNodeID))
         {
-            auto pChannelNode = GetChannelNodeByNodeId(nNodeID);
-            if (pChannelNode)
+            switch (pNode->GetDataType())
             {
-                emit ChannelNodeDBClick(pChannelNode);
+            case DevTreeNodeType::Device:
+            {
+                auto pDevNode = std::dynamic_pointer_cast<DevNode>(pNode);
+                auto pChannel = pDevNode->GetChannelData();
+                if (pChannel)
+                {
+                    emit ChannelNodeDBClick(pChannel);
+                }
+                else
+                {
+                    msg::showWarning(this, QStringLiteral("警告"), QStringLiteral("设备未加载，请稍后再试！"));
+                }
+            }
+            break;
+            case DevTreeNodeType::Group:
+            {
+                if (m_pTree)
+                {
+                    if (m_pTree->isExpanded(index))
+                    {
+                        m_pTree->collapse(index);
+                    }
+                    else
+                    {
+                        m_pTree->expand(index);
+                    }
+                }
+            }
+            break;
+            default:
+                break;
             }
         }
     }

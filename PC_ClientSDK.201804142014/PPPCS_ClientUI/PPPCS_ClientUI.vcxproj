@@ -50,7 +50,7 @@
   </PropertyGroup>
   <PropertyGroup Label="QtSettings" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <QtInstall>MSVC2017_x86</QtInstall>
-    <QtModules>concurrent;core;gui;widgets</QtModules>
+    <QtModules>concurrent;core;gui;network;widgets</QtModules>
   </PropertyGroup>
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.props')">
     <Import Project="$(QtMsBuild)\qt.props" />
@@ -76,7 +76,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>./Dependencies/include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>./Dependencies/include;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -97,11 +97,13 @@
     <ClCompile Include="DevTreeWnd.cpp" />
     <ClCompile Include="DrawWnd.cpp" />
     <ClCompile Include="HintServer.cpp" />
+    <ClCompile Include="HTTPSupport.cpp" />
     <ClCompile Include="IPCNetServer.cpp" />
     <ClCompile Include="LogManager.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainFrame.cpp" />
     <ClCompile Include="MainViewWidget.cpp" />
+    <ClCompile Include="MessageBoxWnd.cpp" />
     <ClCompile Include="MovelabelWidget.cpp" />
     <ClCompile Include="OpenGLDrawWnd.cpp" />
     <ClCompile Include="PPPCS_ClientUI.cpp" />
@@ -123,6 +125,7 @@
   <ItemGroup>
     <QtUic Include="DevTreeWnd.ui" />
     <QtUic Include="MainViewWidget.ui" />
+    <QtUic Include="MessageBoxWnd.ui" />
     <QtUic Include="PPPCS_ClientUI.ui" />
     <QtUic Include="PreviewPanel.ui" />
     <QtUic Include="PreviewRealWnd.ui" />
@@ -135,6 +138,9 @@
     <QtMoc Include="BaseWidget.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtMoc Include="MessageBoxWnd.h" />
+    <ClInclude Include="HTTPSupport.h" />
+    <ClInclude Include="IHttpSupport.h" />
     <ClInclude Include="YUV420P_Render.h" />
     <QtMoc Include="PreviewPanel.h" />
     <ClInclude Include="AreableWidget.h" />

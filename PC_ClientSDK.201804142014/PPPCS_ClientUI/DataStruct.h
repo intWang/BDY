@@ -61,40 +61,41 @@ struct TreeNode
 
 };
 
-struct DevNode :public TreeNode
-{
-    using Ptr = std::shared_ptr<DevNode>;
-    DeviceData stDevice;
-    std::string strUID;
-    std::string strPwd;
-    static int s_nDevCount;
-    DevNode() = default;
-    DevNode(const std::string& strUid, const std::string& strPwd, int nGroupID);
-        
-    virtual ~DevNode() {}
 
-    virtual std::string GetName() override;
-
-    virtual  QJsonObject GenerateJsonObj() override;
-
-    virtual void ReadDataJsonObj(QJsonObject& obj) override;
-
-    void UpdateDevData(const DeviceData& data);
-};
-
-struct ChannelNode:public TreeNode
+struct ChannelNode :public TreeNode
 {
     VideoChannel channelData;
     std::string strUID;
 
     using Ptr = std::shared_ptr<ChannelNode>;
     ChannelNode() = default;
-    ChannelNode(int nDevID, const std::string& strDevUid , VideoChannel& stData);
+    ChannelNode(int nDevID, const std::string& strDevUid, VideoChannel& stData);
 
     virtual ~ChannelNode() {}
     virtual std::string GetName() override;
     virtual QJsonObject GenerateJsonObj() override;
     virtual void ReadDataJsonObj(QJsonObject& obj) override;
+};
+
+
+struct DevNode :public TreeNode
+{
+    using Ptr = std::shared_ptr<DevNode>;
+    DeviceData stDevice;
+    std::string strUID;
+    std::string strCustomName;
+    std::string strPwd;
+    static int s_nDevCount;
+    DevNode() = default;
+    DevNode(const std::string& strUid, const std::string& strPwd, const std::string& strName, int nGroupID);
+        
+    virtual ~DevNode() {}
+    virtual std::string GetName() override;
+    virtual  QJsonObject GenerateJsonObj() override;
+    virtual void ReadDataJsonObj(QJsonObject& obj) override;
+    void UpdateDevData(const DeviceData& data);
+    bool IsDevLoaded();
+    ChannelNode::Ptr GetChannelData();
 };
 
 struct GroupNode :public TreeNode

@@ -2,7 +2,8 @@
 #include "CmdBar.h"
 #include "QtDefine.h"
 #include "AreableWidget.h"
-class BaseDialog :public AreableWidget<QWidget>
+#include <QDialog>
+class BaseDialog :public AreableWidget<QDialog>
 {
     Q_OBJECT
 
@@ -10,13 +11,16 @@ class BaseDialog :public AreableWidget<QWidget>
 public:
     BaseDialog(QWidget *parent = Q_NULLPTR);
     ~BaseDialog();
-    QGridLayoutPtr GetLayout();
+    QVBoxLayoutPtr GetLayout();
     HintBar::Ptr GetBottomBar();
+
 private:
     CmdBar::Ptr m_pTitleBar = nullptr;
     HintBar::Ptr m_pBottomBar = nullptr;
-    QGridLayoutPtr m_pMainLayout = nullptr;
+    QVBoxLayoutPtr m_pMainLayout = nullptr;
 protected:
-
+    void setMinimizeVisible(bool bVisiable);
+    void setMaximizeVisible(bool bVisiable);
+    void setWidgetResizable(bool bVisiable);
 };
 

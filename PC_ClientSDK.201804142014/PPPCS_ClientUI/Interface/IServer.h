@@ -5,6 +5,8 @@
 #include "DataStruct.h"
 //Local Service
 #include "DeocodeDataDefine.h"
+#include "IHttpSupport.h"
+#include <mutex>
 namespace ls
 {
     class ICallback :public std::enable_shared_from_this<ICallback>
@@ -18,6 +20,8 @@ namespace ls
         virtual ~ICallback() = default;
         virtual void Register(CB::Ptr func) = 0;
         virtual void UnRegister(CB::Ptr func) = 0;
+    protected:
+        std::mutex m_mxLockCB;
     };
 
     enum class ReceivePriority
@@ -67,8 +71,7 @@ namespace ls
         //in
         virtual void OnDeviceConnected(const std::string& strDevJsonInfo) = 0;
         virtual void OnDeviceStatuChanged(const std::string& strUid, int nStatu) = 0;
-        virtual void OnVideo(const std::string& strUid, unsigned char*data, int len, long timestamp) = 0;
-        virtual void OnDecodeCallBack(DeocdHandl handle, const unsigned char* pBuf, int width, int height, int len) = 0;
+        virtual void OnVideo(const std::string& strUid, const unsigned char* data, int width, int height, int len, long timestamp) = 0;
     private:
     };
 
@@ -85,7 +88,7 @@ namespace ls
         using Ptr = std::shared_ptr<IHintCallBack>;
         virtual void OnUserHint(const std::string& strHintInfo, ls::HintLevel level) = 0;
 
-    private:
+    protected:
     };
 
 
@@ -104,6 +107,7 @@ namespace ls
         virtual void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp) = 0;
         virtual void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp) = 0;
         virtual void onJSONString(const char* uuid, int msg_type, const char* jsonstr) = 0;
+        virtual void OnDecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len) = 0;
     private:
     };
 
@@ -127,6 +131,7 @@ namespace ls
         virtual void destroy() = 0;
         virtual IIPCNetServer::Ptr GetIPCNetServer() = 0;
         virtual IHintServer::Ptr GetHintServer() = 0;
+        virtual IHttpSupport::Ptr GetHttpSupport() = 0;
     };
 
     class ICallBackEngin :public std::enable_shared_from_this<ICallBackEngin>
@@ -147,6 +152,7 @@ namespace ls
 
     IServiceEngine::Ptr CreateServiceEngine();
     ICallBackEngin::Ptr CreateCallbackEngine();
+    IHttpSupport::Ptr CreateHttpSupport();
 }
 extern ls::IServiceEngine::Ptr g_pEngine;
 extern ls::ICallBackEngin::Ptr g_pCallBack;

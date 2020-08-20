@@ -125,7 +125,7 @@ namespace ls
         m_Quit.store(true);
 
         LogInfo("IPCNetServer::destroy");
-        std::unique_lock <std::mutex> lck(m_mxTmp);
+        std::unique_lock <std::mutex> lck(m_mxWorkThread);
         m_covQuit.notify_all();
         m_thWork.detach();
 //         if (m_thWork.joinable())
@@ -149,24 +149,22 @@ namespace ls
     void IPCNetServer::VideoControl(std::string& strUid, bool bStatu, int param1 /*= 0*/)
     {
         bool bRunTask = false;
-        auto iterFind = std::find(m_RuningVideoTask.begin(), m_RuningVideoTask.end(), strUid);
+        int& nRunCount = m_RuningVideoTask[strUid];
         if (bStatu)
         {
-            if (iterFind != m_RuningVideoTask.end())
+            if (++nRunCount == 1)
             {
-                LogInfo("Already has video task %s ", strUid.c_str());
-                return;
+                PrepareDecoder(strUid);
+                bRunTask = true;
             }
-            m_RuningVideoTask.push_back(strUid);
-            bRunTask = true;
         }
         else
         {
-            if (iterFind != m_RuningVideoTask.end())
+            if (--nRunCount == 0)
             {
-                m_RuningVideoTask.erase(iterFind);
+                RecycleDecoder(strUid);
+                bRunTask = true;
             }
-            bRunTask = true;
         }
 
         if (bRunTask)
@@ -202,7 +200,17 @@ namespace ls
     void IPCNetServer::onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
     {
         //throw std::logic_error("The method or operation is not implemented.");
-        fireNotification(std::bind(&IIPCNetServerCallBack::OnVideo, std::placeholders::_1, std::string(uuid), data, len, timestamp));
+        //h264 decode
+        auto strUuid = std::string(uuid);
+        std::lock_guard<std::mutex> guard(m_mxDecoder);
+        if (m_videoDecoder.find(strUuid) != m_videoDecoder.end())
+        {
+            auto pDecoder = m_videoDecoder[strUuid];
+            if (pDecoder)
+            {
+                pDecoder->InputData(data, len);
+            }
+        }
     }
 
     void IPCNetServer::onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
@@ -219,6 +227,45 @@ namespace ls
             break;
         default:
             break;
+        }
+    }
+
+    void DecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len)
+    {
+        if (auto pIPCServer = g_pIPCServer.lock())
+        {
+            pIPCServer->OnDecodeCallBack(pUserCode, pBuf, width, height, len);
+        }
+    }
+
+
+    void IPCNetServer::OnDecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::OnVideo, std::placeholders::_1, pUserCode, pBuf, width, height, len, 0));
+    }
+
+    void IPCNetServer::PrepareDecoder(const std::string& strUid)
+    {
+        std::lock_guard<std::mutex> guard(m_mxDecoder);
+        if (m_videoDecoder.find(strUid) == m_videoDecoder.end())
+        {
+            auto pDecoder = Decode_CreateDecoder();
+            if (pDecoder != 0)
+            {
+                pDecoder->Init(DecodeCallBack);
+                pDecoder->SetUserCode(strUid.c_str());
+                m_videoDecoder[strUid] = pDecoder;
+            }
+        }
+    }
+
+    void IPCNetServer::RecycleDecoder(const std::string& strUid)
+    {
+        std::lock_guard<std::mutex> guard(m_mxDecoder);
+        if (m_videoDecoder.find(strUid) != m_videoDecoder.end())
+        {
+            auto pDecoder = m_videoDecoder[strUid];
+            m_videoDecoder.erase(strUid);
         }
     }
 
@@ -241,7 +288,7 @@ namespace ls
         LogInfo("IPCNetServer Start Work");
         IPCNetInitialize("");
 
-        std::unique_lock <std::mutex> lck(m_mxTmp);
+        std::unique_lock <std::mutex> lck(m_mxWorkThread);
         while (true)
         {
             auto waitREt = m_covQuit.wait_for(lck, std::chrono::milliseconds(1000));
@@ -322,9 +369,9 @@ namespace ls
                     }
                     delete jaVideoEncode;
                 }
+                delete jsroot;
+                jsroot = nullptr;
             }
-            delete jsroot;
-            jsroot = nullptr;
         }
         else
         {
@@ -332,7 +379,7 @@ namespace ls
         }
         if (stDeviceData.p2p_uuid.size())
         {
-            PrepareDecoder(stDeviceData.p2p_uuid);
+            std::lock_guard<std::mutex> guard(m_mxLockCB);
             utils::TravelVector(m_CBFunc, [&stDeviceData](auto func) {
                 if (func && func->funcOnDeviceConnected)
                 {
@@ -345,6 +392,7 @@ namespace ls
 
     void IPCNetServerCallBack::Register(CB::Ptr func)
     {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
         auto pCBFunc = std::dynamic_pointer_cast<IIPCNetServerCallBack::CallBackFunc>(func);
         if (pCBFunc)
         {
@@ -354,6 +402,7 @@ namespace ls
 
     void IPCNetServerCallBack::UnRegister(CB::Ptr func)
     {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
         auto pCBFunc = std::dynamic_pointer_cast<IIPCNetServerCallBack::CallBackFunc>(func);
         for (auto iterFunc = m_CBFunc.begin(); iterFunc != m_CBFunc.end(); ++iterFunc)
         {
@@ -370,20 +419,12 @@ namespace ls
         //throw std::logic_error("The method or operation is not implemented.");
     }
 
-    void IPCNetServerCallBack::OnVideo(const std::string& strUid, unsigned char*data, int len, long timestamp)
+    void IPCNetServerCallBack::OnVideo(const std::string& strUid, const unsigned char*data, int width, int height, int len, long timestamp)
     {
         //throw std::logic_error("The method or operation is not implemented.");
-        //h264 decode
-        if (m_videoDecoder.find(strUid) != m_videoDecoder.end())
-        {
-            Decode_PushData(m_videoDecoder[strUid], data, len);
-        }
+        DispatchVideoData(strUid, data, width, height, len);
     }
 
-    void IPCNetServerCallBack::OnDecodeCallBack(DeocdHandl handle, const unsigned char* pBuf, int width, int height, int len)
-    {
-        DispatchVideoData(m_decoderUser[handle], pBuf, width, height, len);
-    }
 
     void IPCNetServerCallBack::DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len)
     {
@@ -395,28 +436,6 @@ namespace ls
             }
             return false;
         });
-    }
-
-    void DecodeCallBack(DeocdHandl handle, const unsigned char* pBuf, int width, int height, int len)
-    {
-        if (auto pIPCServerCB = g_pIPCServerCB.lock())
-        {
-            pIPCServerCB->OnDecodeCallBack(handle, pBuf, width, height, len);
-        }
-    }
-
-    void IPCNetServerCallBack::PrepareDecoder(const std::string& strUid)
-    {
-        g_pIPCServerCB = std::dynamic_pointer_cast<IIPCNetServerCallBack>(shared_from_this());
-        if (m_videoDecoder.find(strUid) == m_videoDecoder.end())
-        {
-            auto decoderHandle = Decode_CreateHandle(DecodeCallBack);
-            if (decoderHandle != 0)
-            {
-                m_videoDecoder[strUid] = decoderHandle;
-                m_decoderUser[decoderHandle] = strUid;
-            }
-        }
     }
 
 }

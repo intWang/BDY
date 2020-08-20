@@ -21,6 +21,7 @@ namespace ls
     {
         m_pIPCNetServer = ls::CreateIPCNetServer();
         m_pHintServer = ls::CreateHintServer();
+        m_pHttpSupport = ls::CreateHttpSupport();
         if (m_pIPCNetServer)
         {
             m_pIPCNetServer->initialize();
@@ -49,6 +50,11 @@ namespace ls
     ls::IHintServer::Ptr ServiceEngine::GetHintServer()
     {
         return m_pHintServer;
+    }
+
+    IHttpSupport::Ptr ServiceEngine::GetHttpSupport()
+    {
+        return m_pHttpSupport;
     }
 
 }

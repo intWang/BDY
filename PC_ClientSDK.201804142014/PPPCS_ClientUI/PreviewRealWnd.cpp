@@ -3,35 +3,33 @@
 PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
     : AreableWidget<QWidget>(parent)
 {
-    ui.setupUi(this);
+    //ui.setupUi(this);
 
     SetArea(0, 30);
-    SetAreaBk(s_qcl292C39, s_qcl292C39, s_qcl292C39);
+    SetAreaBk(s_qcl292C39, s_qcl292C39, s_qcl444858);
 
+    auto pMainLayout = MQ(QVBoxLayout)(this);
     m_DrawWnd = new DrawWnd(nIndex, this);
     if (m_DrawWnd)
     {
-        ui.mainLayout->addWidget(m_DrawWnd);
+        pMainLayout->addWidget(m_DrawWnd);
         m_DrawWnd->setAttribute(Qt::WA_TransparentForMouseEvents);
     }
 
-    auto pBottomBar = GetBottomWnd();
-    if (pBottomBar)
+    if (auto pBottomBar = InitBottomBar())
     {
-        ui.mainLayout->addWidget(pBottomBar);
-        pBottomBar->setAttribute(Qt::WA_TransparentForMouseEvents);
+        pMainLayout->addWidget(pBottomBar);
+        //pBottomBar->setAttribute(Qt::WA_TransparentForMouseEvents);
     }
+
+    pMainLayout->setContentsMargins(0, 0, 0, 0);
+    setLayout(pMainLayout);
+
 
     m_CallBackFunc = std::make_shared<ls::IIPCNetServerCallBack::CallBackFunc>();
     if (m_CallBackFunc)
     {
         m_CallBackFunc->funcOnFrameData = std::bind(&PreviewRealWnd::OnFrameData, this, std::placeholders::_1, std::placeholders::_2);
-    }
-
-    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
-    if (pIPCCallBack)
-    {
-        pIPCCallBack->Register(m_CallBackFunc);
     }
 
     SetRuningStatu(Status::Empty);
@@ -40,7 +38,6 @@ PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
 PreviewRealWnd::~PreviewRealWnd()
 {
     StopPreview();
-    Clear();
 }
 
 void PreviewRealWnd::OnFrameData(const std::string& strUid, FrameData::Ptr pFrame)
@@ -54,7 +51,7 @@ void PreviewRealWnd::OnFrameData(const std::string& strUid, FrameData::Ptr pFram
 
 void PreviewRealWnd::StartPreview(ChannelNode::Ptr pChannel)
 {
-    if (GetRuningStatu() == Status::InPreview)
+    if (GetRuningStatu() == Status::InPreview || GetRuningStatu() == Status::StartingPreview)
     {
         StopPreview();
     }
@@ -68,6 +65,17 @@ void PreviewRealWnd::StartPreview(ChannelNode::Ptr pChannel)
         {
             pIPCServer->VideoControl(pChannel->strUID, true);
         }
+
+        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+        if (pIPCCallBack)
+        {
+            pIPCCallBack->Register(m_CallBackFunc);
+        }
+
+        if (m_DrawWnd)
+        {
+            m_DrawWnd->SetPreviewStatu(true);
+        }
     }
 }
 
@@ -75,13 +83,26 @@ void PreviewRealWnd::StopPreview()
 {
     if (m_pChannel && (GetRuningStatu() == Status::InPreview || GetRuningStatu() == Status::StartingPreview))
     {
+        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+        if (pIPCCallBack)
+        {
+            pIPCCallBack->UnRegister(m_CallBackFunc);
+        }
+
         auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
         if (pIPCServer)
         {
             pIPCServer->VideoControl(m_pChannel->strUID, false);
         }
-        SetRuningStatu(Status::Empty);
+
+        if (m_DrawWnd)
+        {
+            m_DrawWnd->SetPreviewStatu(false);
+        }
+
+        m_pChannel = nullptr;
     }
+    SetRuningStatu(Status::Empty);
 }
 
 void PreviewRealWnd::Clear()
@@ -144,5 +165,55 @@ time_t PreviewRealWnd::GetBusyTime()
 
 void PreviewRealWnd::mousePressEvent(QMouseEvent *event)
 {
-    emit PreviewWndUserClick();
+    QPoint ptCurrent = QCursor::pos();
+    QRect rcCenter = GetCenterArea();
+    if (rcCenter.contains(ptCurrent))
+    {
+        emit PreviewWndUserClick();
+        return;
+    }
+    AreableWidget<QWidget>::mousePressEvent(event);
+}
+
+BarWidget::Ptr PreviewRealWnd::InitBottomBar()
+{
+    auto pBottomBar = GetBottomWnd();
+    if (pBottomBar)
+    {
+        if (auto pLayout = pBottomBar->GetLayout())
+        {
+            auto pBtnClose = MQ(QPushButton)(pBottomBar);
+            auto pBtnRecord = MQ(QPushButton)(pBottomBar);
+            auto pBtnSnap = MQ(QPushButton)(pBottomBar);
+
+            pBtnClose->setObjectName("btn_stop_preview");
+            pBtnClose->setToolTip(QStringLiteral("停止预览"));
+            pBtnClose->setFixedWidth(60);
+            pBtnClose->setText(QStringLiteral("关闭"));
+
+            pBtnRecord->setObjectName("btn_record");
+            pBtnRecord->setText(QStringLiteral("录像"));
+            pBtnRecord->setToolTip(QStringLiteral("录像"));
+            pBtnRecord->setFixedWidth(60);
+
+            pBtnSnap->setObjectName("btn_snapshot");
+            pBtnSnap->setText(QStringLiteral("截图"));
+            pBtnSnap->setToolTip(QStringLiteral("截图"));
+            pBtnSnap->setFixedWidth(60);
+
+            pLayout->addStretch();
+            pLayout->setSpacing(10);
+            pLayout->addWidget(pBtnRecord);
+            pLayout->addWidget(pBtnSnap);
+            pLayout->addWidget(pBtnClose);
+
+            pBtnRecord->setEnabled(false);
+            pBtnSnap->setEnabled(false);
+
+            connect(pBtnClose, &QPushButton::clicked, this, [this](bool) {
+                this->StopPreview();
+            });
+        }
+    }
+    return pBottomBar;
 }

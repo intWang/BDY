@@ -38,7 +38,7 @@ signals:
     void PreviewWndUserClick();
 
 private:
-    Ui::PreviewRealWnd ui;
+    //Ui::PreviewRealWnd ui;
     Status m_curStatus = Status::Empty;
     bool m_bSelected = false;
     DrawWnd::Ptr m_DrawWnd = nullptr;
@@ -47,5 +47,6 @@ private:
     time_t m_tmBusy = 0;
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
+    virtual BarWidget::Ptr InitBottomBar() override;
 
 };

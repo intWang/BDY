@@ -11,6 +11,10 @@ public:
     explicit CmdBar(QWidget *parent = 0);
     ~CmdBar();
 
+    void setMinimizeVisible(bool bVisiable);
+    void setMaximizeVisible(bool bVisiable);
+    void setWidgetResizable(bool bVisiable);
+
 private slots:
     void onClicked();
 

@@ -91,14 +91,6 @@ static QColor s_qclTEXT1(COLOR_TEXT_1);
 #define GETDEVID(nID) (nID%BASESPACE_DEVICE)
 #define GETGROUPID(nID) (nID/BASESPACE_DEVICE)
 
-#define MIN_GROUPID 1
-#define MAX_GROUPID 99
-#define MIN_DEVICEID 1001
-#define MAX_DEVICEID 99999
-#define MIN_CHANNELID 100101
-#define MAX_CHANNELID 9999999
-
-#define CHECKIDTYPE(nNodeID) (nNodeID<MAX_GROUPID?DevTreeNodeType::Group:(nNodeID<MIN_DEVICEID?DevTreeNodeType::Device:DevTreeNodeType::Channel))
 ///GroupID 1~99
 ///DevID 1001~ 99999
 ///channelID 100101~9999999

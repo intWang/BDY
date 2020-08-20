@@ -220,9 +220,13 @@ void PreviewPanel::OnStartPreview(ChannelNode::Ptr pChannel)
         time_t oldestBusyTime = time(0);
         for (auto pWnd : m_vcPreviewRealWnds)
         {
-            if (pWnd->isVisible() && (pWnd->GetBusyTime() < oldestBusyTime))
+            if (pWnd->isVisible())
             {
-                pTagetWnd = pWnd;
+                if (pWnd->GetBusyTime() < oldestBusyTime)
+                {
+                    pTagetWnd = pWnd;
+                    oldestBusyTime = pWnd->GetBusyTime();
+                }
             }
         }
     }

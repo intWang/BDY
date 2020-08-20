@@ -26,13 +26,13 @@ private:
     std::map<int, std::vector<int>> m_Group;
     std::vector<TreeNode::Ptr> m_TreeData;
     std::mutex m_mxChannelData;
-    std::vector<ChannelNode::Ptr> m_ChannelData;
     QTreeViewPtr m_pTree = nullptr;
     QStandardItemPtr m_pCurSelTreeItem = nullptr;
     ls::IIPCNetServerCallBack::CallBackFunc::Ptr m_CallBackFunc = nullptr;
 
     QPushButtonPtr m_pAddDeviceBtn = nullptr;
     QPushButtonPtr m_pAddGroupBtn = nullptr;
+    QPushButtonPtr m_pDeleteBtn = nullptr;
 protected:
     virtual BarWidget::Ptr InitTopBar() override;
     virtual BarWidget::Ptr InitBottomBar() override;
@@ -41,7 +41,7 @@ protected:
     void BuildSubTree(QStandardItemPtr pParent);
     //void BuildDevTree(QStandardItemPtr pParent);
     void AddItemToTree(TreeNode::Ptr pNew, QStandardItemPtr pParent = nullptr);
-
+    void SetTotalDevNum(int nNum);
     void SaveTreeData();
     void LoadTreeData();
     QStandardItemPtr GetTreeItem(const QModelIndex &index);
@@ -56,17 +56,17 @@ protected:
     std::vector<TreeNode::Ptr> GetTreeIteByGroup(int nGroupID);
     TreeNode::Ptr GetTreeItemByUid(const std::string& strUid);
     TreeNode::Ptr GetTreeItemByNodeId(int nNodeID);
-    ChannelNode::Ptr GetChannelNodeByNodeId(int nNodeID);
 
     ////////device operate
     void ConectDevice(DevNode::Ptr pNode);
     void DisconnectDevice();
     void OnDeviceConnectedCB(const DeviceData& devData);
+
 signals:
     void LoadedDevNumChange(int nNum);
     void TotalDevNumChange(int nNum);
     void AddNewGroup(const QString& strGooupName, QStandardItemPtr pParent);
-    void AddNewDevice(const QString& strDeviceUid, const QString& strDevicePwd, QStandardItemPtr pParent);
+    void AddNewDevice(const QString& strDeviceUid, const QString& strDevicePwd, const QString& strDeviceName, QStandardItemPtr pParent);
     void ChannelNodeDBClick(ChannelNode::Ptr pNodeData);
 
 protected slots:
