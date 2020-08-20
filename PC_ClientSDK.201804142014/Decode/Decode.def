@@ -1,0 +1,4 @@
+﻿LIBRARY "Decode.dll"
+
+EXPORTS
+	Decode_CreateDecoder @1

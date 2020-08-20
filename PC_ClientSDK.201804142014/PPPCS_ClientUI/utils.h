@@ -8,7 +8,8 @@ namespace utils
 {
     bool CheckPointer(std::initializer_list<void*> list);
     bool PtinWnd(QWidgetPtr pWidget);
-
+    std::string GetUUID();
+    std::string GetTmpPath();
     QJsonValue GetValueFromJsonObj(const QJsonObject& obj, const QString& param);
 
     template<typename T>

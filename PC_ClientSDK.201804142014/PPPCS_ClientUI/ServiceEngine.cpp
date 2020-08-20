@@ -35,11 +35,6 @@ namespace ls
 
     void ServiceEngine::destroy()
     {
-        if (m_pIPCNetServer)
-        {
-            m_pIPCNetServer->destroy();
-            m_pIPCNetServer = nullptr;
-        }
     }
 
     IIPCNetServer::Ptr ServiceEngine::GetIPCNetServer()

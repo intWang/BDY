@@ -9,32 +9,8 @@
 #include "JSONObject.hpp"
 namespace ls
 {
-
-#include <objbase.h>
-#define GUID_LEN 64
-
-    static std::string generate()
-    {
-        char buf[GUID_LEN] = { 0 };
-        GUID guid;
-
-        if (CoCreateGuid(&guid))
-        {
-            return std::move(std::string(""));
-        }
-
-        sprintf_s(buf,
-            "%08X-%04X-%04x-%02X%02X-%02X%02X%02X%02X%02X%02X",
-            guid.Data1, guid.Data2, guid.Data3,
-            guid.Data4[0], guid.Data4[1], guid.Data4[2],
-            guid.Data4[3], guid.Data4[4], guid.Data4[5],
-            guid.Data4[6], guid.Data4[7]);
-
-        return std::move(std::string(buf));
-    }
-
-    std::string strTmpPath = "C:\\Users\\xiaohwa2\\AppData\\Local\\Temp\\PPCS_Client\\Pic\\";
-    std::string strUID = generate();
+    std::string strTmpPath = utils::GetTmpPath();
+    std::string strUID = utils::GetUUID();
 
     void SaveBuf(const unsigned char* pData, int len, const char* filename)
     {
@@ -110,6 +86,7 @@ namespace ls
 
     IPCNetServer::~IPCNetServer()
     {
+        destroy();
     }
 
     bool IPCNetServer::initialize()
@@ -125,13 +102,14 @@ namespace ls
         m_Quit.store(true);
 
         LogInfo("IPCNetServer::destroy");
-        std::unique_lock <std::mutex> lck(m_mxWorkThread);
-        m_covQuit.notify_all();
-        m_thWork.detach();
-//         if (m_thWork.joinable())
-//         {
- //            m_thWork.join();
-//         }
+        {
+            m_covQuit.notify_all();
+        }
+        //m_thWork.detach();
+        if (m_thWork.joinable())
+        {
+            m_thWork.join();
+        }
     }
 
     void IPCNetServer::ConnectDevice(std::string& strUid, std::string& strPwd)
@@ -285,10 +263,10 @@ namespace ls
 
     void IPCNetServer::Work()
     {
-        LogInfo("IPCNetServer Start Work");
+        //LogInfo("IPCNetServer Start Work");
         IPCNetInitialize("");
-
-        std::unique_lock <std::mutex> lck(m_mxWorkThread);
+        std::mutex tmpMutex;
+        std::unique_lock <std::mutex> lck(tmpMutex);
         while (true)
         {
             auto waitREt = m_covQuit.wait_for(lck, std::chrono::milliseconds(1000));
@@ -307,7 +285,7 @@ namespace ls
         }
 
         IPCNetDeInitial();
-        LogInfo("IPCNetServer End Work");
+        //LogInfo("IPCNetServer End Work");
     }
 
 
