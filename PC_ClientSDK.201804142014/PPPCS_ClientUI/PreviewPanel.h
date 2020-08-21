@@ -20,6 +20,9 @@ public:
     ~PreviewPanel();
 
     void OnScreenDevideChange(DevideScreen newMode);
+
+signals:
+    void SelectWnd(PreviewRealWnd::Ptr pWnd);
 protected:
     virtual BarWidget::Ptr InitTopBar();
     virtual BarWidget::Ptr InitBottomBar();
@@ -28,10 +31,12 @@ protected:
     void InitPreviewRealWnds();
     void PraperPreviewRealWnds(int nNums);
     void SetSelectWnd(PreviewRealWnd::Ptr pWnd);
+    void SetWndFull(PreviewRealWnd::Ptr pWnd);
 
 public slots:
     void OnStartPreview(ChannelNode::Ptr pChannel);
     void OnPreveiwWndSelChange();
+    void OnPreveiwWndSelFull(bool bFull);
     void OnScreenDevideModeChange(int nIndex);
 
 private:

@@ -89,9 +89,11 @@
   <ItemGroup>
     <ClCompile Include="BaseDialog.cpp" />
     <ClCompile Include="BaseWidget.cpp" />
+    <ClCompile Include="ChannelCtrlWidget.cpp" />
     <ClCompile Include="CmdBar.cpp" />
     <ClCompile Include="ConfigWidget.cpp" />
     <ClCompile Include="DataStruct.cpp" />
+    <ClCompile Include="DecodeWnd.cpp" />
     <ClCompile Include="Dependencies\src\cJSON.c" />
     <ClCompile Include="Dependencies\src\JSONObject.cpp" />
     <ClCompile Include="DevTreeWnd.cpp" />
@@ -106,10 +108,13 @@
     <ClCompile Include="MessageBoxWnd.cpp" />
     <ClCompile Include="MovelabelWidget.cpp" />
     <ClCompile Include="OpenGLDrawWnd.cpp" />
+    <ClCompile Include="ParamWnd.cpp" />
     <ClCompile Include="PPPCS_ClientUI.cpp" />
     <ClCompile Include="PreviewPanel.cpp" />
     <ClCompile Include="PreviewRealWnd.cpp" />
     <ClCompile Include="PreviewWnd.cpp" />
+    <ClCompile Include="PTZCtrl.cpp" />
+    <ClCompile Include="PtzCtrlWnd.cpp" />
     <ClCompile Include="QtWidgetsClass.cpp" />
     <ClCompile Include="BarWidget.cpp" />
     <ClCompile Include="ServerCallBackEngine.cpp" />
@@ -123,12 +128,16 @@
     <QtMoc Include="PPPCS_ClientUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="DecodeWnd.ui" />
     <QtUic Include="DevTreeWnd.ui" />
     <QtUic Include="MainViewWidget.ui" />
     <QtUic Include="MessageBoxWnd.ui" />
+    <QtUic Include="ParamWnd.ui" />
     <QtUic Include="PPPCS_ClientUI.ui" />
     <QtUic Include="PreviewPanel.ui" />
     <QtUic Include="PreviewRealWnd.ui" />
+    <QtUic Include="PTZCtrl.ui" />
+    <QtUic Include="PtzCtrlWnd.ui" />
     <QtUic Include="QtWidgetsClass.ui" />
   </ItemGroup>
   <ItemGroup>
@@ -139,8 +148,13 @@
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="MessageBoxWnd.h" />
+    <QtMoc Include="ChannelCtrlWidget.h" />
+    <QtMoc Include="DecodeWnd.h" />
     <ClInclude Include="HTTPSupport.h" />
     <ClInclude Include="IHttpSupport.h" />
+    <QtMoc Include="PtzCtrlWnd.h" />
+    <QtMoc Include="PTZCtrl.h" />
+    <QtMoc Include="ParamWnd.h" />
     <ClInclude Include="YUV420P_Render.h" />
     <QtMoc Include="PreviewPanel.h" />
     <ClInclude Include="AreableWidget.h" />

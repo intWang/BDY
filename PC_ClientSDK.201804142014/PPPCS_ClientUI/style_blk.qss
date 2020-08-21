@@ -14,14 +14,6 @@ QWidget#mainWindow {
         background: rgb(50, 50, 50);
 }
 
-#PreviewRealWnd[status="selected"]{
-		border: 2px solid rgb(222, 78, 29);
-}
-
-#PreviewRealWnd[status="unselected"]{
-		border: 2px solid rgb(36,36,36);
-}
-
 QWidget#messageWidget {
         background: rgba(68, 69, 73, 50%);
 }
@@ -806,6 +798,28 @@ QPushButton#linkButton:pressed {
 
 QPushButton#transparentButton {
         background: transparent;
+}
+
+
+QPushButton#TabBtn {
+        border: none;
+        border-radius: none;
+        background: transparent;
+}
+
+
+QPushButton#TabBtn[SelStatu="On"] {
+        border: none;
+        border-radius: none;
+        border-bottom: 2px solid rgb(100, 100, 100);
+        background: transparent;
+}
+
+QPushButton#TabBtn:enabled:hover{
+        background: rgb(85, 85, 85);
+}
+QPushButton#TabBtn:enabled:pressed{
+        background: rgb(80, 80, 80);
 }
 
 /*****************标题栏按钮*******************/

@@ -16,6 +16,9 @@
   <layout class="QHBoxLayout" name="horizontalLayout_2">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="7,2">
+     <property name="spacing">
+      <number>10</number>
+     </property>
      <item>
       <layout class="QHBoxLayout" name="leftLayout"/>
      </item>

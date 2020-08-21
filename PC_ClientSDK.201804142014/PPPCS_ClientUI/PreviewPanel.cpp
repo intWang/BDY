@@ -160,6 +160,7 @@ void PreviewPanel::PraperPreviewRealWnds(int nNums)
         auto pWnd = new PreviewRealWnd(++nCurrent, this);
         m_vcPreviewRealWnds.push_back(pWnd);
         connect(pWnd, &PreviewRealWnd::PreviewWndUserClick, this, &PreviewPanel::OnPreveiwWndSelChange);
+        connect(pWnd, &PreviewRealWnd::PreviewWndUserDBClick, this, &PreviewPanel::OnPreveiwWndSelFull);
         pWnd->hide();
     }
 }
@@ -184,6 +185,7 @@ void PreviewPanel::SetSelectWnd(PreviewRealWnd::Ptr pSelWnd)
             pSelWnd->SetSelectStatu(true);
             m_pCurSelWnd = pSelWnd;
         }
+
     }
     else
     {
@@ -191,7 +193,15 @@ void PreviewPanel::SetSelectWnd(PreviewRealWnd::Ptr pSelWnd)
         {
             m_pCurSelWnd->SetSelectStatu(false);
         }
+        m_pCurSelWnd = nullptr;
     }
+
+    emit SelectWnd(m_pCurSelWnd);
+}
+
+void PreviewPanel::SetWndFull(PreviewRealWnd::Ptr pWnd)
+{
+
 }
 
 void PreviewPanel::OnStartPreview(ChannelNode::Ptr pChannel)
@@ -247,6 +257,32 @@ void PreviewPanel::OnPreveiwWndSelChange()
 {
     auto pSelWnd = qobject_cast<PreviewRealWnd::Ptr>(sender());
     SetSelectWnd(pSelWnd);
+}
+
+void PreviewPanel::OnPreveiwWndSelFull(bool bFull)
+{
+    auto pSelWnd = qobject_cast<PreviewRealWnd::Ptr>(sender());
+    if (pSelWnd && m_pRealWnds)
+    {
+        if (bFull)
+        {
+            QLayoutItem *child;
+            while ((child = m_pRealWnds->takeAt(0)) != 0) 
+            {
+                child->widget()->hide();
+                delete child;
+            }
+
+            m_pRealWnds->addWidget(pSelWnd, 1, 1, 1, 1);
+            pSelWnd->show();
+        }
+        else
+        {
+            OnScreenDevideChange(m_curScreenMode);
+            SetSelectWnd(pSelWnd);
+        }
+       
+    }
 }
 
 void PreviewPanel::OnScreenDevideModeChange(int nIndex)

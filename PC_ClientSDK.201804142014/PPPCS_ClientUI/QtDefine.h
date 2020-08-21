@@ -58,6 +58,23 @@ enum DevTreeNodeType
     Channel,
 };
 
+enum class PtzCommand
+{
+    ZoomIn,
+    ZoomOut,
+    MoveLT,
+    MoveL,
+    MoveLD,
+    MoveD,
+    MoveRD,
+    MoveR,
+    MoveRT,
+    MoveT,
+    Restore,
+    SetSpeed,
+};
+Q_DECLARE_METATYPE(PtzCommand);
+
 template<typename T>
 auto makeQTObject(QWidgetPtr pParent = nullptr) -> T*
 {
@@ -96,3 +113,4 @@ static QColor s_qclTEXT1(COLOR_TEXT_1);
 ///channelID 100101~9999999
 
 #define max(a, b) a>b?a:b
+#define min(a, b) a>b?b:a

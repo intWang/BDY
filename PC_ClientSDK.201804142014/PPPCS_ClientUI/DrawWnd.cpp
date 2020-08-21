@@ -6,6 +6,7 @@ DrawWnd::DrawWnd(int index, QWidget *parent)
     :QWidget(parent)
     , m_nIndex(index)
 {
+    m_strHint = QStringLiteral("监控点正在预览....");
 }
 
 
@@ -20,6 +21,7 @@ void DrawWnd::SetPreviewStatu(bool bPreview /*= false*/)
     {
         m_queWaitRender.swap(std::queue<FrameData::Ptr>());
     }
+    m_pLastFrame = nullptr;
     update();
 }
 
@@ -31,8 +33,11 @@ void DrawWnd::SetSelected(bool bSelected)
 
 void DrawWnd::InputFrameData(FrameData::Ptr pFrame)
 {
-     SetFrame(pFrame);
-     update();
+    if (isVisible())
+    {
+        SetFrame(pFrame);
+        update();
+    }
 }
 
 void DrawWnd::SetFrame(FrameData::Ptr pFrame)
@@ -40,11 +45,80 @@ void DrawWnd::SetFrame(FrameData::Ptr pFrame)
     {
         std::lock_guard<std::mutex> guard(m_mxLockData);
         m_queWaitRender.push(pFrame);
-        if (m_queWaitRender.size() > 10)
-        {
-            m_queWaitRender.pop();
-        }
     }
+}
+
+void DrawWnd::SetHintString(const QString& strHint)
+{
+    m_strHint = strHint;
+}
+
+void DrawWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
+{
+    int nMoveX = 0;
+    int nMoveY = 0;
+    int nSpeed = 10;
+
+    switch (emCmd)
+    {
+    case PtzCommand::ZoomIn:
+        ++m_nZoom;
+        m_nZoom = min(10, m_nZoom);
+        break;
+    case PtzCommand::ZoomOut:
+        --m_nZoom;
+        m_nZoom = max(1, m_nZoom);
+        break;
+    case PtzCommand::MoveLT:
+        nMoveX = m_nPtzSpeed * nSpeed * -1;
+        nMoveY = m_nPtzSpeed * nSpeed * -1;
+        break;
+    case PtzCommand::MoveL:
+        nMoveX = m_nPtzSpeed * nSpeed * -1;
+        break;
+    case PtzCommand::MoveLD:
+        nMoveX = m_nPtzSpeed * nSpeed * -1;
+        nMoveY = m_nPtzSpeed * nSpeed;
+        break;
+    case PtzCommand::MoveD:
+        nMoveY = m_nPtzSpeed * nSpeed;
+        break;
+    case PtzCommand::MoveRD:
+        nMoveX = m_nPtzSpeed * nSpeed;
+        nMoveY = m_nPtzSpeed * nSpeed;
+        break;
+    case PtzCommand::MoveR:
+        nMoveX = m_nPtzSpeed * nSpeed;
+        break;
+    case PtzCommand::MoveRT:
+        nMoveX = m_nPtzSpeed * nSpeed ;
+        nMoveY = m_nPtzSpeed * nSpeed * -1;
+        break;
+    case PtzCommand::MoveT:
+        nMoveY = m_nPtzSpeed * nSpeed * -1;
+        break;
+    case PtzCommand::Restore:
+        m_nZoom = 1;
+        nMoveX = m_viewPos.x() * -1;
+        nMoveY = m_viewPos.y() * -1;
+        break;
+    case PtzCommand::SetSpeed:
+        m_nPtzSpeed = nParam;
+        break;
+    default:
+        break;
+    }
+
+    m_dbCoef = 1 - (m_nZoom - 1) * 0.1;
+    m_viewPos.setX(m_viewPos.x() + nMoveX);
+    m_viewPos.setY(m_viewPos.y() + nMoveY);
+    
+    update();
+}
+
+int DrawWnd::GetPtzSpeed()
+{
+    return m_nPtzSpeed;
 }
 
 void DrawWnd::DrawDefault()
@@ -52,35 +126,32 @@ void DrawWnd::DrawDefault()
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
 
-    QRect rcWnd({0,0}, size());
+    QRect rcWnd(rect());
     painter.fillRect(rcWnd, s_qcl292C39);
 
+    DrawText(painter, QVariant::fromValue(m_nIndex).toString());
+    Drawborder(painter, rcWnd);
+}
+
+void DrawWnd::DrawText(QPainter& painter, QString& strText)
+{
+    QRect rcWnd = rect();
+    QFont font("Arial Unicode MS", 30, 150);
+    painter.setFont(font);
+    int widthOfText = painter.fontMetrics().width(strText);
+    int heightOfText = painter.fontMetrics().height();
+    painter.setPen(s_qclTEXT1);
+    painter.drawText(rcWnd.left() + ((rcWnd.width() - widthOfText) / 2), rcWnd.top() + ((rcWnd.height() - heightOfText) / 2), strText);
+
+}
+
+void DrawWnd::Drawborder(QPainter& painter, QRect& rcArea)
+{
     if (m_bSelected)
     {
         painter.setPen(QPen(s_qclBorder1, m_nBorderWidth));
-        painter.drawRect(rcWnd);
+        painter.drawRect(rcArea);
     }
-
-    QRect rcDraw = GetDrawArea();
-    QFont font("Arial Unicode MS", 30, 150);
-    painter.setFont(font);
-    QString text = QVariant::fromValue(m_nIndex).toString();
-    int widthOfText = painter.fontMetrics().width(text);
-    int heightOfText = painter.fontMetrics().height();
-    painter.setPen(s_qclTEXT1);
-    painter.drawText(rcDraw.left() + ((rcDraw.width() - widthOfText)/ 2), rcDraw.top() + ((rcDraw.height()- heightOfText)/2), text);
-}
-
-QRect DrawWnd::GetDrawArea()
-{
-    QSize wndSize = size();
-    QRect rc({0,0}, wndSize);
-
-    if (m_bSelected)
-    {
-        rc.setRect(m_nBorderWidth, m_nBorderWidth,size().width()-(2* m_nBorderWidth), size().height() - (2 * m_nBorderWidth));
-    }
-    return rc;
 }
 
 FrameData::Ptr DrawWnd::GetFrame()
@@ -92,6 +163,10 @@ FrameData::Ptr DrawWnd::GetFrame()
         {
             std::lock_guard<std::mutex> guard(m_mxLockData);
             m_queWaitRender.pop();
+        }
+        if (m_queWaitRender.size() > 3)
+        {
+            update();
         }
     }
     return pRet;
@@ -158,17 +233,35 @@ void DrawWnd::paintEvent(QPaintEvent *event)
     if (m_bInPreview)
     {
         QPainter painter(this);
+        QRect rcDst(0, 0, size().width(), size().height());
         if (auto pFrame = GetFrame())
         {
-            QRect rcDst(0,0,size().width(), size().height());
-            QRect rcPic(0,0, pFrame->nPicWidth, pFrame->nPicHeight);
-            QImage tmpImg((uchar *)pFrame->pBufData, pFrame->nPicWidth, pFrame->nPicHeight, QImage::Format_RGB32);
+            m_pLastFrame = pFrame;
+        }
+
+        if (m_pLastFrame)
+        {
+            int nShowPicWidth = m_pLastFrame->nPicWidth * m_dbCoef;
+            int nShowPicHeight = m_pLastFrame->nPicHeight * m_dbCoef;
+            int nShowPosX = max(0,m_viewPos.x());
+            int nShowPosY = max(0,m_viewPos.y());
+            nShowPosX = min(m_pLastFrame->nPicWidth - nShowPicWidth, nShowPosX);
+            nShowPosY = min(m_pLastFrame->nPicHeight - nShowPicHeight, nShowPosY);
+
+            m_viewPos.setX(nShowPosX);
+            m_viewPos.setY(nShowPosY);
+            QRect rcPic(nShowPosX, nShowPosY, nShowPicWidth, nShowPicHeight);
+            QImage tmpImg((uchar *)m_pLastFrame->pBufData, m_pLastFrame->nPicWidth, m_pLastFrame->nPicHeight, QImage::Format_RGB32);
             painter.drawImage(rcDst, tmpImg, rcPic);
         }
+        else
+        {
+            DrawText(painter, m_strHint);
+        }
+        Drawborder(painter, rcDst);
     }
     else
     {
-
         DrawDefault();
     }
 }

@@ -13,7 +13,7 @@ namespace utils
     QJsonValue GetValueFromJsonObj(const QJsonObject& obj, const QString& param);
 
     template<typename T>
-    void TravelQJsonArray(QJsonArray arrayData, T func)
+    void TravelQJsonArray(QJsonArray arrayData, T& func)
     {
         int nSize = arrayData.size();
         for (int i = 0; i < nSize; ++i)
@@ -23,7 +23,7 @@ namespace utils
     }
 
     template<typename V, typename T>
-    void TravelVector(std::vector<V> vc, T func)
+    void TravelVector(std::vector<V> vc, T& func)
     {
         for (auto item: vc )
         {

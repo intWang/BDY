@@ -74,6 +74,8 @@ void PreviewRealWnd::StartPreview(ChannelNode::Ptr pChannel)
 
         if (m_DrawWnd)
         {
+            QString strWndHint = "监控点 [" + QString::fromStdString(pChannel->GetName()) + "]  正在预览....";
+            m_DrawWnd->SetHintString(strWndHint);
             m_DrawWnd->SetPreviewStatu(true);
         }
     }
@@ -163,11 +165,38 @@ time_t PreviewRealWnd::GetBusyTime()
     return m_tmBusy;
 }
 
+bool PreviewRealWnd::IsFull()
+{
+    return m_bFull;
+}
+
+void PreviewRealWnd::SetFull(bool bValue)
+{
+    m_bFull = bValue;
+}
+
+int PreviewRealWnd::GetPtzSpeed()
+{
+    if (m_DrawWnd)
+    {
+        return m_DrawWnd->GetPtzSpeed();
+    }
+    return 1;
+}
+
+void PreviewRealWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
+{
+    if(m_DrawWnd)
+    {
+        m_DrawWnd->OnPtzCtrl(emCmd, nParam);
+    }
+}
+
 void PreviewRealWnd::mousePressEvent(QMouseEvent *event)
 {
     QPoint ptCurrent = QCursor::pos();
     QRect rcCenter = GetCenterArea();
-    if (rcCenter.contains(ptCurrent))
+    if (rcCenter.contains(mapFromGlobal(ptCurrent)))
     {
         emit PreviewWndUserClick();
         return;
@@ -216,4 +245,11 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
         }
     }
     return pBottomBar;
+}
+
+
+void PreviewRealWnd::mouseDoubleClickEvent(QMouseEvent *event)
+{
+    emit PreviewWndUserDBClick(!m_bFull);
+    m_bFull = !m_bFull;
 }

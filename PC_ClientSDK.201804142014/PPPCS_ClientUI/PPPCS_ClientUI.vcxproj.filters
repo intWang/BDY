@@ -127,6 +127,21 @@
     <ClCompile Include="HTTPSupport.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ChannelCtrlWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PtzCtrlWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PTZCtrl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ParamWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DecodeWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h">
@@ -168,6 +183,21 @@
     <QtMoc Include="MessageBoxWnd.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="ChannelCtrlWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="PtzCtrlWnd.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="PTZCtrl.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="ParamWnd.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="DecodeWnd.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="PPPCS_ClientUI.ui">
@@ -189,6 +219,18 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="MessageBoxWnd.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="PtzCtrlWnd.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="PTZCtrl.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="ParamWnd.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="DecodeWnd.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>

@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "LogManager.h"
 #include "DevTreeWnd.h"
+#include "ChannelCtrlWidget.h"
 MainViewWidget::MainViewWidget(QWidget *parent)
     : AreableWidget<QWidget>(parent)
 {
@@ -11,7 +12,7 @@ MainViewWidget::MainViewWidget(QWidget *parent)
     auto pLeftLayout = ui.leftLayout;
     auto pRightLayout = ui.rightLayout;
     auto pPreviewPanel = MQ(PreviewPanel)(this);
-    //auto pTabWnd = MQ(AreableWidget<QWidget>)(this);
+    auto pTabWnd = MQ(ChannelCtrlWidget)(this);
     auto pTreeView = MQ(DevTreeWnd)(this);
     if (utils::CheckPointer({ pLeftLayout , pPreviewPanel}))
     {
@@ -19,9 +20,10 @@ MainViewWidget::MainViewWidget(QWidget *parent)
     }
 
     connect(pTreeView, &DevTreeWnd::ChannelNodeDBClick, pPreviewPanel, &PreviewPanel::OnStartPreview);
+    connect(pPreviewPanel, &PreviewPanel::SelectWnd, pTabWnd, &ChannelCtrlWidget::BindPreviewWnd);
 
     pLeftLayout->addWidget(pPreviewPanel);
-    //pRightLayout->addWidget(pTabWnd);
+    pRightLayout->addWidget(pTabWnd);
     pRightLayout->addWidget(pTreeView);
     pRightLayout->setStretch(0, 2);
     pRightLayout->setStretch(1, 3);
