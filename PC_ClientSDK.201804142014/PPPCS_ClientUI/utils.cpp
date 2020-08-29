@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <objbase.h>
+#include <QDir>
 #define GUID_LEN 64
 namespace utils
 {
@@ -33,6 +34,15 @@ namespace utils
             return value;
         }
         return QJsonValue();
+    }
+
+    void MakePathExist(QString strPath)
+    {
+        QDir dir(strPath);
+        if (!dir.exists())
+        {
+            dir.mkdir(strPath);
+        }
     }
 
     std::string GetUUID()

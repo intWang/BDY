@@ -103,7 +103,7 @@ void CmdBar::onClicked()
         }
         else if (pButton == m_pCloseButton)
         {
-            pWindow->close();
+            emit OnCloseBtnClicked();
         }
     }
 }
@@ -205,6 +205,8 @@ HintBar::HintBar(QWidget *parent /*= 0*/)
     pLayout->setContentsMargins(10, 0, 0, 0);
     setLayout(pLayout);
 
+    connect(this, &HintBar::RecvHintData, this, &HintBar::SetHint, Qt::QueuedConnection);
+
     m_pCBFunc = std::make_shared<ls::IHintCallBack::CallBackFunc>();
     if (m_pCBFunc)
     {
@@ -232,5 +234,5 @@ void HintBar::SetHint(const QString& strText, ls::HintLevel level)
 
 void HintBar::OnUserHint(const std::string& strHintInfo, ls::HintLevel level)
 {
-    SetHint(QString::fromStdString(strHintInfo), level);
+    emit RecvHintData(QString::fromStdString(strHintInfo), level);
 }

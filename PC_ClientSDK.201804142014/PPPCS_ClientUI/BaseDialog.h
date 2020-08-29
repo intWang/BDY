@@ -13,7 +13,9 @@ public:
     ~BaseDialog();
     QVBoxLayoutPtr GetLayout();
     HintBar::Ptr GetBottomBar();
-
+    void SetNoBottomBar();
+public slots:
+    void OnCloseCmd();
 private:
     CmdBar::Ptr m_pTitleBar = nullptr;
     HintBar::Ptr m_pBottomBar = nullptr;
@@ -22,5 +24,6 @@ protected:
     void setMinimizeVisible(bool bVisiable);
     void setMaximizeVisible(bool bVisiable);
     void setWidgetResizable(bool bVisiable);
+    void DeletBottomBar();
 };
 

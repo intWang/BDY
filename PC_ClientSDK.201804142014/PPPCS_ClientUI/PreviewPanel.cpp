@@ -83,7 +83,6 @@ void PreviewPanel::OnScreenDevideChange(DevideScreen newMode)
 
     }
 
-
 }
 
 BarWidget::Ptr PreviewPanel::InitTopBar()
@@ -161,42 +160,50 @@ void PreviewPanel::PraperPreviewRealWnds(int nNums)
         m_vcPreviewRealWnds.push_back(pWnd);
         connect(pWnd, &PreviewRealWnd::PreviewWndUserClick, this, &PreviewPanel::OnPreveiwWndSelChange);
         connect(pWnd, &PreviewRealWnd::PreviewWndUserDBClick, this, &PreviewPanel::OnPreveiwWndSelFull);
+        connect(pWnd, &PreviewRealWnd::PreviewWndStopPreview, this, &PreviewPanel::OnStopPreview);
         pWnd->hide();
     }
 }
 
-void PreviewPanel::SetSelectWnd(PreviewRealWnd::Ptr pSelWnd)
+void PreviewPanel::SetSelectWnd(PreviewRealWnd::Ptr pSelWnd, bool bForceSel)
 {
     if (pSelWnd)
     {
         if (m_pCurSelWnd && m_pCurSelWnd != pSelWnd)
         {
             m_pCurSelWnd->SetSelectStatu(false);
+            m_pCurSelWnd = nullptr;
         }
 
         bool bOriginStatu = pSelWnd->GetSelectStatu();
-        if (bOriginStatu)
+        bool bNewStatu = !bOriginStatu || bForceSel;
+        pSelWnd->SetSelectStatu(bNewStatu);
+        if (bNewStatu)
         {
-            pSelWnd->SetSelectStatu(false);
-            m_pCurSelWnd = nullptr;
+            m_pCurSelWnd = pSelWnd;
         }
         else
         {
-            pSelWnd->SetSelectStatu(true);
-            m_pCurSelWnd = pSelWnd;
+            m_pCurSelWnd = nullptr;
         }
-
     }
     else
     {
         if (m_pCurSelWnd)
         {
             m_pCurSelWnd->SetSelectStatu(false);
+            m_pCurSelWnd = nullptr;
         }
-        m_pCurSelWnd = nullptr;
     }
 
-    emit SelectWnd(m_pCurSelWnd);
+    if (m_pCurSelWnd && m_pCurSelWnd->IsInPreview())
+    {
+        emit SelectPreviewWnd(m_pCurSelWnd);
+    }
+    else
+    {
+        emit SelectPreviewWnd(nullptr);
+    }
 }
 
 void PreviewPanel::SetWndFull(PreviewRealWnd::Ptr pWnd)
@@ -204,7 +211,7 @@ void PreviewPanel::SetWndFull(PreviewRealWnd::Ptr pWnd)
 
 }
 
-void PreviewPanel::OnStartPreview(ChannelNode::Ptr pChannel)
+void PreviewPanel::OnStartPreview(DevNode::Ptr pChannel)
 {
     //Get a free wnd or get the  select wnd 
     PreviewRealWnd::Ptr pTagetWnd = nullptr;
@@ -241,15 +248,34 @@ void PreviewPanel::OnStartPreview(ChannelNode::Ptr pChannel)
         }
     }
 
-    SetSelectWnd(pTagetWnd);
 
     if (pTagetWnd)
     {
         pTagetWnd->StartPreview(pChannel);
+        emit PreviewStatuChanged(QString::fromStdString(pChannel->GetDevUid()), true);
     }
     else
     {
         LogError("No wnd could use");
+    }
+    SetSelectWnd(pTagetWnd, true);
+}
+
+void PreviewPanel::OnStopPreview(const QString& strUid, PreviewRealWnd::Ptr pWnd)
+{
+    emit PreviewStatuChanged(strUid, false);
+    if (pWnd == m_pCurSelWnd)
+    {
+        emit SelectPreviewWnd(nullptr);
+    }
+}
+
+void PreviewPanel::OnDeviceLostConnect(const QString& strUID)
+{
+    std::string strTaget = strUID.toStdString();
+    for (auto pWnd:m_vcPreviewRealWnds)
+    {
+        pWnd->CheckDevLostConnect(strTaget);
     }
 }
 
@@ -279,7 +305,7 @@ void PreviewPanel::OnPreveiwWndSelFull(bool bFull)
         else
         {
             OnScreenDevideChange(m_curScreenMode);
-            SetSelectWnd(pSelWnd);
+            SetSelectWnd(pSelWnd, true);
         }
        
     }

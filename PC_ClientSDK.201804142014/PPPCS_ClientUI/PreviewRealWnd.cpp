@@ -1,5 +1,7 @@
 #include "PreviewRealWnd.h"
 #include "OpenGLDrawWnd.h"
+#include "ConfigDlg.h"
+#include "MessageBoxWnd.h"
 PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
     : AreableWidget<QWidget>(parent)
 {
@@ -49,11 +51,19 @@ void PreviewRealWnd::OnFrameData(const std::string& strUid, FrameData::Ptr pFram
     }
 }
 
-void PreviewRealWnd::StartPreview(ChannelNode::Ptr pChannel)
+void PreviewRealWnd::StartPreview(DevNode::Ptr pChannel)
 {
     if (GetRuningStatu() == Status::InPreview || GetRuningStatu() == Status::StartingPreview)
     {
-        StopPreview();
+        if (pChannel->GetDevUid() != m_pChannel->GetDevUid())
+        {
+            StopPreview();
+        }
+        else
+        {
+            LogInfo("start preview %s duplicate", pChannel->strUID.c_str());
+            return;
+        }
     }
     if (pChannel)
     {
@@ -78,6 +88,8 @@ void PreviewRealWnd::StartPreview(ChannelNode::Ptr pChannel)
             m_DrawWnd->SetHintString(strWndHint);
             m_DrawWnd->SetPreviewStatu(true);
         }
+
+        pChannel->StartPreview();
     }
 }
 
@@ -101,10 +113,26 @@ void PreviewRealWnd::StopPreview()
         {
             m_DrawWnd->SetPreviewStatu(false);
         }
-
+        m_pChannel->StopPreview();
+        emit PreviewWndStopPreview(QString::fromStdString(m_pChannel->GetDevUid()), this);
         m_pChannel = nullptr;
     }
     SetRuningStatu(Status::Empty);
+}
+
+void PreviewRealWnd::CallConfig()
+{
+    ConfigDlg config(m_pChannel, this);
+    config.exec();
+}
+
+bool PreviewRealWnd::SnapShot()
+{
+    if (m_DrawWnd && m_pChannel)
+    {
+        return m_DrawWnd->SnapShot(QString::fromStdString(m_pChannel->GetName()));
+    }
+    return false;
 }
 
 void PreviewRealWnd::Clear()
@@ -141,13 +169,16 @@ void PreviewRealWnd::SetRuningStatu(Status state)
     {
     case PreviewRealWnd::Empty:
         m_tmBusy = 0;
+        SetBottomEnable(false);
         break;
     case PreviewRealWnd::StartingRecord:
     case PreviewRealWnd::StartingPreview:
         m_tmBusy = time(0);
+        SetBottomEnable(true);
         break;
     case PreviewRealWnd::InPreview:
     case PreviewRealWnd::Record:
+        SetBottomEnable(true);
         break;
     default:
         break;
@@ -184,6 +215,38 @@ int PreviewRealWnd::GetPtzSpeed()
     return 1;
 }
 
+void PreviewRealWnd::SetBottomEnable(bool bEnable)
+{
+    auto pBottomBar = GetBottomWnd();
+    if (pBottomBar)
+    {
+        pBottomBar->setEnabled(bEnable);
+    }
+}
+
+int PreviewRealWnd::IsInPreview()
+{
+    auto emCurStatu = GetRuningStatu();
+    return (emCurStatu == InPreview)|| (emCurStatu == StartingPreview)|| (emCurStatu == Reconnecting);
+}
+
+DevNode::Ptr PreviewRealWnd::GetDevNode()
+{
+    return m_pChannel;
+}
+
+bool PreviewRealWnd::CheckDevLostConnect(const std::string& strLostDev)
+{
+    if (m_pChannel && m_pChannel->GetDevUid() == strLostDev)
+    {
+        QString strWndHint = "监控点 [" + QString::fromStdString(m_pChannel->GetName()) + "]  丢失连接,正在重连....";
+        m_DrawWnd->SetHintString(strWndHint);
+        m_DrawWnd->update();
+        SetRuningStatu(Status::Reconnecting);
+    }
+    return false;
+}
+
 void PreviewRealWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
 {
     if(m_DrawWnd)
@@ -214,6 +277,7 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
             auto pBtnClose = MQ(QPushButton)(pBottomBar);
             auto pBtnRecord = MQ(QPushButton)(pBottomBar);
             auto pBtnSnap = MQ(QPushButton)(pBottomBar);
+            auto pBtnConfig = MQ(QPushButton)(pBottomBar);
 
             pBtnClose->setObjectName("btn_stop_preview");
             pBtnClose->setToolTip(QStringLiteral("停止预览"));
@@ -230,18 +294,37 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
             pBtnSnap->setToolTip(QStringLiteral("截图"));
             pBtnSnap->setFixedWidth(60);
 
+            pBtnConfig->setObjectName("btn_config");
+            pBtnConfig->setText(QStringLiteral("配置"));
+            pBtnConfig->setToolTip(QStringLiteral("配置"));
+            pBtnConfig->setFixedWidth(60);
+
             pLayout->addStretch();
             pLayout->setSpacing(10);
             pLayout->addWidget(pBtnRecord);
             pLayout->addWidget(pBtnSnap);
             pLayout->addWidget(pBtnClose);
+            pLayout->addWidget(pBtnConfig);
 
             pBtnRecord->setEnabled(false);
-            pBtnSnap->setEnabled(false);
 
             connect(pBtnClose, &QPushButton::clicked, this, [this](bool) {
+                if (this->GetRuningStatu() == PreviewRealWnd::Status::Reconnecting)
+                {
+                    msg::showInformation(this, "信息", "设备正在重连，请稍后再试!");
+                    return;
+                }
                 this->StopPreview();
             });
+
+            connect(pBtnSnap, &QPushButton::clicked, this, [this](bool) {
+                this->SnapShot();
+            });
+            
+            connect(pBtnConfig, &QPushButton::clicked, this, [this](bool) {
+                this->CallConfig();
+            });
+
         }
     }
     return pBottomBar;

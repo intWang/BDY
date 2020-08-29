@@ -40,6 +40,8 @@ public:
     virtual void SetUserCode(const char* pStrCode) override;
     virtual const char* GetUserCode() override;
 
+    virtual bool StartRecord() override;
+    virtual bool StopRecord() override;
 protected:
     void DataCallBack(const unsigned char* pData, int width, int height, int len);
 

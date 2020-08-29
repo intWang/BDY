@@ -22,7 +22,9 @@ public:
     void OnScreenDevideChange(DevideScreen newMode);
 
 signals:
-    void SelectWnd(PreviewRealWnd::Ptr pWnd);
+    void PreviewStatuChanged(const QString& strUid, bool bStatu);
+    void SelectPreviewWnd(PreviewRealWnd::Ptr pWnd);
+
 protected:
     virtual BarWidget::Ptr InitTopBar();
     virtual BarWidget::Ptr InitBottomBar();
@@ -30,11 +32,13 @@ protected:
     void InitTopBar4PreviewMode(QHBoxLayoutPtr pBarLayout);
     void InitPreviewRealWnds();
     void PraperPreviewRealWnds(int nNums);
-    void SetSelectWnd(PreviewRealWnd::Ptr pWnd);
+    void SetSelectWnd(PreviewRealWnd::Ptr pWnd, bool bForceSel = false);
     void SetWndFull(PreviewRealWnd::Ptr pWnd);
 
 public slots:
-    void OnStartPreview(ChannelNode::Ptr pChannel);
+    void OnStartPreview(DevNode::Ptr pChannel);
+    void OnStopPreview(const QString& strUid, PreviewRealWnd::Ptr pWnd);
+    void OnDeviceLostConnect(const QString& strUID);
     void OnPreveiwWndSelChange();
     void OnPreveiwWndSelFull(bool bFull);
     void OnScreenDevideModeChange(int nIndex);

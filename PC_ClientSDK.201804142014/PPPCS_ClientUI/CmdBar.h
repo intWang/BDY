@@ -15,6 +15,8 @@ public:
     void setMaximizeVisible(bool bVisiable);
     void setWidgetResizable(bool bVisiable);
 
+signals:
+    void OnCloseBtnClicked();
 private slots:
     void onClicked();
 
@@ -44,9 +46,13 @@ public:
     explicit HintBar(QWidget *parent = 0);
     ~HintBar();
 
+public slots: 
     void SetHint(const QString& strText, ls::HintLevel level);
 
     void OnUserHint(const std::string& strHintInfo, ls::HintLevel level);
+signals:
+    void RecvHintData(const QString& strInfo, ls::HintLevel level);
+
 protected:
     ls::IHintCallBack::CallBackFunc::Ptr m_pCBFunc = nullptr;
 

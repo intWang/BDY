@@ -11,4 +11,7 @@ public:
     virtual void InputData(unsigned char*data, int len) = 0;
     virtual void SetUserCode(const char* pStrCode) = 0;
     virtual const char* GetUserCode() = 0;
+
+    virtual bool StartRecord() = 0;
+    virtual bool StopRecord() = 0;
 };

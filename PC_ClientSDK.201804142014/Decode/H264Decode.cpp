@@ -308,6 +308,16 @@ const char* H264Decode::GetUserCode()
     return m_strUserCode.c_str();
 }
 
+bool H264Decode::StartRecord()
+{
+    return false;
+}
+
+bool H264Decode::StopRecord()
+{
+    return false;
+}
+
 H264Decode::BufferData::BufferData(const unsigned char* data, int len)
 {
     AllocateBuf(len);

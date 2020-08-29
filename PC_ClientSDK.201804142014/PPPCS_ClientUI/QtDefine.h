@@ -58,6 +58,14 @@ enum DevTreeNodeType
     Channel,
 };
 
+enum DevTreeNodeStatu
+{
+    Default,
+    Connecting,
+    Pause,
+    Play,
+};
+
 enum class PtzCommand
 {
     ZoomIn,
@@ -92,13 +100,20 @@ auto makeQTObject(QObjectPtr pParent = nullptr) -> T*
 #define COLOR_TOP_292C39 41,44,57
 #define COLOR_MID_1E2233 30,34,51
 #define COLOR_BORDER 66,172,230
+#define COLOR_BORDER2 0,0,0
+#define COLOR_BK 28,32,48
 #define COLOR_TEXT_1 199,202,217 
+#define COLOR_GROUP_BTN_SEL 61,79,114
 
 static QColor s_qcl444858(COLOR_TOP_444858);
 static QColor s_qcl292C39(COLOR_TOP_292C39);
 static QColor s_qcl1E2233(COLOR_MID_1E2233);
 static QColor s_qclBorder1(COLOR_BORDER);
+static QColor s_qclBorder2(COLOR_BORDER2);
 static QColor s_qclTEXT1(COLOR_TEXT_1);
+static QColor s_qclGroupBtnSel(COLOR_GROUP_BTN_SEL);
+static QColor s_qclBK283248(COLOR_BK);
+
 
 #define TREEROOTID 0
 #define BASEID 1
@@ -114,3 +129,6 @@ static QColor s_qclTEXT1(COLOR_TEXT_1);
 
 #define max(a, b) a>b?a:b
 #define min(a, b) a>b?b:a
+
+#define CUSTOMIZED_STATU_BASE 100
+#define CSTATU_RECONNECTED (CUSTOMIZED_STATU_BASE + 1)

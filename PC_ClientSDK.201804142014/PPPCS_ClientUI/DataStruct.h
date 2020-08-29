@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include "QtDefine.h"
+#include "JSONStructProtocal.h"
 typedef struct VideoChannel
 {
     int ch_no;
@@ -14,6 +15,20 @@ typedef struct VideoChannel
     int height_max;
     std::string chann_name;
 }*PVideoChannel;
+
+typedef struct VideoParamData
+{
+    short brightness;
+    short tone;
+    short contrast;
+    short saturation;
+    time_t tmLastUpdate;
+
+    bool isExpired()
+    {
+        return (time(NULL) - tmLastUpdate) > 60 * 10;
+    }
+}*PVideoParamData;
 
 typedef struct HotKey
 {
@@ -49,7 +64,8 @@ struct TreeNode
     using Ptr = std::shared_ptr<TreeNode>;
     int nNodeId = -1;
     int nParentId = -1;
-    DevTreeNodeType emNodeType;
+    DevTreeNodeType emNodeType = Group;
+    DevTreeNodeStatu emStatu = Default;
     TreeNode() = default;
     virtual std::string GetName() = 0;
     virtual QJsonObject GenerateJsonObj() = 0;
@@ -59,43 +75,69 @@ struct TreeNode
     int GetParent();
     DevTreeNodeType GetDataType();
 
+    void SetStatu(DevTreeNodeStatu emStatu);
+    DevTreeNodeStatu GetStatu();
+    std::string GetStatuProperty();
+
 };
-
-
-struct ChannelNode :public TreeNode
-{
-    VideoChannel channelData;
-    std::string strUID;
-
-    using Ptr = std::shared_ptr<ChannelNode>;
-    ChannelNode() = default;
-    ChannelNode(int nDevID, const std::string& strDevUid, VideoChannel& stData);
-
-    virtual ~ChannelNode() {}
-    virtual std::string GetName() override;
-    virtual QJsonObject GenerateJsonObj() override;
-    virtual void ReadDataJsonObj(QJsonObject& obj) override;
-};
-
 
 struct DevNode :public TreeNode
 {
     using Ptr = std::shared_ptr<DevNode>;
     DeviceData stDevice;
     std::string strUID;
+    std::string strShortID;
     std::string strCustomName;
     std::string strPwd;
     static int s_nDevCount;
+    int nPreviewCount;
+    VideoParamData stVideoParam;
+
+    IPCNetWifiAplist::Ptr pWifiList;
+    IPCNetWiFiAPInfo_t::Ptr pHotSpot;
+
     DevNode() = default;
     DevNode(const std::string& strUid, const std::string& strPwd, const std::string& strName, int nGroupID);
         
-    virtual ~DevNode() {}
+    virtual ~DevNode();
     virtual std::string GetName() override;
     virtual  QJsonObject GenerateJsonObj() override;
     virtual void ReadDataJsonObj(QJsonObject& obj) override;
     void UpdateDevData(const DeviceData& data);
     bool IsDevLoaded();
-    ChannelNode::Ptr GetChannelData();
+    bool CheckPwd(std::string strInputPwd);
+    std::string GetDevUid();
+    std::string GetLabelUid();
+    VideoParamData GetVideoParam();
+    void SetVideoParam(VideoParamData& stParam);
+
+    void StartPreview();
+    void StopPreview();
+
+    void SetWifiList(IPCNetWifiAplist::Ptr pData);
+    IPCNetWifiAplist::Ptr GetWifiList();
+
+    void SetHotSpotData(IPCNetWiFiAPInfo_t::Ptr pData);
+    IPCNetWiFiAPInfo_t::Ptr GetHotSpotData();
+
+    //////CB OPerate
+    void OnLostConnect();
+    void OnReConnect();
+
+    //////IPCNetOperate
+    bool Conect();
+    bool DisConnect();
+    bool GetDevTime();
+    bool RestartDevice();
+    bool RestoreDevice();
+
+    bool SearchWifi();
+    bool SetWifi(std::string& strSSID, std::string& strPwd, std::string& strEncType);
+    bool ChangePwd(std::string strNewPwd);
+    bool GetHotSpot();
+    bool SetHotSpot(std::string& strJson);
+    bool GetNetStrategy();
+    bool SetNetStrategy(std::string& strJson);
 };
 
 struct GroupNode :public TreeNode

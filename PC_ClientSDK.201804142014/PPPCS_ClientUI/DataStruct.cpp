@@ -1,6 +1,6 @@
 #include "DataStruct.h"
 #include "utils.h"
-
+#include "IServer.h"
 int GroupNode::s_GroupCount = BASEID;
 int DevNode::s_nDevCount = BASEID;
 
@@ -19,6 +19,38 @@ DevTreeNodeType TreeNode::GetDataType()
     return emNodeType;
 }
 
+void TreeNode::SetStatu(DevTreeNodeStatu _emStatu)
+{
+    emStatu = _emStatu;
+}
+
+DevTreeNodeStatu TreeNode::GetStatu()
+{
+    return emStatu;
+}
+
+std::string TreeNode::GetStatuProperty()
+{
+    std::string strRet = "";
+    switch (emStatu)
+    {
+    case Default:
+        break;
+    case Connecting:
+        strRet = "Connecting";
+        break;
+    case Pause:
+        strRet = "Pause";
+        break;
+    case Play:
+        strRet = "Play";
+        break;
+    default:
+        break;
+    }
+    return strRet;
+}
+
 DevNode::DevNode(const std::string& strUid, const std::string& strPwd, const std::string& strName, int nGroupID)
     : strUID(strUid)
     , strPwd(strPwd)
@@ -27,6 +59,12 @@ DevNode::DevNode(const std::string& strUid, const std::string& strPwd, const std
     emNodeType = DevTreeNodeType::Device;
     nParentId = nGroupID;
     nNodeId = MAKEDEVID(nGroupID, ++s_nDevCount);
+    nPreviewCount = 0;
+}
+
+DevNode::~DevNode()
+{
+    DisConnect();
 }
 
 std::string DevNode::GetName()
@@ -77,13 +115,219 @@ bool DevNode::IsDevLoaded()
     return stDevice.video_input.size();
 }
 
-ChannelNode::Ptr DevNode::GetChannelData()
+bool DevNode::CheckPwd(std::string strInputPwd)
 {
-    if (stDevice.video_input.size())
+    return strInputPwd == strPwd;
+}
+
+std::string DevNode::GetDevUid()
+{
+    return strUID;
+}
+
+std::string DevNode::GetLabelUid()
+{
+    return strShortID;
+}
+
+bool DevNode::GetDevTime()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
     {
-        return std::make_shared<ChannelNode>(nNodeId, strUID, stDevice.video_input[0]);
+        pICPServer->GetDevTime(strUID);
+        return true;
     }
-    return nullptr;
+    return false;
+}
+
+bool DevNode::RestartDevice()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->RestartDevice(strUID);
+        return true;
+    }
+
+    return false;
+}
+
+bool DevNode::RestoreDevice()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->ResetDevice(strUID);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::SearchWifi()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->SearchWifi(strUID);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::SetWifi(std::string& strSSID, std::string& strPwd, std::string& strEncType)
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->SetWifi(strUID, strSSID, strPwd, strEncType);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::ChangePwd(std::string strNewPwd)
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->ChangeDevPwd(strUID,strNewPwd);
+        strPwd = strNewPwd;
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::GetHotSpot()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->GetHotSpot(strUID);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::SetHotSpot(std::string& strJson)
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->SetHotSpot(strUID, strJson);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::GetNetStrategy()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->GetNetStrategy(strUID);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::SetNetStrategy(std::string& strJson)
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->SetNetStrategy(strUID, strJson);
+        return true;
+    }
+    return false;
+}
+
+VideoParamData DevNode::GetVideoParam()
+{
+    return stVideoParam;
+}
+
+void DevNode::SetVideoParam(VideoParamData& stParam)
+{
+    stVideoParam = stParam;
+}
+
+void DevNode::StartPreview()
+{
+    nPreviewCount++;
+    if (nPreviewCount)
+    {
+        SetStatu(Play);
+    }
+}
+
+void DevNode::StopPreview()
+{
+    nPreviewCount--;
+    if (!nPreviewCount)
+    {
+        SetStatu(Pause);
+    }
+}
+
+
+void DevNode::SetWifiList(IPCNetWifiAplist::Ptr pData)
+{
+    pWifiList = pData;
+}
+
+IPCNetWifiAplist::Ptr DevNode::GetWifiList()
+{
+    return pWifiList;
+}
+
+void DevNode::SetHotSpotData(IPCNetWiFiAPInfo_t::Ptr pData)
+{
+    pHotSpot = pData;
+}
+
+IPCNetWiFiAPInfo_t::Ptr DevNode::GetHotSpotData()
+{
+    return pHotSpot;
+}
+
+void DevNode::OnLostConnect()
+{
+    memset(&stDevice, 0, sizeof(stDevice));
+    SetStatu(Connecting);
+}
+
+void DevNode::OnReConnect()
+{
+    SetStatu(Play);
+}
+
+bool DevNode::Conect()
+{
+    if (IsDevLoaded())
+    {
+        return true;
+    }
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->ConnectDevice(strUID, strPwd);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::DisConnect()
+{
+    if (IsDevLoaded())
+    {
+        auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+        if (pICPServer)
+        {
+            pICPServer->DisconnectDevice(strUID);
+        }
+    }
+    return true;
 }
 
 GroupNode::GroupNode(const std::string& strGroupName, int nGroupId, int nId /*= -1*/)
@@ -127,29 +371,6 @@ void GroupNode::ReadDataJsonObj(QJsonObject& obj)
     s_GroupCount = max(s_GroupCount, nNodeId);
 }
 
-ChannelNode::ChannelNode(int nDevID, const std::string& strDevUid, VideoChannel& stData)
-    :channelData(stData)
-{
-    strUID = strDevUid;
-    emNodeType = DevTreeNodeType::Channel;
-    nParentId = nDevID;
-    nNodeId = MAKECHANNELID(nDevID, stData.ch_no);
-}
-
-std::string ChannelNode::GetName()
-{
-    return channelData.chann_name;
-}
-
-QJsonObject ChannelNode::GenerateJsonObj()
-{
-    QJsonObject obj;
-    return obj;
-}
-
-void ChannelNode::ReadDataJsonObj(QJsonObject& obj)
-{
-}
 
 FrameData::FrameData(const unsigned char* data, int width, int height, int len)
 {

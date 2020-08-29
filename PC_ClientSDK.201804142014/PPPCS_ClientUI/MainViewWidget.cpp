@@ -20,7 +20,9 @@ MainViewWidget::MainViewWidget(QWidget *parent)
     }
 
     connect(pTreeView, &DevTreeWnd::ChannelNodeDBClick, pPreviewPanel, &PreviewPanel::OnStartPreview);
-    connect(pPreviewPanel, &PreviewPanel::SelectWnd, pTabWnd, &ChannelCtrlWidget::BindPreviewWnd);
+    connect(pTreeView, &DevTreeWnd::DeviceLostConnect, pPreviewPanel, &PreviewPanel::OnDeviceLostConnect, Qt::QueuedConnection);
+    connect(pPreviewPanel, &PreviewPanel::SelectPreviewWnd, pTabWnd, &ChannelCtrlWidget::BindPreviewWnd);
+    connect(pPreviewPanel, &PreviewPanel::PreviewStatuChanged, pTreeView, &DevTreeWnd::OnPreviewStatuChanged);
 
     pLeftLayout->addWidget(pPreviewPanel);
     pRightLayout->addWidget(pTabWnd);

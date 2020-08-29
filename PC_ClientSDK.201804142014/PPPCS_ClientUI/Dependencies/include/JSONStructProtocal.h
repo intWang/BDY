@@ -9,7 +9,7 @@
 
 using namespace std;
 #include<list>
-
+#include <memory>
 #if _WIN32
 #pragma comment(lib, "ws2_32.lib")
 #define __func__ __FUNCTION__
@@ -845,18 +845,14 @@ typedef struct IPCNetDate_st{
 	int Day;
 }IPCNetDate_st;
 typedef struct IPCNetTimeCfg{
-	IPCNetDate_st *Date;
-	IPCNetTime_st *Time;
+	IPCNetDate_st Date;
+	IPCNetTime_st Time;
 	Boolean_t NtpEnable;
 	String NtpServ;
 	int TimeZone;
 	IPCNetTimeCfg(){
-		Date = new IPCNetDate_st();
-		Time = new IPCNetTime_st();
 	}
 	~IPCNetTimeCfg(){
-		delete Date;
-		delete Time;
 	}
 	Boolean_t parseJSON(PJson::JSONObject &jsdata){
 		int value;
@@ -871,19 +867,19 @@ typedef struct IPCNetTimeCfg{
 					
 			PJson::JSONObject *jsTime = jsroot->getJSONObject("Time");
 			jsTime->getInt("Hour",value);
-			Time->Hour = value;
+			Time.Hour = value;
 			jsTime->getInt("Min",value);
-			Time->Min = value;
+            Time.Min = value;
 			jsTime->getInt("Sec",value);
-			Time->Sec = value;
+            Time.Sec = value;
 					
 			PJson::JSONObject *info = jsroot->getJSONObject("Date");
 			info->getInt("Day",value);
-			Date->Day = value;
+			Date.Day = value;
 			info->getInt("Mon",value);
-			Date->Mon = value;
+            Date.Mon = value;
 			info->getInt("Year",value);
-			Date->Year = value;
+            Date.Year = value;
 
 			delete jsroot;
 			return true;
@@ -900,15 +896,15 @@ typedef struct IPCNetTimeCfg{
 		jsresult.put("TimeZone",TimeZone);
 				
 		PJson::JSONObject jsTime;
-		jsTime.put("Hour", Time->Hour);
-		jsTime.put("Min", Time->Min);
-		jsTime.put("Sec", Time->Sec);
+		jsTime.put("Hour", Time.Hour);
+		jsTime.put("Min", Time.Min);
+		jsTime.put("Sec", Time.Sec);
 		jsresult.put("Time", jsTime);
 				
 		PJson::JSONObject info;
-		info.put("Day",Date->Day);
-		info.put("Mon",Date->Mon);
-		info.put("Year",Date->Year);
+		info.put("Day", Date.Day);
+		info.put("Mon", Date.Mon);
+		info.put("Year", Date.Year);
 		jsresult.put("Date", info);
 				
 		jsroot.put("Time.Conf", jsresult);
@@ -1235,6 +1231,7 @@ typedef struct IPCNetWirelessConfig{
 #define IPCNET_WIFI_CTRL_MODIFY 2
 #define IPCNET_WIFI_CTRL_CHG_PWD 3
 #define IPCNET_WIFI_CTRL_FORCE_SETUP 4
+    using Ptr = std::shared_ptr<IPCNetWirelessConfig>;
 	int Ctrl;//use to indicate what operation it is
 
 	Boolean_t WirelessEnable;
@@ -1436,6 +1433,7 @@ typedef struct IPCNetWifiApItem{
     String DNS2;
 }IPCNetWifiApItem_st;
 typedef struct IPCNetWifiAplist{
+    using Ptr = std::shared_ptr<IPCNetWifiAplist>;
 	IPCNetWifiApItem_st **ApItem;// = new IPCNetWifiApItem[1];
 	int num;
 	IPCNetWifiAplist(){
@@ -3572,6 +3570,7 @@ typedef struct IPCNetExpType{
 }IPCNetExpType_st;
 
 typedef struct IPCNetWiFiAPInfo{
+    using Ptr = std::shared_ptr<IPCNetWiFiAPInfo>;
 	Boolean_t Enable;
 	Boolean_t DHCP;
 	String EncType;
@@ -3675,6 +3674,7 @@ typedef struct IPCNetMobileNetworkStrategy{
 
 #define MAX_PRIO_NUM 5
 typedef struct IPCNetNetworkStrategy{
+    using Ptr = std::shared_ptr<IPCNetNetworkStrategy>;
     String CurNetwork;
 
 	int PrioSeqNum;
@@ -3689,41 +3689,42 @@ typedef struct IPCNetNetworkStrategy{
 	IPCNetNetworkStrategy(){
 		PrioSeqNum=0;
 	}
-    Boolean_t parseJSON(PJson::JSONObject &jsdata) {
+    Boolean_t parseJSON(PJson::JSONObject &jsdata)
+    {
         //try {
-            PJson::JSONObject *jsroot = jsdata.getJSONObject("NetworkStrategy");
-            if (jsroot != NULL) {
-                jsroot->getBoolean("NotNetworkAP", NotNetworkAP);
-                jsroot->getString("CurNetwork", CurNetwork);
-                PJson::JSONArray *jaPrioSeq = jsroot->getJSONArray("PrioSeq");
-				if(jaPrioSeq!=NULL){
-					PrioSeqNum = jaPrioSeq->getLength();
-					PrioSeqNum = PrioSeqNum>MAX_PRIO_NUM?MAX_PRIO_NUM:PrioSeqNum;
-					for(int i=0;i<PrioSeqNum;i++){
-						jaPrioSeq->getString(i, PrioSeq[i]);
-					}
-					delete jaPrioSeq;
-				}
-                PJson::JSONObject *jsob = jsroot->getJSONObject("WiredNetworkStrategy");
-				if(jsob!=NULL){
-					jsob->getBoolean("RouteToAP", WiredNetworkStrategy.RouteToAP);
-					delete jsob;
-				}
-
-                jsob = jsroot->getJSONObject("WiFiNetworkStrategy");
-				if(jsob!=NULL){
-					jsob->getBoolean("ForceToAP", WiFiNetworkStrategy.ForceToAP);
-					jsob->getBoolean("RouteToWiredNetwork", WiFiNetworkStrategy.RouteToWiredNetwork);
-					delete jsob;
-				}
-
-                jsob = jsroot->getJSONObject("MobileNetworkStrategy");
-				if(jsob!=NULL){
-					jsob->getBoolean("RouteToAP", MobileNetworkStrategy.RouteToAP);
-					jsob->getBoolean("RouteToWiredNetwork", MobileNetworkStrategy.RouteToWiredNetwork);
-					delete jsob;
-				}
+        PJson::JSONObject *jsroot = jsdata.getJSONObject("NetworkStrategy");
+        if (jsroot != NULL) {
+            jsroot->getBoolean("NotNetworkAP", NotNetworkAP);
+            jsroot->getString("CurNetwork", CurNetwork);
+            PJson::JSONArray *jaPrioSeq = jsroot->getJSONArray("PrioSeq");
+            if (jaPrioSeq != NULL) {
+                PrioSeqNum = jaPrioSeq->getLength();
+                PrioSeqNum = PrioSeqNum > MAX_PRIO_NUM ? MAX_PRIO_NUM : PrioSeqNum;
+                for (int i = 0; i < PrioSeqNum; i++) {
+                    jaPrioSeq->getString(i, PrioSeq[i]);
+                }
+                delete jaPrioSeq;
             }
+            PJson::JSONObject *jsob = jsroot->getJSONObject("WiredNetworkStrategy");
+            if (jsob != NULL) {
+                jsob->getBoolean("RouteToAP", WiredNetworkStrategy.RouteToAP);
+                delete jsob;
+            }
+
+            jsob = jsroot->getJSONObject("WiFiNetworkStrategy");
+            if (jsob != NULL) {
+                jsob->getBoolean("ForceToAP", WiFiNetworkStrategy.ForceToAP);
+                jsob->getBoolean("RouteToWiredNetwork", WiFiNetworkStrategy.RouteToWiredNetwork);
+                delete jsob;
+            }
+
+            jsob = jsroot->getJSONObject("MobileNetworkStrategy");
+            if (jsob != NULL) {
+                jsob->getBoolean("RouteToAP", MobileNetworkStrategy.RouteToAP);
+                jsob->getBoolean("RouteToWiredNetwork", MobileNetworkStrategy.RouteToWiredNetwork);
+                delete jsob;
+            }
+        }
         //} catch (JSONException e) {
         //    e.printStackTrace();
         //    return false;
@@ -3731,45 +3732,48 @@ typedef struct IPCNetNetworkStrategy{
         return 1;
     }
 
-    int toJSONString(String&str) {
+    int toJSONString(String&str)
+    {
         PJson::JSONObject jsroot;
         //try {
-            PJson::JSONObject jsethnetwork;
-            jsethnetwork.put("NotNetworkAP", NotNetworkAP);
-            jsethnetwork.put("CurNetwork", CurNetwork);
-            if(PrioSeqNum>0 && PrioSeqNum<MAX_PRIO_NUM){
-                PJson::JSONArray jaPrioSeq;
-                for(int i=0;i<PrioSeqNum;i++){
-                    jaPrioSeq.put(i, PrioSeq[i]);
-                }
-                jsethnetwork.put("PrioSeq", jaPrioSeq);
-            }else{
-                Log("PrioSeq is null");
-                return 0;
+        PJson::JSONObject jsethnetwork;
+        jsethnetwork.put("NotNetworkAP", NotNetworkAP);
+        jsethnetwork.put("CurNetwork", CurNetwork);
+        if (PrioSeqNum > 0 && PrioSeqNum < MAX_PRIO_NUM) {
+            PJson::JSONArray jaPrioSeq;
+            for (int i = 0; i < PrioSeqNum; i++) {
+                jaPrioSeq.put(i, PrioSeq[i]);
             }
+            jsethnetwork.put("PrioSeq", jaPrioSeq);
+        }
+        else {
+            //Log("PrioSeq is null");
+            return 0;
+        }
 
-            PJson::JSONObject jsob;
-            jsob.put("RouteToAP", WiredNetworkStrategy.RouteToAP);
-            jsethnetwork.put("WiredNetworkStrategy", jsob);
+        PJson::JSONObject jsob;
+        jsob.put("RouteToAP", WiredNetworkStrategy.RouteToAP);
+        jsethnetwork.put("WiredNetworkStrategy", jsob);
 
-            PJson::JSONObject jsob1;
-            jsob1.put("ForceToAP", WiFiNetworkStrategy.ForceToAP);
-            jsob1.put("RouteToWiredNetwork", WiFiNetworkStrategy.RouteToWiredNetwork);
-            jsethnetwork.put("WiFiNetworkStrategy", jsob1);
+        PJson::JSONObject jsob1;
+        jsob1.put("ForceToAP", WiFiNetworkStrategy.ForceToAP);
+        jsob1.put("RouteToWiredNetwork", WiFiNetworkStrategy.RouteToWiredNetwork);
+        jsethnetwork.put("WiFiNetworkStrategy", jsob1);
 
-            PJson::JSONObject jsob2;
-            jsob2.put("RouteToAP", MobileNetworkStrategy.RouteToAP);
-            jsob2.put("RouteToWiredNetwork", MobileNetworkStrategy.RouteToWiredNetwork);
-            jsethnetwork.put("MobileNetworkStrategy", jsob2);
+        PJson::JSONObject jsob2;
+        jsob2.put("RouteToAP", MobileNetworkStrategy.RouteToAP);
+        jsob2.put("RouteToWiredNetwork", MobileNetworkStrategy.RouteToWiredNetwork);
+        jsethnetwork.put("MobileNetworkStrategy", jsob2);
 
-            jsroot.put("NetworkStrategy", jsethnetwork);
+        jsroot.put("NetworkStrategy", jsethnetwork);
         //} catch (JSONException e) {
         //    e.printStackTrace();
         //    return null;
         //}
-			jsroot.toString(str);
-		return str.length();
+        jsroot.toString(str);
+        return str.length();
     }
+    
 }IPCNetNetworkStrategy_st;
 
 typedef struct IPCNetRemoteFileOperation{

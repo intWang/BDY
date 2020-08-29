@@ -20,17 +20,40 @@ namespace ls
         virtual void DisconnectDevice(std::string& strUid) override;
         virtual void VideoControl(std::string& strUid, bool bStatu, int param1 = 0) override;
         virtual void AudioControl(std::string& strUid, bool bStatu, int param1 = 0) override;
+        virtual int VideoParamCtrl(std::string& strUid, bool bSet, VideoParam tagParam, int nParamValue) override;
+
 
         virtual void onStatus(const char* uuid, int status) override;
         virtual void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp) override;
         virtual void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp) override;
         virtual void onJSONString(const char* uuid, int msg_type, const char* jsonstr) override;
-
         virtual void OnDecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len);
+        virtual void OnNetOperteResult(int cmd, const char*uuid, const char*json) override;
+
+        virtual void RestartDevice(std::string& strUid) override;
+        virtual void ResetDevice(std::string& strUid) override;
+        virtual void GetDevTime(std::string& strUid) override;
+
+        virtual void SearchWifi(std::string& strUid) override;
+        virtual void SetWifi(std::string& strUid, std::string& strSSID, std::string& strPwd, std::string& strEncType) override;
+        virtual void ChangeDevPwd(std::string& strUid, std::string& strPwd) override;
+        virtual void GetHotSpot(std::string& strUid) override;
+        virtual void SetHotSpot(std::string& strUid, std::string& strJsonParam) override;
+        virtual void GetNetStrategy(std::string& strUid) override;
+        virtual void SetNetStrategy(std::string& strUid, std::string& strJsonParam) override;
+
     protected:
         void PrepareDecoder(const std::string& strUid);
         void RecycleDecoder(const std::string& strUid);
 
+        void onParamCmd(std::string& strUid, IPCNetCamColorCfg_st& stIPCNetCamColorCfg);
+        void onDevTimeCmd(std::string& strUid, IPCNetTimeCfg_st& stIPCNetTimeCfg);
+        void onSearchWifiCmd(std::string& strUid, IPCNetWifiAplist::Ptr& stNetWirelessConfig);
+        void onGetWifiCmd(std::string& strUid, IPCNetWirelessConfig_st::Ptr& pData);
+        void onGetHotSpotCmd(std::string& strUid, IPCNetWiFiAPInfo_t::Ptr& pData);
+        void onGetNetStrategy(std::string& strUid, IPCNetNetworkStrategy::Ptr& pData);
+
+        void OnHintMsg(std::string& strHint, ls::HintLevel emLevel = HintLevel::Info);
         void AddTask(ITask::Ptr ptask);
         ITask::Ptr PopTask();
         void Work();
@@ -58,10 +81,21 @@ namespace ls
         virtual void OnDeviceConnected(const std::string& strDevJsonInfo) override;
         virtual void OnDeviceStatuChanged(const std::string& strUid, int nStatu) override;
         virtual void OnVideo(const std::string& strUid, const unsigned char*data, int width, int height, int len, long timestamp) override;
+        virtual void onParamCmd(const std::string& strUid, const IPCNetCamColorCfg_st& stParam) override;
+        virtual void onDevTimeCmd(const std::string& strUid, const IPCNetTimeCfg_st& stData) override;
+        virtual void onSearchWifiCmd(std::string& strUid, const IPCNetWifiAplist::Ptr& stNetWirelessConfig) override;
+        virtual void onGetWifiCmd(std::string& strUid, const IPCNetWirelessConfig_st::Ptr& pData) override;
+        virtual void onGetHotSpotCmd(std::string& strUid, const IPCNetWiFiAPInfo_t::Ptr& pData) override;
+        virtual void onGetNetStrategy(std::string& strUid, const IPCNetNetworkStrategy::Ptr& pData) override;
+
     protected:
         void DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len);
     protected:
         std::vector<IIPCNetServerCallBack::CallBackFunc::Ptr> m_CBFunc;
+
+    private:
+        std::mutex m_mxLostTrack;
+        std::vector<std::string> m_LostDevice;
     };
 
 

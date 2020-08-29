@@ -91,7 +91,18 @@
     <ClCompile Include="BaseWidget.cpp" />
     <ClCompile Include="ChannelCtrlWidget.cpp" />
     <ClCompile Include="CmdBar.cpp" />
+    <ClCompile Include="ConfigBaseInfoWnd.cpp" />
+    <ClCompile Include="ConfigCenter.cpp" />
+    <ClCompile Include="ConfigChangePwd.cpp" />
+    <ClCompile Include="ConfigDlg.cpp" />
+    <ClCompile Include="ConfigHotSpot.cpp" />
+    <ClCompile Include="ConfigNetWork.cpp" />
     <ClCompile Include="ConfigWidget.cpp" />
+    <ClCompile Include="ConfigWifi.cpp" />
+    <ClCompile Include="ConfigWifiConfirm.cpp" />
+    <ClCompile Include="ConfigWifiList.cpp" />
+    <ClCompile Include="ConfigWifiWidget.cpp" />
+    <ClCompile Include="ContainerWnd.cpp" />
     <ClCompile Include="DataStruct.cpp" />
     <ClCompile Include="DecodeWnd.cpp" />
     <ClCompile Include="Dependencies\src\cJSON.c" />
@@ -128,6 +139,13 @@
     <QtMoc Include="PPPCS_ClientUI.h" />
   </ItemGroup>
   <ItemGroup>
+    <QtUic Include="ConfigBaseInfoWnd.ui" />
+    <QtUic Include="ConfigChangePwd.ui" />
+    <QtUic Include="ConfigHotSpot.ui" />
+    <QtUic Include="ConfigNetWork.ui" />
+    <QtUic Include="ConfigWifiConfirm.ui" />
+    <QtUic Include="ConfigWifiList.ui" />
+    <QtUic Include="ConfigWifiWidget.ui" />
     <QtUic Include="DecodeWnd.ui" />
     <QtUic Include="DevTreeWnd.ui" />
     <QtUic Include="MainViewWidget.ui" />
@@ -150,6 +168,17 @@
     <QtMoc Include="MessageBoxWnd.h" />
     <QtMoc Include="ChannelCtrlWidget.h" />
     <QtMoc Include="DecodeWnd.h" />
+    <QtMoc Include="ConfigCenter.h" />
+    <QtMoc Include="ConfigDlg.h" />
+    <QtMoc Include="ConfigBaseInfoWnd.h" />
+    <QtMoc Include="ConfigWifi.h" />
+    <QtMoc Include="ConfigHotSpot.h" />
+    <QtMoc Include="ConfigNetWork.h" />
+    <QtMoc Include="ConfigChangePwd.h" />
+    <QtMoc Include="ConfigWifiWidget.h" />
+    <QtMoc Include="ConfigWifiConfirm.h" />
+    <QtMoc Include="ConfigWifiList.h" />
+    <ClInclude Include="ContainerWnd.h" />
     <ClInclude Include="HTTPSupport.h" />
     <ClInclude Include="IHttpSupport.h" />
     <QtMoc Include="PtzCtrlWnd.h" />

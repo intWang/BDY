@@ -2,11 +2,20 @@
 #include <QPainter>
 #include "QtDefine.h"
 #include "utils.h"
+#include "ConfigCenter.h"
+#include "MessageBoxWnd.h"
+#include <QTime>
+#include <QDesktopServices>
+#include <QProcess>
 DrawWnd::DrawWnd(int index, QWidget *parent)
     :QWidget(parent)
     , m_nIndex(index)
 {
     m_strHint = QStringLiteral("监控点正在预览....");
+
+    connect(this, &DrawWnd::FrameReady, this, [this]() {
+        repaint();
+    }, Qt::QueuedConnection);
 }
 
 
@@ -36,7 +45,7 @@ void DrawWnd::InputFrameData(FrameData::Ptr pFrame)
     if (isVisible())
     {
         SetFrame(pFrame);
-        update();
+        emit FrameReady();
     }
 }
 
@@ -50,6 +59,7 @@ void DrawWnd::SetFrame(FrameData::Ptr pFrame)
 
 void DrawWnd::SetHintString(const QString& strHint)
 {
+    m_pLastFrame = nullptr;
     m_strHint = strHint;
 }
 
@@ -119,6 +129,39 @@ void DrawWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
 int DrawWnd::GetPtzSpeed()
 {
     return m_nPtzSpeed;
+}
+
+bool DrawWnd::SnapShot(const QString& strPicName)
+{
+    if (auto pCurFrame = m_pLastFrame)
+    {
+        QImage tmpImg((uchar *)pCurFrame->pBufData, pCurFrame->nPicWidth, pCurFrame->nPicHeight, QImage::Format_RGB32);
+        QString strPath = ConfigCenter::GetInstance().GetSnapShotSavepath();
+        utils::MakePathExist(strPath);
+        QString strFileName = strPath + strPicName + QDateTime::currentDateTime().toString("_yyMMdd_hh_mm_ss") + ".jpg";
+        if (tmpImg.save(strFileName, "JPG", 100))
+        {
+            QString strInfo = "截图已保存至: " + strFileName;
+            if (msg::showInformation(this, QStringLiteral("截图"), strInfo, QMessageBox::Ok | QMessageBox::Open) == QMessageBox::Open)
+            {
+                QProcess process;
+                QString filePath = strFileName;
+                filePath.replace("/", "\\"); // 只能识别 "\"
+                QString cmd = QString("explorer.exe /select,\"%1\"").arg(filePath);
+                process.startDetached(cmd);
+            }
+        }
+        else
+        {
+            msg::showError(this, QStringLiteral("错误"), QStringLiteral("保存失败!"));
+
+        }
+    }
+    else
+    {
+        msg::showWarning(this, QStringLiteral("警告"), QStringLiteral("当前无画面，请稍后再试!"));
+    }
+    return false;
 }
 
 void DrawWnd::DrawDefault()

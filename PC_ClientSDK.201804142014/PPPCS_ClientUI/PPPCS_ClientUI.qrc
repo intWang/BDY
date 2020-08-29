@@ -6,6 +6,63 @@
         <file>res/minimize.png</file>
         <file>res/bk/bk_dialog.png</file>
         <file>res/bk/bk_dialog_bt.png</file>
+        <file>res/connecting_b.png</file>
+        <file>res/connecting_g.png</file>
+        <file>res/group_b.png</file>
+        <file>res/group_g.png</file>
+        <file>res/pause_b.png</file>
+        <file>res/pause_g.png</file>
+        <file>res/play_b.png</file>
+        <file>res/play_g.png</file>
+        <file>res/add.png</file>
+        <file>res/delete.png</file>
+        <file>res/folder.png</file>
+        <file>res/search.png</file>
+        <file>res/bk/bk_dir.png</file>
+        <file>res/refresh.png</file>
+        <file>res/dirb1_l.png</file>
+        <file>res/dirb2_l.png</file>
+        <file>res/dirb1_d.png</file>
+        <file>res/dirb1_ld.png</file>
+        <file>res/dirb1_lt.png</file>
+        <file>res/dirb1_r.png</file>
+        <file>res/dirb1_rd.png</file>
+        <file>res/dirb1_rt.png</file>
+        <file>res/dirb1_t.png</file>
+        <file>res/dirb2_d.png</file>
+        <file>res/dirb2_ld.png</file>
+        <file>res/dirb2_lt.png</file>
+        <file>res/dirb2_r.png</file>
+        <file>res/dirb2_rd.png</file>
+        <file>res/dirb2_rt.png</file>
+        <file>res/dirb2_t.png</file>
+        <file>res/dirb3_l.png</file>
+        <file>res/dirb4_l.png</file>
+        <file>res/dirb3_d.png</file>
+        <file>res/dirb3_ld.png</file>
+        <file>res/dirb3_lt.png</file>
+        <file>res/dirb3_r.png</file>
+        <file>res/dirb3_rd.png</file>
+        <file>res/dirb3_rt.png</file>
+        <file>res/dirb3_t.png</file>
+        <file>res/dirb4_d.png</file>
+        <file>res/dirb4_ld.png</file>
+        <file>res/dirb4_lt.png</file>
+        <file>res/dirb4_r.png</file>
+        <file>res/dirb4_rd.png</file>
+        <file>res/dirb4_rt.png</file>
+        <file>res/dirb4_t.png</file>
+        <file>res/logo_64.png</file>
+        <file>res/logo32.png</file>
+        <file>res/wifi.png</file>
+        <file>res/Switch-off.png</file>
+        <file>res/Switch-on.png</file>
+        <file>res/checkbox.png</file>
+        <file>res/checkbox_hover.png</file>
+        <file>res/checkbox_press.png</file>
+        <file>res/checkedbox.png</file>
+        <file>res/checkedbox_hover.png</file>
+        <file>res/checkedbox_press.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>

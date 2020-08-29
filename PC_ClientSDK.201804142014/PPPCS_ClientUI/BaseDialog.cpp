@@ -1,5 +1,6 @@
 #include "BaseDialog.h"
 #include "utils.h"
+#include <QDialogButtonBox>
 BaseDialog::BaseDialog(QWidget *parent)
     :AreableWidget<QDialog>(parent)
 {
@@ -14,8 +15,8 @@ BaseDialog::BaseDialog(QWidget *parent)
     }
 
     installEventFilter(m_pTitleBar);
-
-    //setWindowIcon(QIcon(":/Images/logo
+    connect(m_pTitleBar, &CmdBar::OnCloseBtnClicked, this, &BaseDialog::OnCloseCmd);
+    setWindowIcon(QIcon(":/Black/res/logo32.png"));
     SetArea(30, 30);
     pLayout->addWidget(m_pTitleBar);
     pLayout->addLayout(m_pMainLayout);
@@ -41,6 +42,20 @@ HintBar::Ptr BaseDialog::GetBottomBar()
     return m_pBottomBar;
 }
 
+void BaseDialog::SetNoBottomBar()
+{
+    if (auto pBottomBar = GetBottomBar())
+    {
+        layout()->removeWidget(pBottomBar);
+        pBottomBar->hide();
+    }
+}
+
+void BaseDialog::OnCloseCmd()
+{
+    done(QDialogButtonBox::Close);
+}
+
 void BaseDialog::setMinimizeVisible(bool bVisiable)
 {
     if (m_pTitleBar)
@@ -63,4 +78,8 @@ void BaseDialog::setWidgetResizable(bool bVisiable)
     {
         m_pTitleBar->setWidgetResizable(bVisiable);
     }
+}
+
+void BaseDialog::DeletBottomBar()
+{
 }

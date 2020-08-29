@@ -115,6 +115,9 @@ void AreableWidget<T>::paintEvent(QPaintEvent *event)
     {
         painter.fillRect(bottom, m_clrBottom);
     }
+// 
+//     painter.setPen(QPen(s_qclBorder2));
+//     painter.drawRect(0, 0, wndSize.width(), wndSize.height());
 }
 
 template <typename T>

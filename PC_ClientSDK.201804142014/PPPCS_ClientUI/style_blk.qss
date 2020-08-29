@@ -170,10 +170,18 @@ QTabBar#tabBar::tab:selected {
         background: rgb(57, 58, 60);
 }
 
+/**********列表************/
+QListWidget{
+	background: transparent;
+	border: transparent;
+	border-bottom: 1px solid rgb(65, 81, 110);
+}
 
 /**********树************/
 QTreeView{
 	background: transparent;
+	border: transparent;
+	border-bottom: 1px solid rgb(65, 81, 110);
 }
 
 QTreeView {
@@ -181,26 +189,28 @@ QTreeView {
 }
  
 QTreeView::item {
-    border: 1px solid #d9d9d9;
-    border-top-color: transparent;
-    border-bottom-color: transparent;
+	color: rgb(199, 202, 217);
+	min-height: 30px;
+	font-size: 24px;
+	border: transparent;
 }
- 
+
 QTreeView::item:hover {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #e7effd, stop: 1 #cbdaf1);
-    border: 1px solid #bfcde4;
+	color: rgb(62, 153, 205);
+	border: transparent;
 }
  
 QTreeView::item:selected {
-    border: 1px solid #567dbc;
+	color: rgb(66, 172, 230);
+	border: transparent;
 }
- 
+
 QTreeView::item:selected:active{
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6ea1f1, stop: 1 #567dbc);
+	border: transparent;
 }
  
 QTreeView::item:selected:!active {
-    background: qlineargradient(x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #6b9be8, stop: 1 #577fbf);
+	border: transparent;
 }
 
 /**********表头**********/
@@ -268,22 +278,22 @@ QTableView::indicator {
         height: 20px;
 }
 QTableView::indicator:enabled:unchecked {
-        image: url(:/Black/checkBox);
+        image: url(:/Black/res/checkbox);
 }
 QTableView::indicator:enabled:unchecked:hover {
-        image: url(:/Black/checkBoxHover);
+        image: url(:/Black/res/checkbox_hover);
 }
 QTableView::indicator:enabled:unchecked:pressed {
-        image: url(:/Black/checkBoxPressed);
+        image: url(:/Black/res/checkbox_press);
 }
 QTableView::indicator:enabled:checked {
-        image: url(:/Black/checkBoxChecked);
+        image: url(:/Black/res/checkedbox);
 }
 QTableView::indicator:enabled:checked:hover {
-        image: url(:/Black/checkBoxCheckedHover);
+        image: url(:/Black/res/checkedbox_hover);
 }
 QTableView::indicator:enabled:checked:pressed {
-        image: url(:/Black/checkBoxCheckedPressed);
+        image: url(:/Black/res/checkedbox_press);
 }
 QTableView::indicator:enabled:indeterminate {
         image: url(:/Black/checkBoxIndeterminate);
@@ -466,23 +476,24 @@ QCheckBox::indicator {
         height: 20px;
 }
 QCheckBox::indicator:unchecked {
-        image: url(:/Black/checkBox);
+        image: url(:/Black/res/checkbox);
 }
 QCheckBox::indicator:unchecked:hover {
-        image: url(:/Black/checkBoxHover);
+        image: url(:/Black/res/checkbox_hover);
 }
 QCheckBox::indicator:unchecked:pressed {
-        image: url(:/Black/checkBoxPressed);
+        image: url(:/Black/res/checkbox_press);
 }
 QCheckBox::indicator:checked {
-        image: url(:/Black/checkBoxChecked);
+        image: url(:/Black/res/checkedbox);
 }
 QCheckBox::indicator:checked:hover {
-        image: url(:/Black/checkBoxCheckedHover);
+        image: url(:/Black/res/checkedbox_hover);
 }
 QCheckBox::indicator:checked:pressed {
-        image: url(:/Black/checkBoxCheckedPressed);
+        image: url(:/Black/res/checkedbox_press);
 }
+
 QCheckBox::indicator:indeterminate {
         image: url(:/Black/checkBoxIndeterminate);
 }
@@ -492,6 +503,20 @@ QCheckBox::indicator:indeterminate:hover {
 QCheckBox::indicator:indeterminate:pressed {
         image: url(:/Black/checkBoxIndeterminatePressed);
 }
+
+QCheckBox#chkHideAP::indicator{
+        width: 32px;
+        height: 32px;
+}
+
+QCheckBox#chkHideAP::indicator:checked {
+        image: url(:/Black/res/Switch-on.png);
+}
+
+QCheckBox#chkHideAP::indicator:unchecked {
+        image: url(:/Black/res/Switch-off.png);
+}
+
 
 /**********单选框**********/
 QRadioButton{
@@ -530,21 +555,21 @@ QRadioButton::indicator:checked:pressed {
 }
 
 /**********输入框**********/
-QLineEdit {
-        border-radius: 4px;
+QLineEdit{
         height: 25px;
-        border: 1px solid rgb(100, 100, 100);
-        background: rgb(72, 72, 73);
+        border: 1px solid rgb(77, 103, 148);
+        background: rgb(44, 50, 67);
 }
 QLineEdit:enabled {
         color: rgb(175, 175, 175);
 }
-QLineEdit:enabled:hover, QLineEdit:enabled:focus {
+QLineEdit:enabled:hover, :enabled:focus {
         color: rgb(230, 230, 230);
 }
 QLineEdit:!enabled {
         color: rgb(155, 155, 155);
 }
+
 
 /**********文本编辑框**********/
 QTextEdit {
@@ -617,6 +642,14 @@ QSpinBox::down-button:enabled:hover {
 QLabel{
         color: rgb(199, 202, 217);
         font-size: 16px;
+}
+
+QLabel#labelWifi{
+	image: url(:/Black/res/wifi.png);
+}
+
+QLabel#lblWifiName{
+	font-weight: bold;
 }
 
 QLabel#grayLabel {
@@ -729,6 +762,7 @@ QToolButton#transferButton:hover{
 }
 
 /**********按钮**********/
+
 QPushButton{
         border-radius: 4px;
         border: none;
@@ -770,7 +804,7 @@ QPushButton#blueButton:enabled:pressed {
 
 QPushButton#selectButton {
         border: none;
-        border-radius: none;
+        border-radius: 0px;
         border-left: 1px solid rgb(100, 100, 100);
         image: url(:/Black/scan);
         background: transparent;
@@ -803,14 +837,14 @@ QPushButton#transparentButton {
 
 QPushButton#TabBtn {
         border: none;
-        border-radius: none;
+        border-radius: 0px;
         background: transparent;
 }
 
 
 QPushButton#TabBtn[SelStatu="On"] {
         border: none;
-        border-radius: none;
+        border-radius: 0px;
         border-bottom: 2px solid rgb(100, 100, 100);
         background: transparent;
 }
@@ -822,82 +856,123 @@ QPushButton#TabBtn:enabled:pressed{
         background: rgb(80, 80, 80);
 }
 
+
+QPushButton#ListGroupBtn {
+		font-size: 16px;
+		font-weight: bold;
+		width:160px;
+		height:80;
+        border: none;
+        border-radius: 0px;
+        background: transparent;
+}
+
+
+QPushButton#ListGroupBtn[SelStatu="On"] {
+        border-radius: 0px;
+        background: rgb(61,79,114);
+}
+
+QPushButton#ListGroupBtn:enabled:hover{
+        background: rgb(41, 59, 94);
+}
+QPushButton#ListGroupBtn:enabled:pressed{
+        background: rgb(51, 69, 104);
+}
+
+
+
 /*****************标题栏按钮*******************/
 QPushButton#minimizeButton {
-        border-radius: none;
+        border-radius: 0px;
         border-bottom-left-radius: 4px;
         background: rgb(41, 44, 57);
-        image: url(:/Black/res/minimize);
+		qproperty-icon: url(:/Black/res/minimize);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#minimizeButton:hover {
         background: rgb(60, 60, 60);
-        image: url(:/Black/res/minimize);
+		qproperty-icon: url(:/Black/res/minimize);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#minimizeButton:pressed {
         background: rgb(55, 55, 55);
-        image: url(:/Black/res/minimize);
+		qproperty-icon: url(:/Black/res/minimize);
+		qproperty-iconSize: 20px 20px;
 }
 
 QPushButton#maximizeButton[maximizeProperty="maximize"] {
-        border-radius: none;
+        border-radius: 0px;
         background: rgb(41, 44, 57);
-        image: url(:/Black/res/maxmize);
+		qproperty-icon: url(:/Black/res/maxmize);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#maximizeButton[maximizeProperty="maximize"]:hover {
         background: rgb(60, 60, 60);
-        image: url(:/Black/res/maxmize);
+		qproperty-icon: url(:/Black/res/maxmize);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#maximizeButton[maximizeProperty="maximize"]:pressed {
         background: rgb(55, 55, 55);
-        image: url(:/Black/res/maxmize);
+		qproperty-icon: url(:/Black/res/maxmize);
+		qproperty-iconSize: 20px 20px;
 }
 
 QPushButton#maximizeButton[maximizeProperty="restore"] {
-        border-radius: none;
+        border-radius: 0px;
         background: rgb(41, 44, 57);
-        image: url(:/Black/res/restore);
+		qproperty-icon: url(:/Black/res/restore);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#maximizeButton[maximizeProperty="restore"]:hover {
         background: rgb(60, 60, 60);
-        image: url(:/Black/res/restore);
+		qproperty-icon: url(:/Black/res/restore);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#maximizeButton[maximizeProperty="restore"]:pressed {
         background: rgb(55, 55, 55);
-        image: url(:/Black/res/restore);
+		qproperty-icon: url(:/Black/res/restore);
+		qproperty-iconSize: 20px 20px;
 }
 
 QPushButton#closeButton {
-        border-radius: none;
-        background: rgb(41, 44, 57);
-        image: url(:/Black/res/close);
+        border-radius: 0px;
+        background: transparent;
+		qproperty-icon: url(:/Black/res/close);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#closeButton:hover {
         background: rgb(232, 17, 35);
-        image: url(:/Black/res/close);
+		qproperty-icon: url(:/Black/res/close);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#closeButton:pressed {
         background: rgb(241, 112, 122);
-        image: url(:/Black/res/close);
+		qproperty-icon: url(:/Black/res/close);
+		qproperty-iconSize: 20px 20px;
 }
 
 QPushButton#closeButtonNor {
-        border-radius: none;
+        border-radius: 0px;
         background: rgb(60, 60, 60);
-        image: url(:/Black/res/close);
+		qproperty-icon: url(:/Black/res/close);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#closeButtonNor:hover {
         background: rgb(232, 17, 35);
-        image: url(:/Black/res/close);
+		qproperty-icon: url(:/Black/res/close);
+		qproperty-iconSize: 20px 20px;
 }
 QPushButton#closeButtonNor:pressed {
         background: rgb(55, 55, 55);
-        image: url(:/Black/res/close);
+		qproperty-icon: url(:/Black/res/close);
+		qproperty-iconSize: 20px 20px;
 }
 
 
 
 QPushButton#skinButton {
-        border-radius: none;
+        border-radius: 0px;
         border-bottom-left-radius: 4px;
         border-bottom-right-radius: 4px;
         background: rgb(50, 50, 50);
@@ -913,7 +988,7 @@ QPushButton#skinButton:pressed {
 }
 
 QPushButton#feedbackButton {
-        border-radius: none;
+        border-radius: 0px;
         border-bottom-left-radius: 4px;
         border-bottom-right-radius: 4px;
         background: rgb(50, 50, 50);
@@ -929,7 +1004,7 @@ QPushButton#feedbackButton:pressed {
 }
 
 QPushButton#closeTipButton {
-        border-radius: none;
+        border-radius: 0px;
         border-image: url(:/Black/close);
         background: transparent;
 }
@@ -972,7 +1047,7 @@ QPushButton#transferButton[iconProperty="right"] {
 }
 
 QPushButton#openButton {
-        border-radius: none;
+        border-radius: 0px;
         image: url(:/Black/open);
         background: transparent;
 }
@@ -984,7 +1059,7 @@ QPushButton#openButton:pressed {
 }
 
 QPushButton#deleteButton {
-        border-radius: none;
+        border-radius: 0px;
         image: url(:/Black/delete);
         background: transparent;
 }
@@ -1008,3 +1083,200 @@ QPushButton#menuButton::menu-indicator{
         image: url(:/Black/arrowBottom);
         padding-right: 3px;
 }
+
+QPushButton#AddDevice {
+        border-radius: 4px;
+        background: rgb(41, 44, 57);
+		qproperty-icon: url(:/Black/res/add.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#AddDevice:hover {
+        background: rgb(60, 60, 60);
+		qproperty-icon: url(:/Black/res/add.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#AddDevice:pressed {
+        background: rgb(55, 55, 55);
+		qproperty-icon: url(:/Black/res/add.png);
+		qproperty-iconSize: 20px 20px;
+}
+
+QPushButton#AddGroup {
+        border-radius: 4px;
+        background: rgb(41, 44, 57);
+		qproperty-icon: url(:/Black/res/folder.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#AddGroup:hover {
+        background: rgb(60, 60, 60);
+		qproperty-icon: url(:/Black/res/folder.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#AddGroup:pressed {
+        background: rgb(55, 55, 55);
+		qproperty-icon: url(:/Black/res/folder.png);
+		qproperty-iconSize: 20px 20px;
+}
+
+QPushButton#DeleteItem {
+        border-radius: 4px;
+        background: rgb(41, 44, 57);
+		qproperty-icon: url(:/Black/res/delete.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#DeleteItem:hover {
+        background: rgb(60, 60, 60);
+		qproperty-icon: url(:/Black/res/delete.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#DeleteItem:pressed {
+        background: rgb(55, 55, 55);
+		qproperty-icon: url(:/Black/res/delete.png);
+		qproperty-iconSize: 20px 20px;
+}
+
+
+
+QPushButton#btnSearch {
+        border-radius: 4px;
+        background: rgb(77, 103, 148);
+		qproperty-icon: url(:/Black/res/search.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#btnSearch:hover {
+        background: rgb(57, 83, 128);
+		qproperty-icon: url(:/Black/res/search.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#btnSearch:pressed {
+        background: rgb(47, 73, 118);
+		qproperty-icon: url(:/Black/res/search.png);
+		qproperty-iconSize: 20px 20px;
+}
+
+
+QPushButton#btnLT {
+	background: transparent;
+	image: url(:/Black/res/dirb3_lt.png);
+}
+QPushButton#btnLT:enabled:hover{
+	image: url(:/Black/res/dirb2_lt.png);
+}
+QPushButton#btnLT:enabled:pressed{
+	image: url(:/Black/res/dirb1_lt.png);
+}
+QPushButton#btnLT:!enabled{
+	image: url(:/Black/res/dirb4_lt.png);
+}
+
+QPushButton#btnT {
+	background: transparent;
+	image: url(:/Black/res/dirb3_t.png);
+}
+QPushButton#btnT:enabled:hover{
+	image: url(:/Black/res/dirb2_t.png);
+}
+QPushButton#btnT:enabled:pressed{
+	image: url(:/Black/res/dirb1_t.png);
+}
+QPushButton#btnT:!enabled{
+	image: url(:/Black/res/dirb4_t.png);
+}
+
+QPushButton#btnRT {
+	background: transparent;
+	image: url(:/Black/res/dirb3_rt.png);
+}
+QPushButton#btnRT:enabled:hover{
+	image: url(:/Black/res/dirb2_rt.png);
+}
+QPushButton#btnRT:enabled:pressed{
+	image: url(:/Black/res/dirb1_rt.png);
+}
+QPushButton#btnRT:!enabled{
+	image: url(:/Black/res/dirb4_rt.png);
+}
+
+
+QPushButton#btnL {
+	background: transparent;
+	image: url(:/Black/res/dirb3_l.png);
+}
+QPushButton#btnL:enabled:hover{
+	image: url(:/Black/res/dirb2_l.png);
+}
+QPushButton#btnL:enabled:pressed{
+	image: url(:/Black/res/dirb1_l.png);
+}
+QPushButton#btnL:!enabled{
+	image: url(:/Black/res/dirb4_l.png);
+}
+
+
+QPushButton#btnRestore {
+	background: transparent;
+	qproperty-icon: url(:/Black/res/refresh.png);
+	qproperty-iconSize: 26px 26px;
+}
+
+QPushButton#btnR {
+	background: transparent;
+	image: url(:/Black/res/dirb3_r.png);
+}
+QPushButton#btnR:enabled:hover{
+	image: url(:/Black/res/dirb2_r.png);
+}
+QPushButton#btnR:enabled:pressed{
+	image: url(:/Black/res/dirb1_r.png);
+}
+QPushButton#btnR:!enabled{
+	image: url(:/Black/res/dirb4_r.png);
+}
+
+
+QPushButton#btnLD {
+	background: transparent;
+	image: url(:/Black/res/dirb3_ld.png);
+}
+QPushButton#btnLD:enabled:hover{
+	image: url(:/Black/res/dirb2_ld.png);
+}
+QPushButton#btnLD:enabled:pressed{
+	image: url(:/Black/res/dirb1_ld.png);
+}
+QPushButton#btnLD:!enabled{
+	image: url(:/Black/res/dirb4_ld.png);
+}
+
+
+QPushButton#btnD {
+	background: transparent;
+	image: url(:/Black/res/dirb3_d.png);
+}
+QPushButton#btnD:enabled:hover{
+	image: url(:/Black/res/dirb2_d.png);
+}
+QPushButton#btnD:enabled:pressed{
+	image: url(:/Black/res/dirb1_d.png);
+}
+QPushButton#btnD:!enabled{
+	image: url(:/Black/res/dirb4_d.png);
+}
+
+
+QPushButton#btnRD {
+	background: transparent;
+	image: url(:/Black/res/dirb3_rd.png);
+}
+QPushButton#btnRD:enabled:hover{
+	image: url(:/Black/res/dirb2_rd.png);
+}
+QPushButton#btnRD:enabled:pressed{
+	image: url(:/Black/res/dirb1_rd.png);
+}
+QPushButton#btnRD:!enabled{
+	image: url(:/Black/res/dirb4_rd.png);
+}
+
+
+

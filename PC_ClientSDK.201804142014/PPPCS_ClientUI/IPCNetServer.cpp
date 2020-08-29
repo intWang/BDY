@@ -57,10 +57,19 @@ namespace ls
 
     void onJSONString(const char* uuid, int msg_type, const char* jsonstr)
     {
-        LogInfo("OnJsonData %s %d %s", uuid, msg_type, jsonstr);
+        //LogInfo("OnJsonData %s %d %s", uuid, msg_type, jsonstr);
         if (auto pIPCServer = g_pIPCServer.lock())
         {
             pIPCServer->onJSONString(uuid, msg_type, jsonstr);
+        }
+    }
+
+    void OnCmdResult(int cmd, const char*uuid, const char*json)
+    {
+        LogInfo("OnCmdResult %s %d %s", uuid, cmd, json);
+        if (auto pIPCServer = g_pIPCServer.lock())
+        {
+            pIPCServer->OnNetOperteResult(cmd, uuid, json);
         }
     }
 
@@ -94,6 +103,8 @@ namespace ls
         m_Quit.store(false);
         m_thWork = std::thread(&IPCNetServer::Work, this);
         g_pIPCServer = std::dynamic_pointer_cast<IIPCNetServer>(shared_from_this());
+        IPCNetInitialize("");
+
         return true;
     }
 
@@ -110,6 +121,7 @@ namespace ls
         {
             m_thWork.join();
         }
+        //IPCNetDeInitial();
     }
 
     void IPCNetServer::ConnectDevice(std::string& strUid, std::string& strPwd)
@@ -147,7 +159,7 @@ namespace ls
 
         if (bRunTask)
         {
-            ITask::Ptr pTask = std::make_shared<VideoTask>(strUid, bStatu, param1);
+            ITask::Ptr pTask = std::make_shared<VideoTask>(strUid, bStatu, OnCmdResult, param1);
             AddTask(pTask);
         }
     }
@@ -160,9 +172,10 @@ namespace ls
 
     void IPCNetServer::onStatus(const char* uuid, int status)
     {
+        std::string struid(uuid);
         switch (status) {
         case ERROR_SEP2P_SUCCESSFUL:
-            IPCNetGetBrightness(uuid);
+            //IPCNetGetBrightness(uuid);
             break;
         case ERROR_SEP2P_INVALID_ID:
             break;
@@ -172,7 +185,7 @@ namespace ls
             break;
         }
 
-        fireNotification(std::bind(&IIPCNetServerCallBack::OnDeviceStatuChanged, std::placeholders::_1, std::string(uuid), status));
+        fireNotification(std::bind(&IIPCNetServerCallBack::OnDeviceStatuChanged, std::placeholders::_1, struid, status));
     }
 
     void IPCNetServer::onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp)
@@ -198,6 +211,7 @@ namespace ls
 
     void IPCNetServer::onJSONString(const char* uuid, int msg_type, const char* jsonstr)
     {
+        auto strUid = std::string(uuid);
         switch (msg_type)
         {
         case REMOTE_MSG_RESP_LOGIN:
@@ -220,6 +234,167 @@ namespace ls
     void IPCNetServer::OnDecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len)
     {
         fireNotification(std::bind(&IIPCNetServerCallBack::OnVideo, std::placeholders::_1, pUserCode, pBuf, width, height, len, 0));
+    }
+
+
+    void IPCNetServer::onParamCmd(std::string& strUid, IPCNetCamColorCfg_st& stIPCNetCamColorCfg)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onParamCmd, std::placeholders::_1, strUid, stIPCNetCamColorCfg));
+    }
+
+    void IPCNetServer::onDevTimeCmd(std::string& strUid, IPCNetTimeCfg_st& stIPCNetTimeCfg)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onDevTimeCmd, std::placeholders::_1, strUid, stIPCNetTimeCfg));
+    }
+
+    void IPCNetServer::onSearchWifiCmd(std::string& strUid, IPCNetWifiAplist::Ptr& stNetWirelessConfig)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onSearchWifiCmd, std::placeholders::_1, strUid, stNetWirelessConfig));
+    }
+
+    void IPCNetServer::onGetWifiCmd(std::string& strUid, IPCNetWirelessConfig_st::Ptr& pData)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onGetWifiCmd, std::placeholders::_1, strUid, pData));
+    }
+
+    void IPCNetServer::onGetHotSpotCmd(std::string& strUid, IPCNetWiFiAPInfo_t::Ptr& pData)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onGetHotSpotCmd, std::placeholders::_1, strUid, pData));
+    }
+
+    void IPCNetServer::onGetNetStrategy(std::string& strUid, IPCNetNetworkStrategy::Ptr& pData)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onGetNetStrategy, std::placeholders::_1, strUid, pData));
+    }
+
+    void IPCNetServer::OnHintMsg(std::string& strHint, ls::HintLevel emLevel)
+    {
+        if (g_pEngine)
+        {
+            auto pHintServer = g_pEngine->GetHintServer();
+            if (pHintServer)
+            {
+                pHintServer->OnUserOperateHint(strHint, emLevel);
+            }
+        }
+    }
+
+    void IPCNetServer::OnNetOperteResult(int cmd, const char*uuid, const char*json)
+    {
+        PJson::JSONObject jsdata(json);
+        std::string strUid = uuid;
+        switch (cmd)
+        {
+        case IPCNET_NETWORK_WIFI_SEARCH_GET_RESP:
+        {
+            auto pWirelessNetList = std::make_shared<IPCNetWifiAplist>();
+            if (pWirelessNetList && pWirelessNetList->parseJSON(jsdata))
+            {
+                onSearchWifiCmd(strUid, pWirelessNetList);
+            }
+        }
+        break;
+        case IPCNET_NETWORK_WIFI_GET_RESP:
+        {
+            auto pData = std::make_shared<IPCNetWirelessConfig_st>();
+            if (pData && pData->parseJSON(jsdata))
+            {
+                onGetWifiCmd(strUid, pData);
+            }
+        }
+        break;
+        case IPCNET_GET_WIFI_AP_INFO_RESP:
+        {
+            auto pData = std::make_shared<IPCNetWiFiAPInfo_t>();
+            if (pData && pData->parseJSON(jsdata))
+            {
+                onGetHotSpotCmd(strUid, pData);
+            }
+        }
+        break;
+        case IPCNET_GET_TIME_RESP:
+        {
+            IPCNetTimeCfg_st ipcNetTimeCfg_st;
+            if (ipcNetTimeCfg_st.parseJSON(jsdata))
+            {
+                onDevTimeCmd(strUid, ipcNetTimeCfg_st);
+                return;
+            }
+        }
+        break;
+        case IPCNET_GET_NETWORK_STRATEGY_RESP:
+        {
+            auto pData = std::make_shared<IPCNetNetworkStrategy>();
+            if (pData && pData->parseJSON(jsdata))
+            {
+                onGetNetStrategy(strUid, pData);
+            }
+        }
+        break;
+        case IPCNET_GET_CAM_PIC_CFG_RESP:
+        {
+            IPCNetCamColorCfg_st stIPCNetCamColorCfg;
+            if (stIPCNetCamColorCfg.parseJSON(jsdata))
+            {
+                onParamCmd(strUid, stIPCNetCamColorCfg);
+                return;
+            }
+        }
+        break;
+        default:
+        {
+            IPCNetRetsult result;
+            if (result.parseJSON(jsdata))
+            {
+                std::string strHintMsg;
+                switch (cmd)
+                {
+                case IPCNET_SET_WIFI_AP_INFO_RESP:
+                    strHintMsg = "设置热点操作";
+                break;
+                case IPCNET_NETWORK_WIFI_SET_RESP:
+                    strHintMsg = "连接Wifi操作";
+                break;
+                case IPCNET_SET_NETWORK_STRATEGY_RESP:
+                    strHintMsg = "设置网络策略";
+                    break;
+                case IPCNET_SET_REBOOT_RESP:
+                    strHintMsg = "设备重启";
+                    break;
+                case IPCNET_USER_SET_RESP:
+                    strHintMsg = "用户设置(密码)";
+                    break;
+                default:
+                    break;
+                }
+                if (strHintMsg.size())
+                {
+                    std::string strResult = (result.ret == 0?"成功！":"失败！");
+                    OnHintMsg(strHintMsg + strResult);
+                }
+            }
+        }
+        break;
+        }
+    }
+
+    void IPCNetServer::RestartDevice(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<DeviceRestartTask>(strUid,OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::ResetDevice(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<DeviceResetTask>(strUid, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    int IPCNetServer::VideoParamCtrl(std::string& strUid, bool bSet, VideoParam tagParam, int nParamValue)
+    {
+        ITask::Ptr pTask = std::make_shared<VideoParamTask>(strUid, bSet, tagParam, OnCmdResult, nParamValue);
+        AddTask(pTask);
+        return 0;
     }
 
     void IPCNetServer::PrepareDecoder(const std::string& strUid)
@@ -264,7 +439,6 @@ namespace ls
     void IPCNetServer::Work()
     {
         //LogInfo("IPCNetServer Start Work");
-        IPCNetInitialize("");
         std::mutex tmpMutex;
         std::unique_lock <std::mutex> lck(tmpMutex);
         while (true)
@@ -284,11 +458,57 @@ namespace ls
             }
         }
 
-        IPCNetDeInitial();
         //LogInfo("IPCNetServer End Work");
     }
 
+    void IPCNetServer::GetDevTime(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<GetDeviceTimeTask>(strUid, OnCmdResult);
+        AddTask(pTask);
+    }
 
+
+    void IPCNetServer::SearchWifi(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<SearchWifiTask>(strUid, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::SetWifi(std::string& strUid, std::string& strSSID, std::string& strPwd, std::string& strEncType)
+    {
+        ITask::Ptr pTask = std::make_shared<SetWifiTask>(strUid, strSSID, strPwd, strEncType, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::ChangeDevPwd(std::string& strUid, std::string& strPwd)
+    {
+        ITask::Ptr pTask = std::make_shared<ChangeDevPwdTask>(strUid, strPwd, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::GetHotSpot(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<HotSpotTask>(strUid, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::SetHotSpot(std::string& strUid, std::string& strJsonParam)
+    {
+        ITask::Ptr pTask = std::make_shared<HotSpotTask>(strUid, OnCmdResult, strJsonParam.c_str());
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::GetNetStrategy(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<NetStrategyTask>(strUid, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::SetNetStrategy(std::string& strUid, std::string& strJsonParam)
+    {
+        ITask::Ptr pTask = std::make_shared<NetStrategyTask>(strUid, OnCmdResult, strJsonParam.c_str());
+        AddTask(pTask);
+    }
 
     void IPCNetServerCallBack::OnDeviceConnected(const std::string& strDevJsonInfo)
     {
@@ -365,6 +585,25 @@ namespace ls
                 }
                 return false;
             });
+
+
+            {
+                std::lock_guard<std::mutex> guard(m_mxLostTrack);
+                auto iterFind = std::find(m_LostDevice.begin(), m_LostDevice.end(), stDeviceData.p2p_uuid);
+                if (iterFind != m_LostDevice.end())
+                {
+                    auto strUid = stDeviceData.p2p_uuid;
+                    auto nStatu = CSTATU_RECONNECTED;
+                    utils::TravelVector(m_CBFunc, [&strUid, &nStatu](auto func) {
+                        if (func && func->funcOnDeviceStatuChanged)
+                        {
+                            func->funcOnDeviceStatuChanged(strUid, nStatu);
+                        }
+                        return false;
+                    });
+                    m_LostDevice.erase(iterFind);
+                }
+            }
         }
     }
 
@@ -394,7 +633,19 @@ namespace ls
 
     void IPCNetServerCallBack::OnDeviceStatuChanged(const std::string& strUid, int nStatu)
     {
-        //throw std::logic_error("The method or operation is not implemented.");
+        if (nStatu == ERROR_SEP2P_STATUS_CONNECTION_LOST)
+        {
+            std::lock_guard<std::mutex> guard(m_mxLostTrack);
+            m_LostDevice.push_back(strUid);
+        }
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &nStatu](auto func) {
+            if (func && func->funcOnDeviceStatuChanged)
+            {
+                func->funcOnDeviceStatuChanged(strUid, nStatu);
+            }
+            return false;
+        });
     }
 
     void IPCNetServerCallBack::OnVideo(const std::string& strUid, const unsigned char*data, int width, int height, int len, long timestamp)
@@ -404,10 +655,82 @@ namespace ls
     }
 
 
+    void IPCNetServerCallBack::onParamCmd(const std::string& strUid, const IPCNetCamColorCfg_st& stParam)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &stParam](auto func) {
+            if (func && func->funcOnVideoParamData)
+            {
+                func->funcOnVideoParamData(strUid, stParam);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::onDevTimeCmd(const std::string& strUid, const IPCNetTimeCfg_st& stData)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &stData](auto func) {
+            if (func && func->funcOnDevTimeData)
+            {
+                func->funcOnDevTimeData(strUid, stData);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::onSearchWifiCmd(std::string& strUid, const IPCNetWifiAplist::Ptr& stNetWirelessConfig)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &stNetWirelessConfig](auto func) {
+            if (func && func->funcOnSearchWifiData)
+            {
+                func->funcOnSearchWifiData(strUid, stNetWirelessConfig);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::onGetWifiCmd(std::string& strUid, const IPCNetWirelessConfig_st::Ptr& pData)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &pData](auto func) {
+            if (func && func->funcOnGetWifiData)
+            {
+                func->funcOnGetWifiData(strUid, pData);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::onGetHotSpotCmd(std::string& strUid, const IPCNetWiFiAPInfo_t::Ptr& pData)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &pData](auto func) {
+            if (func && func->funcOnGetHotSpotData)
+            {
+                func->funcOnGetHotSpotData(strUid, pData);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::onGetNetStrategy(std::string& strUid, const IPCNetNetworkStrategy::Ptr& pData)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &pData](auto func) {
+            if (func && func->funcOnGetNetStrategyData)
+            {
+                func->funcOnGetNetStrategyData(strUid, pData);
+            }
+            return false;
+        });
+    }
+
     void IPCNetServerCallBack::DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len)
     {
         FrameData::Ptr pFrameData = std::make_shared<FrameData>(data, width, height, len);
-        utils::TravelVector(m_CBFunc, [strUid, pFrameData](auto func) {
+        utils::TravelVector(m_CBFunc, [&strUid, pFrameData](auto func) {
             if (func && func->funcOnFrameData)
             {
                 func->funcOnFrameData(strUid, pFrameData);

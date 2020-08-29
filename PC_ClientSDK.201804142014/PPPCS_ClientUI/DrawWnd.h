@@ -13,6 +13,7 @@ public:
     DrawWnd(int index, QWidget *parent = Q_NULLPTR);
     ~DrawWnd();
 
+
     void SetPreviewStatu(bool bPreview = false);
     void SetSelected(bool bSelected);
     void InputFrameData(FrameData::Ptr pFrame);
@@ -20,9 +21,10 @@ public:
     void SetHintString(const QString& strHint);
     void OnPtzCtrl(PtzCommand emCmd, int nParam);
     int GetPtzSpeed();
+    bool SnapShot(const QString& strPicName);
 
 signals:
-    void FrameReady(FrameData::Ptr pFrame);
+    void FrameReady();
 
 private:
     bool m_bInPreview = false;

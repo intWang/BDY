@@ -17,7 +17,9 @@ MessageBox::MessageBox(QWidget *parent, const QString &title, const QString &tex
     setMinimizeVisible(false);
     setMaximizeVisible(false);
     setWidgetResizable(false);
+    SetAreaBk(s_qcl444858, s_qcl1E2233, s_qcl444858);
     SetArea(30, 0);
+    SetNoBottomBar();
     m_pButtonBox = new QDialogButtonBox(this);
     m_pButtonBox->setStandardButtons(QDialogButtonBox::StandardButtons(int(buttons)));
     setDefaultButton(defaultButton);
