@@ -78,6 +78,7 @@ protected:
     void ConectDevice(DevNode::Ptr pNode);
     void OnDeviceConnectedCB(const DeviceData& devData);
     void OnDeviceStatuChanged(const std::string& strUid, int nStatus);
+    void OnStreamInfo(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData);
 
 signals:
     void LoadedDevNumChange(int nNum);

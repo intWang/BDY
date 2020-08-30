@@ -274,4 +274,67 @@ namespace ls
             LogInfo("Exec IPCNetGetNetworkStrategyR %s ret %d", m_strUID.c_str(), nRet);
         }
     }
+
+    ResolutionTask::ResolutionTask(std::string& strUID, bool bSet, int nResolution, OnCmdResult_t pCB)
+        :m_pCB(pCB)
+        , m_bSet(bSet)
+        , m_nResolution(nResolution)
+    {
+        m_strUID = strUID;
+    }
+
+    void ResolutionTask::Run()
+    {
+        int nRet = 0;
+        if (m_bSet)
+        {
+            nRet = IPCNetSetResolutionR(m_strUID.c_str(), m_nResolution, m_pCB);
+            LogInfo("Exec IPCNetSetResolutionR %s %d ret %d", m_strUID.c_str(), m_nResolution, nRet);
+        }
+        else
+        {
+            nRet = IPCNetGetResolutionR(m_strUID.c_str(), m_pCB);
+            LogInfo("Exec IPCNetGetResolutionR %s ret %d", m_strUID.c_str(), nRet);
+        }
+    }
+
+    FlipMirrorTask::FlipMirrorTask(std::string& strUID, bool bSet, int nFlip, int nMirror, OnCmdResult_t pCB)
+        :m_pCB(pCB)
+        , m_nFlip(nFlip)
+        , m_nMirror(nMirror)
+        , m_bSet(bSet)
+    {
+        m_strUID = strUID;
+    }
+
+    void FlipMirrorTask::Run()
+    {
+        int nRet = 0;
+        if (m_bSet)
+        {
+            nRet = IPCNetSetFlipMirrorR(m_strUID.c_str(), m_nFlip, m_nMirror, m_pCB);
+            LogInfo("Exec IPCNetSetFlipMirrorR %s %d %d ret %d", m_strUID.c_str(), m_nFlip, m_nMirror, nRet);
+        }
+        else
+        {
+            nRet = IPCNetGetFlipMirrorR(m_strUID.c_str(), m_pCB);
+            LogInfo("Exec IPCNetGetFlipMirrorR %s ret %d", m_strUID.c_str(), nRet);
+        }
+    }
+
+    SwitchStreamTask::SwitchStreamTask(std::string& strUID, int nStream, OnCmdResult_t pCB)
+        :m_pCB(pCB)
+        ,m_nStream(nStream)
+    {
+        m_strUID = strUID;
+    }
+
+    void SwitchStreamTask::Run()
+    {
+        int nRet = IPCNetStopVideo(m_strUID.c_str());
+        LogInfo("Exec IPCNetStopVideo %s ret %d", m_strUID.c_str(), nRet);
+        nRet = IPCNetStartVideoR(m_strUID.c_str(), m_nStream, m_pCB);
+        LogInfo("Exec IPCNetStartVideoR %s ret %d", m_strUID.c_str(), nRet);
+    }
+
 }

@@ -517,6 +517,94 @@ QCheckBox#chkHideAP::indicator:unchecked {
         image: url(:/Black/res/Switch-off.png);
 }
 
+QCheckBox#chkClarity::indicator{
+        width: 32px;
+        height: 32px;
+}
+
+QCheckBox#chkClarity::indicator:checked {
+        image: url(:/Black/res/switch_right);
+}
+
+QCheckBox#chkClarity::indicator:checked:hover {
+        image: url(:/Black/res/switch_right_hover);
+}
+
+QCheckBox#chkClarity::indicator:checked:pressed {
+        image: url(:/Black/res/switch_right_press);
+}
+
+QCheckBox#chkClarity::indicator:unchecked {
+        image: url(:/Black/res/switch_left);
+}
+
+QCheckBox#chkClarity::indicator:unchecked:hover {
+        image: url(:/Black/res/switch_left_hover);
+}
+
+QCheckBox#chkClarity::indicator:unchecked:pressed {
+        image: url(:/Black/res/switch_left_press);
+}
+
+QCheckBox#chkFlip::indicator{
+        width: 32px;
+        height: 32px;
+}
+
+QCheckBox#chkFlip::indicator:checked {
+        image: url(:/Black/res/flip_checked);
+}
+
+QCheckBox#chkFlip::indicator:checked:hover {
+        image: url(:/Black/res/flip_checked_hover);
+}
+
+QCheckBox#chkFlip::indicator:checked:pressed {
+        image: url(:/Black/res/flip_checked_press);
+}
+
+QCheckBox#chkFlip::indicator:unchecked {
+        image: url(:/Black/res/flip_unchecked);
+}
+
+QCheckBox#chkFlip::indicator:unchecked:hover {
+        image: url(:/Black/res/flip_unchecked_hover);
+}
+
+QCheckBox#chkFlip::indicator:unchecked:pressed {
+        image: url(:/Black/res/flip_unchecked_press);
+}
+
+
+
+QCheckBox#chkMirror::indicator{
+        width: 32px;
+        height: 32px;
+}
+
+QCheckBox#chkMirror::indicator:checked {
+        image: url(:/Black/res/mirror_checked);
+}
+
+QCheckBox#chkMirror::indicator:checked:hover {
+        image: url(:/Black/res/mirror_checked_hover);
+}
+
+QCheckBox#chkMirror::indicator:checked:pressed {
+        image: url(:/Black/res/mirror_checked_press);
+}
+
+QCheckBox#chkMirror::indicator:unchecked {
+        image: url(:/Black/res/mirror_unchecked);
+}
+
+QCheckBox#chkMirror::indicator:unchecked:hover {
+        image: url(:/Black/res/mirror_unchecked_hover);
+}
+
+QCheckBox#chkMirror::indicator:unchecked:pressed {
+        image: url(:/Black/res/mirror_unchecked_press);
+}
 
 /**********单选框**********/
 QRadioButton{
@@ -1279,4 +1367,30 @@ QPushButton#btnRD:!enabled{
 }
 
 
+QPushButton#btnFlip {
+	background: transparent;
+	image: url(:/Black/res/flip_checked);
+}
+QPushButton#btnFlip:enabled:hover{
+	image: url(:/Black/res/flip_checked_hover);
+}
+QPushButton#btnFlip:enabled:pressed{
+	image: url(:/Black/res/flip_checked_press);
+}
+QPushButton#btnFlip:!enabled{
+	image: url(:/Black/res/flip_unchecked_hover);
+}
 
+QPushButton#btnMirror {
+	background: transparent;
+	image: url(:/Black/res/mirror_checked);
+}
+QPushButton#btnMirror:enabled:hover{
+	image: url(:/Black/res/mirror_checked_hover);
+}
+QPushButton#btnMirror:enabled:pressed{
+	image: url(:/Black/res/mirror_checked_press);
+}
+QPushButton#btnMirror:!enabled{
+	image: url(:/Black/res/mirror_unchecked_hover);
+}

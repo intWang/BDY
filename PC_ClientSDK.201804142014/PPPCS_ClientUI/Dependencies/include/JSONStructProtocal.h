@@ -798,7 +798,9 @@ typedef struct IPCNetCamColorCfg{
 	}
 }IPCNetCamColorCfg_st;
 
+//{"IspOverTurn.info":{"ViCh":0,"Mirror":false,"Flip":true},"ret":0}
 typedef struct IPCNetPicOverTurn{
+    using Ptr = std::shared_ptr<IPCNetPicOverTurn>;
 	int ViCh;//max=3
 	int Mirror;
 	int Flip;
@@ -811,8 +813,12 @@ typedef struct IPCNetPicOverTurn{
 
 		if(jsroot){
 			jsroot->getInt("ViCh",ViCh);
-			jsroot->getInt("Mirror",Mirror);
-			jsroot->getInt("Flip",Flip);
+            Boolean_t bMirror;
+            Boolean_t bFlip;
+			jsroot->getBoolean("Mirror", bMirror);
+            jsroot->getBoolean("Flip", bFlip);
+            Mirror = bMirror;
+            Flip = bFlip;
 		
 			delete jsroot;
 			return true;
@@ -1838,6 +1844,7 @@ typedef struct
 }IPCNetVideoResolutionOpt_st;
 #ifdef _WIN32
 typedef struct IPCNetVideoEncode{
+    using Ptr = std::shared_ptr<IPCNetVideoEncode>;
 	IPCNetVideoEncode(){
 		VideoResolutionOpt=0;
 		OpionEncode=0;
@@ -4131,4 +4138,54 @@ typedef struct IPCNetRetsult{
 		return 0;
 	}
 }IPCNetRetsult_st;
+
+//{"Stream.StreamInfo":{"VideoStream":{"ViCh":0,"EncCh":1
+//,"Encode":"ENC_H264","Width":352,"Height":288,"IFrame":50,
+//"FrameRate":15}}}
+typedef struct IPCNetStreamInfo {
+    using Ptr = std::shared_ptr<IPCNetStreamInfo>;
+    int ViCh;
+    int EncCh;
+    int Encode;
+    int Width;
+    int Height;
+    int IFrame;
+    int FrameRate;
+
+    IPCNetStreamInfo() {
+        ViCh = 0;
+        EncCh = 0;
+        Encode = 0;
+        Width = 0;
+        Height = 0;
+        IFrame = 0;
+        FrameRate = 0;
+    }
+    ~IPCNetStreamInfo() {
+    }
+    Boolean_t parseJSON(PJson::JSONObject &jsdata) {
+        PJson::JSONObject *jsroot = jsdata.getJSONObject("Stream.StreamInfo");
+        if (jsroot) {
+            PJson::JSONObject *jsStreamObj = jsroot->getJSONObject("VideoStream");
+            if (jsStreamObj)
+            {
+                jsStreamObj->getInt("ViCh", ViCh);
+                jsStreamObj->getInt("EncCh", EncCh);
+                jsStreamObj->getInt("Encode", Encode);
+                jsStreamObj->getInt("Width", Width);
+                jsStreamObj->getInt("Height", Height);
+                jsStreamObj->getInt("IFrame", IFrame);
+                jsStreamObj->getInt("FrameRate", FrameRate);
+
+                delete jsStreamObj;
+            }
+            delete jsroot;
+        }
+        return true;
+    }
+    int toJSONString(String&str) {
+        return 0;
+    }
+}IPCNetStreamInfo_st;
+
 #endif

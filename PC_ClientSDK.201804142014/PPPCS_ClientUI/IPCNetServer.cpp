@@ -267,6 +267,16 @@ namespace ls
         fireNotification(std::bind(&IIPCNetServerCallBack::onGetNetStrategy, std::placeholders::_1, strUid, pData));
     }
 
+    void IPCNetServer::onGetClarityCmd(std::string& strUid, IPCNetStreamInfo::Ptr& pData)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onGetClarityCmd, std::placeholders::_1, strUid, pData));
+    }
+
+    void IPCNetServer::onGetFlipMirrorCmd(std::string& strUid, IPCNetPicOverTurn::Ptr& pData)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::onGetFlipMirrorCmd, std::placeholders::_1, strUid, pData));
+    }
+
     void IPCNetServer::OnHintMsg(std::string& strHint, ls::HintLevel emLevel)
     {
         if (g_pEngine)
@@ -331,6 +341,15 @@ namespace ls
             }
         }
         break;
+        case IPCNET_GET_OVERTURN_RESP:
+        {
+            auto pData = std::make_shared<IPCNetPicOverTurn>();
+            if (pData && pData->parseJSON(jsdata))
+            {
+                onGetFlipMirrorCmd(strUid, pData);
+            }
+        }
+        break;
         case IPCNET_GET_CAM_PIC_CFG_RESP:
         {
             IPCNetCamColorCfg_st stIPCNetCamColorCfg;
@@ -338,6 +357,14 @@ namespace ls
             {
                 onParamCmd(strUid, stIPCNetCamColorCfg);
                 return;
+            }
+        }
+        case IPCNET_GET_STREAM_REQ:
+        {
+            auto pData = std::make_shared<IPCNetStreamInfo>();
+            if (pData && pData->parseJSON(jsdata))
+            {
+                onGetClarityCmd(strUid, pData);
             }
         }
         break;
@@ -363,6 +390,9 @@ namespace ls
                     break;
                 case IPCNET_USER_SET_RESP:
                     strHintMsg = "用户设置(密码)";
+                    break;
+                case IPCNET_SET_OVERTURN_RESQ:
+                    strHintMsg = "图像翻转设置";
                     break;
                 default:
                     break;
@@ -508,6 +538,39 @@ namespace ls
     {
         ITask::Ptr pTask = std::make_shared<NetStrategyTask>(strUid, OnCmdResult, strJsonParam.c_str());
         AddTask(pTask);
+    }
+
+    void IPCNetServer::GetClarity(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<ResolutionTask>(strUid, false, 0, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::SetClarity(std::string& strUid, int nClarity)
+    {
+        ITask::Ptr pTask = std::make_shared<ResolutionTask>(strUid, true, nClarity, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::GetFlipMirror(std::string& strUid)
+    {
+        ITask::Ptr pTask = std::make_shared<FlipMirrorTask>(strUid, false, 0, 0, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::SetFlipMirror(std::string& strUid, int nFilp, int nMirror)
+    {
+        ITask::Ptr pTask = std::make_shared<FlipMirrorTask>(strUid, true, nFilp, nMirror, OnCmdResult);
+        AddTask(pTask);
+    }
+
+    void IPCNetServer::SwitchStream(std::string& strUid, int nStream)
+    {
+        ITask::Ptr pTask = std::make_shared<SwitchStreamTask>(strUid, nStream, OnCmdResult);
+        //AddTask(pTask);
+        RecycleDecoder(strUid);
+        PrepareDecoder(strUid);
+        pTask->Run();
     }
 
     void IPCNetServerCallBack::OnDeviceConnected(const std::string& strDevJsonInfo)
@@ -722,6 +785,30 @@ namespace ls
             if (func && func->funcOnGetNetStrategyData)
             {
                 func->funcOnGetNetStrategyData(strUid, pData);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::onGetClarityCmd(std::string& strUid, const IPCNetStreamInfo::Ptr& pData)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &pData](auto func) {
+            if (func && func->funconGetClarityData)
+            {
+                func->funconGetClarityData(strUid, pData);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::onGetFlipMirrorCmd(std::string& strUid, const IPCNetPicOverTurn::Ptr& pData)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &pData](auto func) {
+            if (func && func->funconGetFlipMirrorData)
+            {
+                func->funconGetFlipMirrorData(strUid, pData);
             }
             return false;
         });

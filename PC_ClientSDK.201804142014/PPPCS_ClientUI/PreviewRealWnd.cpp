@@ -73,7 +73,9 @@ void PreviewRealWnd::StartPreview(DevNode::Ptr pChannel)
         auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
         if (pIPCServer)
         {
-            pIPCServer->VideoControl(pChannel->strUID, true);
+            auto pStreamInfo = m_pChannel->GetStreamData();
+            int nStreamData = pStreamInfo ? pStreamInfo->EncCh : 1;
+            pIPCServer->VideoControl(pChannel->strUID, true, nStreamData);
         }
 
         auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;

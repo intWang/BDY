@@ -27,5 +27,4 @@ private:
     std::mutex m_mxLockDevNode;
     DevNode::Ptr m_pDevNode = nullptr;
     VideoParamData m_origionalData = {0};
-    ls::IIPCNetServerCallBack::CallBackFunc::Ptr m_CallBackFunc = nullptr;
 };

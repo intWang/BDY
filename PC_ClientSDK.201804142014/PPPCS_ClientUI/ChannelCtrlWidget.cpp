@@ -31,10 +31,29 @@ ChannelCtrlWidget::ChannelCtrlWidget(QWidget *parent)
 
     m_pPtzWnd = pPTZWnd;
     m_pParamWnd = pParamWnd;
+    m_pDecodeWnd = pDecodeWnd;
+
+    m_CallBackFunc = std::make_shared<ls::IIPCNetServerCallBack::CallBackFunc>();
+    if (m_CallBackFunc)
+    {
+        m_CallBackFunc->funcOnVideoParamData = std::bind(&ChannelCtrlWidget::OnVideoParamData, this, std::placeholders::_1, std::placeholders::_2);
+        m_CallBackFunc->funconGetClarityData = std::bind(&ChannelCtrlWidget::OnVideoEncodeData, this, std::placeholders::_1, std::placeholders::_2);
+        m_CallBackFunc->funconGetFlipMirrorData = std::bind(&ChannelCtrlWidget::OnPicOverTurnData, this, std::placeholders::_1, std::placeholders::_2);
+    }
+    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+    if (pIPCCallBack)
+    {
+        pIPCCallBack->Register(m_CallBackFunc);
+    }
 }
 
 ChannelCtrlWidget::~ChannelCtrlWidget()
 {
+    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+    if (pIPCCallBack)
+    {
+        pIPCCallBack->UnRegister(m_CallBackFunc);
+    }
 }
 
 PtzCtrlWnd::Ptr ChannelCtrlWidget::GetPtzCtrlWnd()
@@ -42,11 +61,36 @@ PtzCtrlWnd::Ptr ChannelCtrlWidget::GetPtzCtrlWnd()
     return m_pPtzWnd;
 }
 
+void ChannelCtrlWidget::OnVideoParamData(const std::string& strUid, const IPCNetCamColorCfg_st& stParam)
+{
+    if (m_pParamWnd)
+    {
+        m_pParamWnd->OnVideoParamData(strUid, stParam);
+    }
+}
+
+void ChannelCtrlWidget::OnPicOverTurnData(const std::string& strUid, const IPCNetPicOverTurn::Ptr& pData)
+{
+    if (m_pDecodeWnd)
+    {
+        m_pDecodeWnd->OnPicOverTurnData(strUid, pData);
+    }
+}
+
+void ChannelCtrlWidget::OnVideoEncodeData(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData)
+{
+    if (m_pDecodeWnd)
+    {
+        m_pDecodeWnd->OnVideoEncodeData(strUid, pData);
+    }
+}
+
 void ChannelCtrlWidget::BindPreviewWnd(PreviewRealWnd::Ptr pWnd)
 {
     m_pPreviewpWnd = pWnd;
     UpdatePtzWnd();
     UpdateParamWnd();
+    UpdateDecodeWnd();
 }
 
 BarWidget::Ptr ChannelCtrlWidget::InitTopBar()
@@ -142,5 +186,20 @@ void ChannelCtrlWidget::UpdatePtzWnd()
     else if (m_pPreviewpWnd->IsInPreview())
     {
         m_pPtzWnd->BindPreviewWnd(m_pPreviewpWnd);
+    }
+}
+
+void ChannelCtrlWidget::UpdateDecodeWnd()
+{
+    if (m_pDecodeWnd)
+    {
+        if (m_pPreviewpWnd)
+        {
+            m_pDecodeWnd->BindDevNode(m_pPreviewpWnd->GetDevNode());
+        }
+        else
+        {
+            m_pDecodeWnd->Untie();
+        }
     }
 }

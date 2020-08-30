@@ -221,7 +221,14 @@ HintBar::HintBar(QWidget *parent /*= 0*/)
 
 HintBar::~HintBar()
 {
-
+    if (m_pCBFunc)
+    {
+        auto pHintCallBack = g_pCallBack ? g_pCallBack->GetHintCallBack() : nullptr;
+        if (pHintCallBack)
+        {
+            pHintCallBack->UnRegister(m_pCBFunc);
+        }
+    }
 }
 
 void HintBar::SetHint(const QString& strText, ls::HintLevel level)

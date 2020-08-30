@@ -44,6 +44,7 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
     {
         m_CallBackFunc->funcOnDeviceConnected = std::bind(&DevTreeWnd::OnDeviceConnectedCB, this, std::placeholders::_1);
         m_CallBackFunc->funcOnDeviceStatuChanged = std::bind(&DevTreeWnd::OnDeviceStatuChanged, this, std::placeholders::_1, std::placeholders::_2);
+        m_CallBackFunc->funconGetClarityData = std::bind(&DevTreeWnd::OnStreamInfo, this, std::placeholders::_1, std::placeholders::_2);
         auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
         if (pIPCCallBack)
         {
@@ -98,6 +99,14 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
 
 DevTreeWnd::~DevTreeWnd()
 {
+    if (m_CallBackFunc)
+    {
+        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+        if (pIPCCallBack)
+        {
+            pIPCCallBack->UnRegister(m_CallBackFunc);
+        }
+    }
     SaveTreeData();
 }
 
@@ -841,6 +850,15 @@ void DevTreeWnd::OnDeviceStatuChanged(const std::string& strUid, int nStatus)
         default:
             break;
         }
+    }
+}
+
+void DevTreeWnd::OnStreamInfo(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData)
+{
+    auto pDevNode = std::dynamic_pointer_cast<DevNode>(GetTreeItemByUid(strUid));
+    if (pDevNode)
+    {
+        pDevNode->SetStreamData(pData);
     }
 }
 

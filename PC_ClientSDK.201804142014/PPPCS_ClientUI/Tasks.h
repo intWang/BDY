@@ -166,4 +166,41 @@ namespace ls
         OnCmdResult_t m_pCB = nullptr;
         std::string m_strJsonParam;
     };
+
+    class ResolutionTask : public ITask
+    {
+    public:
+        using Ptr = std::shared_ptr<ResolutionTask>;
+        //nResolution - 0 标清，1 高清，2 4K超清
+        ResolutionTask(std::string& strUID, bool bSet, int nResolution, OnCmdResult_t pCB);
+        virtual void Run() override;
+    private:
+        OnCmdResult_t m_pCB = nullptr;
+        int m_nResolution;
+        bool m_bSet;
+    };
+
+    class FlipMirrorTask : public ITask
+    {
+    public:
+        using Ptr = std::shared_ptr<FlipMirrorTask>;
+        FlipMirrorTask(std::string& strUID, bool bSet, int nFlip, int nMirror, OnCmdResult_t pCB);
+        virtual void Run() override;
+    private:
+        OnCmdResult_t m_pCB = nullptr;
+        int m_nFlip;
+        int m_nMirror;
+        bool m_bSet;
+    };
+
+    class SwitchStreamTask : public ITask
+    {
+    public:
+        using Ptr = std::shared_ptr<SwitchStreamTask>;
+        SwitchStreamTask(std::string& strUID, int nStream, OnCmdResult_t pCB);
+        virtual void Run() override;
+    private:
+        OnCmdResult_t m_pCB = nullptr;
+        int m_nStream;
+    };
 }

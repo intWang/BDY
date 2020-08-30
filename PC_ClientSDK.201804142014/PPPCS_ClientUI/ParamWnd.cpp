@@ -15,26 +15,12 @@ ParamWnd::ParamWnd(QWidget *parent)
     connect(ui.btnRestoreParam, &QPushButton::clicked, this, [this]() {
         this->Restore();
     });
-
-    m_CallBackFunc = std::make_shared<ls::IIPCNetServerCallBack::CallBackFunc>();
-    if (m_CallBackFunc)
-    {
-        m_CallBackFunc->funcOnVideoParamData = std::bind(&ParamWnd::OnVideoParamData, this, std::placeholders::_1, std::placeholders::_2);
-    }
-    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
-    if (pIPCCallBack)
-    {
-        pIPCCallBack->Register(m_CallBackFunc);
-    }
+    
 }
 
 ParamWnd::~ParamWnd()
 {
-    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
-    if (pIPCCallBack)
-    {
-        pIPCCallBack->UnRegister(m_CallBackFunc);
-    }
+    
 }
 
 void ParamWnd::BindDevNode(DevNode::Ptr pDevNode)

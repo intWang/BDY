@@ -72,6 +72,8 @@ namespace ls
             std::function<void(const std::string&, const IPCNetWirelessConfig_st::Ptr&)> funcOnGetWifiData = nullptr;
             std::function<void(const std::string&, const IPCNetWiFiAPInfo_t::Ptr&)> funcOnGetHotSpotData = nullptr;
             std::function<void(const std::string&, const IPCNetNetworkStrategy::Ptr&)> funcOnGetNetStrategyData = nullptr;
+            std::function<void(const std::string&, const IPCNetStreamInfo::Ptr&)> funconGetClarityData = nullptr;
+            std::function<void(const std::string&, const IPCNetPicOverTurn::Ptr&)> funconGetFlipMirrorData = nullptr;
             virtual ~CallBackFunc() {};
         };
 
@@ -87,6 +89,8 @@ namespace ls
         virtual void onGetWifiCmd(std::string& strUid, const IPCNetWirelessConfig_st::Ptr& pData) = 0;
         virtual void onGetHotSpotCmd(std::string& strUid, const IPCNetWiFiAPInfo_t::Ptr& pData) = 0;
         virtual void onGetNetStrategy(std::string& strUid, const IPCNetNetworkStrategy::Ptr& pData) = 0;
+        virtual void onGetClarityCmd(std::string& strUid, const IPCNetStreamInfo::Ptr& pData) = 0;
+        virtual void onGetFlipMirrorCmd(std::string& strUid, const IPCNetPicOverTurn::Ptr& pData) = 0;
     private:
     };
 
@@ -138,6 +142,12 @@ namespace ls
         virtual void GetNetStrategy(std::string& strUid)=0;
         virtual void SetNetStrategy(std::string& strUid, std::string& strJsonParam) = 0;
         virtual void ChangeDevPwd(std::string& strUid, std::string& strPwd) = 0;
+        virtual void GetClarity(std::string& strUid) = 0;
+        virtual void SetClarity(std::string& strUid, int nClarity) = 0;
+
+        virtual void GetFlipMirror(std::string& strUid) = 0;
+        virtual void SetFlipMirror(std::string& strUid, int nFilp, int nMirror) = 0;
+        virtual void SwitchStream(std::string& strUid, int nStream) = 0;
 
         virtual void onStatus(const char* uuid, int status) = 0;
         virtual void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp) = 0;

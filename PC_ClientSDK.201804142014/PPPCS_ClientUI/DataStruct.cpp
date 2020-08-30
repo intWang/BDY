@@ -242,6 +242,55 @@ bool DevNode::SetNetStrategy(std::string& strJson)
     return false;
 }
 
+bool DevNode::GetClarity()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->GetClarity(strUID);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::SetClarity(int nClarity)
+{
+    return SwitchStream(nClarity);
+}
+
+bool DevNode::GetFlipMirror()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->GetFlipMirror(strUID);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::SetFlipMirror(int nFilp, int nMirror)
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->SetFlipMirror(strUID, nFilp, nMirror);
+        return true;
+    }
+    return false;
+}
+
+bool DevNode::SwitchStream(int nStream)
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->SwitchStream(strUID, nStream);
+        return true;
+    }
+    return false;
+}
+
 VideoParamData DevNode::GetVideoParam()
 {
     return stVideoParam;
@@ -271,7 +320,7 @@ void DevNode::StopPreview()
 }
 
 
-void DevNode::SetWifiList(IPCNetWifiAplist::Ptr pData)
+void DevNode::SetWifiList(const IPCNetWifiAplist::Ptr& pData)
 {
     pWifiList = pData;
 }
@@ -281,7 +330,7 @@ IPCNetWifiAplist::Ptr DevNode::GetWifiList()
     return pWifiList;
 }
 
-void DevNode::SetHotSpotData(IPCNetWiFiAPInfo_t::Ptr pData)
+void DevNode::SetHotSpotData(const IPCNetWiFiAPInfo_t::Ptr& pData)
 {
     pHotSpot = pData;
 }
@@ -289,6 +338,16 @@ void DevNode::SetHotSpotData(IPCNetWiFiAPInfo_t::Ptr pData)
 IPCNetWiFiAPInfo_t::Ptr DevNode::GetHotSpotData()
 {
     return pHotSpot;
+}
+
+void DevNode::SetStreamData(const IPCNetStreamInfo::Ptr& pData)
+{
+    pStreamInfo = pData;
+}
+
+IPCNetStreamInfo::Ptr DevNode::GetStreamData()
+{
+    return pStreamInfo;
 }
 
 void DevNode::OnLostConnect()

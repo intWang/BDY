@@ -23,6 +23,10 @@ public:
 public:
     PtzCtrlWnd::Ptr GetPtzCtrlWnd();
 
+    void OnVideoParamData(const std::string& strUid, const IPCNetCamColorCfg_st& stParam);
+    void OnPicOverTurnData(const std::string& strUid, const IPCNetPicOverTurn::Ptr& pData);
+    void OnVideoEncodeData(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData);
+
 public slots:
     void BindPreviewWnd(PreviewRealWnd::Ptr pWnd);
 
@@ -34,6 +38,8 @@ protected:
 
     void UpdateParamWnd();
     void UpdatePtzWnd();
+    void UpdateDecodeWnd();
+
 private:
     int m_nTopHeight = 50;
     QStackedWidget* m_pStackWidget = nullptr;
@@ -42,4 +48,5 @@ private:
     ParamWnd::Ptr m_pParamWnd = nullptr;
     PreviewRealWnd::Ptr m_pPreviewpWnd = nullptr;
     DecodeWnd::Ptr m_pDecodeWnd = nullptr;
+    ls::IIPCNetServerCallBack::CallBackFunc::Ptr m_CallBackFunc = nullptr;
 };

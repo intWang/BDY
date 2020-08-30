@@ -93,9 +93,9 @@ struct DevNode :public TreeNode
     int nPreviewCount;
     VideoParamData stVideoParam;
 
-    IPCNetWifiAplist::Ptr pWifiList;
-    IPCNetWiFiAPInfo_t::Ptr pHotSpot;
-
+    IPCNetWifiAplist::Ptr pWifiList = nullptr;
+    IPCNetWiFiAPInfo_t::Ptr pHotSpot = nullptr;
+    IPCNetStreamInfo::Ptr pStreamInfo = nullptr;
     DevNode() = default;
     DevNode(const std::string& strUid, const std::string& strPwd, const std::string& strName, int nGroupID);
         
@@ -114,11 +114,14 @@ struct DevNode :public TreeNode
     void StartPreview();
     void StopPreview();
 
-    void SetWifiList(IPCNetWifiAplist::Ptr pData);
+    void SetWifiList(const IPCNetWifiAplist::Ptr& pData);
     IPCNetWifiAplist::Ptr GetWifiList();
 
-    void SetHotSpotData(IPCNetWiFiAPInfo_t::Ptr pData);
+    void SetHotSpotData(const IPCNetWiFiAPInfo_t::Ptr& pData);
     IPCNetWiFiAPInfo_t::Ptr GetHotSpotData();
+
+    void SetStreamData(const IPCNetStreamInfo::Ptr& pData);
+    IPCNetStreamInfo::Ptr GetStreamData();
 
     //////CB OPerate
     void OnLostConnect();
@@ -138,6 +141,14 @@ struct DevNode :public TreeNode
     bool SetHotSpot(std::string& strJson);
     bool GetNetStrategy();
     bool SetNetStrategy(std::string& strJson);
+
+    bool GetClarity();
+    bool SetClarity(int nClarity);
+
+    bool GetFlipMirror();
+    bool SetFlipMirror(int nFilp, int nMirror);
+
+    bool SwitchStream(int nStream);
 };
 
 struct GroupNode :public TreeNode

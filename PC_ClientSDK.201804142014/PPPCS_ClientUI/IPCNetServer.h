@@ -41,6 +41,11 @@ namespace ls
         virtual void SetHotSpot(std::string& strUid, std::string& strJsonParam) override;
         virtual void GetNetStrategy(std::string& strUid) override;
         virtual void SetNetStrategy(std::string& strUid, std::string& strJsonParam) override;
+        virtual void GetClarity(std::string& strUid) override;
+        virtual void SetClarity(std::string& strUid, int nClarity) override;
+        virtual void GetFlipMirror(std::string& strUid) override;
+        virtual void SetFlipMirror(std::string& strUid, int nFilp, int nMirror) override;
+        virtual void SwitchStream(std::string& strUid, int nStream) override;
 
     protected:
         void PrepareDecoder(const std::string& strUid);
@@ -52,7 +57,8 @@ namespace ls
         void onGetWifiCmd(std::string& strUid, IPCNetWirelessConfig_st::Ptr& pData);
         void onGetHotSpotCmd(std::string& strUid, IPCNetWiFiAPInfo_t::Ptr& pData);
         void onGetNetStrategy(std::string& strUid, IPCNetNetworkStrategy::Ptr& pData);
-
+        void onGetClarityCmd(std::string& strUid, IPCNetStreamInfo::Ptr& pData);
+        void onGetFlipMirrorCmd(std::string& strUid, IPCNetPicOverTurn::Ptr& pData);
         void OnHintMsg(std::string& strHint, ls::HintLevel emLevel = HintLevel::Info);
         void AddTask(ITask::Ptr ptask);
         ITask::Ptr PopTask();
@@ -87,6 +93,8 @@ namespace ls
         virtual void onGetWifiCmd(std::string& strUid, const IPCNetWirelessConfig_st::Ptr& pData) override;
         virtual void onGetHotSpotCmd(std::string& strUid, const IPCNetWiFiAPInfo_t::Ptr& pData) override;
         virtual void onGetNetStrategy(std::string& strUid, const IPCNetNetworkStrategy::Ptr& pData) override;
+        virtual void onGetClarityCmd(std::string& strUid, const IPCNetStreamInfo::Ptr& pData) override;
+        virtual void onGetFlipMirrorCmd(std::string& strUid, const IPCNetPicOverTurn::Ptr& pData) override;
 
     protected:
         void DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len);

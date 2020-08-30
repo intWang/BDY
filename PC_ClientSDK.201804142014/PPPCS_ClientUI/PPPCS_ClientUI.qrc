@@ -63,6 +63,24 @@
         <file>res/checkedbox.png</file>
         <file>res/checkedbox_hover.png</file>
         <file>res/checkedbox_press.png</file>
+        <file>res/switch_left.png</file>
+        <file>res/switch_left_hover.png</file>
+        <file>res/switch_left_press.png</file>
+        <file>res/switch_right.png</file>
+        <file>res/switch_right_hover.png</file>
+        <file>res/switch_right_press.png</file>
+        <file>res/mirror_checked.png</file>
+        <file>res/mirror_checked_hover.png</file>
+        <file>res/mirror_checked_press.png</file>
+        <file>res/mirror_unchecked.png</file>
+        <file>res/mirror_unchecked_hover.png</file>
+        <file>res/mirror_unchecked_press.png</file>
+        <file>res/flip_checked.png</file>
+        <file>res/flip_checked_hover.png</file>
+        <file>res/flip_checked_press.png</file>
+        <file>res/flip_unchecked.png</file>
+        <file>res/flip_unchecked_hover.png</file>
+        <file>res/flip_unchecked_press.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>
