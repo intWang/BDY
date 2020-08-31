@@ -7,6 +7,8 @@
 #include "SEP2P_Error.h"
 #include "JSONStructProtocal.h"
 #include "JSONObject.hpp"
+#include "ConfigCenter.h"
+#include <QDateTime>
 namespace ls
 {
     std::string strTmpPath = utils::GetTmpPath();
@@ -193,13 +195,15 @@ namespace ls
         //throw std::logic_error("The method or operation is not implemented.");
         //h264 decode
         auto strUuid = std::string(uuid);
-        std::lock_guard<std::mutex> guard(m_mxDecoder);
-        if (m_videoDecoder.find(strUuid) != m_videoDecoder.end())
         {
-            auto pDecoder = m_videoDecoder[strUuid];
-            if (pDecoder)
+            std::lock_guard<std::mutex> guard(m_mxDecoder);
+            if (m_videoDecoder.find(strUuid) != m_videoDecoder.end())
             {
-                pDecoder->InputData(data, len);
+                auto pDecoder = m_videoDecoder[strUuid];
+                if (pDecoder)
+                {
+                    pDecoder->InputData(data, len);
+                }
             }
         }
     }
@@ -231,11 +235,48 @@ namespace ls
     }
 
 
+    void DecodeStatuCallBack(const char* pUserCode, DecodeStatus emStatus, void* pParam)
+    {
+        if (auto pIPCServer = g_pIPCServer.lock())
+        {
+            pIPCServer->OnDecodeStatuCallBack(pUserCode, emStatus, pParam);
+        }
+    }
+
+
     void IPCNetServer::OnDecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len)
     {
         fireNotification(std::bind(&IIPCNetServerCallBack::OnVideo, std::placeholders::_1, pUserCode, pBuf, width, height, len, 0));
     }
 
+
+    void IPCNetServer::OnDecodeStatuCallBack(const char* pUserCode, DecodeStatus emStatus, void* pParam)
+    {
+        std::string strHint = "";
+        switch (emStatus)
+        {
+        case Start_Record:
+            fireNotification(std::bind(&IIPCNetServerCallBack::OnRecordStatuNotify, std::placeholders::_1, strUID, true));
+            strHint = "录像开始！";
+            break;
+        case Stop_Record:
+            fireNotification(std::bind(&IIPCNetServerCallBack::OnRecordStatuNotify, std::placeholders::_1, strUID, false));
+            strHint = "录像结束！";
+            break;
+        case Start_Transfer:
+            strHint = "录像正在转码！";
+            break;
+        case Complete_Transfer:
+        {
+            std::string strInfo = (const char*)pParam;
+            strHint = strInfo;
+        }
+            break;
+        default:
+            break;
+        }
+        OnHintMsg(strHint);
+    }
 
     void IPCNetServer::onParamCmd(std::string& strUid, IPCNetCamColorCfg_st& stIPCNetCamColorCfg)
     {
@@ -573,6 +614,29 @@ namespace ls
         pTask->Run();
     }
 
+    void IPCNetServer::RecordControl(std::string& strUiD,std::string& strName, bool bStart)
+    {
+        std::string strHint = "";
+        std::lock_guard<std::mutex> guard(m_mxDecoder);
+        auto &pRecoder = m_videoDecoder[strUiD];
+        if (!pRecoder)
+        {
+            strHint = "解码器错误！";
+            OnHintMsg(strHint);
+            return;
+        }
+
+        if (bStart)
+        {
+            pRecoder->StartRecord(ConfigCenter::GetInstance().GetRecordSaveFileName(strUiD).toStdString().c_str(), strName.c_str(), DecodeStatuCallBack);
+        }
+        else
+        {
+            QString tmNow = QDateTime::currentDateTime().toString("-dd_hh_mm_ss");
+            pRecoder->StopRecord(tmNow.toStdString().c_str());
+        }
+    }
+
     void IPCNetServerCallBack::OnDeviceConnected(const std::string& strDevJsonInfo)
     {
         DeviceData stDeviceData;
@@ -809,6 +873,18 @@ namespace ls
             if (func && func->funconGetFlipMirrorData)
             {
                 func->funconGetFlipMirrorData(strUid, pData);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::OnRecordStatuNotify(const std::string& strUid, bool bStart)
+    {
+        std::lock_guard<std::mutex> guard(m_mxLockCB);
+        utils::TravelVector(m_CBFunc, [&strUid, &bStart](auto func) {
+            if (func && func->funcOnRecordNotify)
+            {
+                func->funcOnRecordNotify(strUid, bStart);
             }
             return false;
         });

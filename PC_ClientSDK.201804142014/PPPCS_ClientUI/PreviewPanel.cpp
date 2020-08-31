@@ -7,6 +7,11 @@ PreviewPanel::PreviewPanel(QWidget *parent)
     ui.setupUi(this);
     SetArea(50,0);
     SetAreaBk(s_qcl444858, s_qcl1E2233, s_qcl444858);
+
+    m_icon1X1 = QIcon(":/Black/res/1X1.png");
+    m_icon2X2 = QIcon(":/Black/res/2X2.png");
+    m_icon3X3 = QIcon(":/Black/res/3X3.png");
+    m_icon4X3 = QIcon(":/Black/res/4X3.png");
     auto pTopBar = InitTopBar();
     if (pTopBar)
     {
@@ -80,9 +85,7 @@ void PreviewPanel::OnScreenDevideChange(DevideScreen newMode)
                 pRealWnd->show();
             }
         }
-
     }
-
 }
 
 BarWidget::Ptr PreviewPanel::InitTopBar()
@@ -125,14 +128,23 @@ void PreviewPanel::InitTopBar4PreviewMode(QHBoxLayoutPtr pBarLayout)
     m_pCbbDevideScreen = MQ(QComboBox)(this);
     auto pbtnFullScreen = MQ(QPushButton)(this);
 
-    m_pCbbDevideScreen->addItem("1画面", DevideScreen::Screen_1X1);
-    m_pCbbDevideScreen->addItem("4画面", DevideScreen::Screen_2X2);
-    m_pCbbDevideScreen->addItem("9画面", DevideScreen::Screen_3X3);
-    m_pCbbDevideScreen->addItem("12画面", DevideScreen::Screen_3X4);
+    m_pCbbDevideScreen->addItem(m_icon1X1, "1画面", DevideScreen::Screen_1X1);
+    m_pCbbDevideScreen->addItem(m_icon2X2, "4画面", DevideScreen::Screen_2X2);
+    m_pCbbDevideScreen->addItem(m_icon3X3, "9画面", DevideScreen::Screen_3X3);
+    m_pCbbDevideScreen->addItem(m_icon4X3, "12画面", DevideScreen::Screen_3X4);
+    m_pCbbDevideScreen->setIconSize({30,30});
+
+    m_pCbbDevideScreen->setItemData(0, QColor(RGB(220, 220, 220)), Qt::TextColorRole);
+    m_pCbbDevideScreen->setItemData(1, QColor(RGB(220, 220, 220)), Qt::TextColorRole);
+    m_pCbbDevideScreen->setItemData(2, QColor(RGB(220, 220, 220)), Qt::TextColorRole);
+    m_pCbbDevideScreen->setItemData(3, QColor(RGB(220, 220, 220)), Qt::TextColorRole);
 
     pBarLayout->addWidget(m_pCbbDevideScreen);
     pBarLayout->addStretch();
     pBarLayout->addWidget(pbtnFullScreen);
+    pBarLayout->setContentsMargins(20, 10, 20, 10);
+
+    pbtnFullScreen->hide();
 
     connect(m_pCbbDevideScreen, QOverload<int>::of(&QComboBox::activated), [this](int index) {
         this->OnScreenDevideModeChange(index);

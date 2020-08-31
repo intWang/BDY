@@ -320,6 +320,24 @@ void DevNode::StopPreview()
 }
 
 
+void DevNode::StartRecord()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->RecordControl(strUID, GetName(), true);
+    }
+}
+
+void DevNode::StopRecord()
+{
+    auto pICPServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pICPServer)
+    {
+        pICPServer->RecordControl(strUID, GetName(), false);
+    }
+}
+
 void DevNode::SetWifiList(const IPCNetWifiAplist::Ptr& pData)
 {
     pWifiList = pData;

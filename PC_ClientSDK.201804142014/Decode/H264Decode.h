@@ -5,6 +5,8 @@
 #include <atomic>
 #include <condition_variable>
 #include <queue>
+#include "DecodeUtils.h"
+#include "TransferTask.h"
 struct AVCodecContext;
 struct AVCodec;
 struct AVFrame;
@@ -14,18 +16,6 @@ struct SwsContext;
 class H264Decode :public IDecoder
 {
 public:
-
-    struct BufferData
-    {
-        using Ptr = std::shared_ptr<BufferData>;
-        BufferData() = default;
-        BufferData(const unsigned char* data, int len);
-        void AllocateBuf(int len);
-        virtual ~BufferData();
-        unsigned char* pBufData = nullptr;
-        int nBuffLen;
-    };
-
     using Ptr = std::shared_ptr<H264Decode>;
     H264Decode();
     ~H264Decode();
@@ -39,12 +29,14 @@ public:
 
     virtual void SetUserCode(const char* pStrCode) override;
     virtual const char* GetUserCode() override;
-
-    virtual bool StartRecord() override;
-    virtual bool StopRecord() override;
+    virtual bool StartRecord(const char* pSavePath, const char* pUserName, pfnDecodeStatuCallBack pStatusCB);
+    virtual bool StopRecord(const char* pEndTimeStr) override;
 protected:
     void DataCallBack(const unsigned char* pData, int width, int height, int len);
-
+    void CreateRecordFile(const std::string& strTmpDataFile);
+    void CloseRecordFile();
+    void WriteRecordFile(unsigned char*data, int len);
+    void OnTransferTask(TransferTask::TransferStatu emStatu, const std::string & strInfo);
 protected:
     bool m_init = false;
     AVCodecContext* m_pCodecContext = nullptr;
@@ -61,6 +53,17 @@ protected:
     std::condition_variable m_covDataCome;
     std::string m_strUserCode;
     std::mutex m_mxLockFrame;
+
+
+    ////record
+    bool m_bInRecord;
+    bool m_bInTransfer;
+    FILE* m_pRecordFile = nullptr;
+    std::string m_strSavePath;
+    std::string m_strTmpPath;
+    std::string m_strCurRecordFile;
+    pfnDecodeStatuCallBack m_pDataStatuCallBack = nullptr;
+    std::queue<TransferTask::Ptr> m_queTransferTasks;
 };
 
 

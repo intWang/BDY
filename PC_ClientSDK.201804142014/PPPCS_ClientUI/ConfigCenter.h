@@ -11,6 +11,7 @@ public:
 
     QString GetSnapShotSavepath();
     QString GetRecordSavepath();
+    QString GetRecordSaveFileName(std::string& strUID);
 
 protected:
     ConfigCenter(QObject *parent);

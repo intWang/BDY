@@ -32,9 +32,14 @@ PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
     if (m_CallBackFunc)
     {
         m_CallBackFunc->funcOnFrameData = std::bind(&PreviewRealWnd::OnFrameData, this, std::placeholders::_1, std::placeholders::_2);
+        m_CallBackFunc->funcOnRecordNotify = std::bind(&PreviewRealWnd::OnRecordNotify, this, std::placeholders::_1, std::placeholders::_2);
     }
 
     SetRuningStatu(Status::Empty);
+    if (m_pRecordBtn)
+    {
+        connect(this, &PreviewRealWnd::RecordStatuChanged, this, &PreviewRealWnd::UpdateRecordStatu);
+    }
 }
 
 PreviewRealWnd::~PreviewRealWnd()
@@ -48,6 +53,14 @@ void PreviewRealWnd::OnFrameData(const std::string& strUid, FrameData::Ptr pFram
     {
         SetRuningStatu(Status::InPreview);
         m_DrawWnd->InputFrameData(pFrame);
+    }
+}
+
+void PreviewRealWnd::OnRecordNotify(const std::string& strUid, bool bStart)
+{
+    if (m_pChannel && strUid == m_pChannel->GetDevUid())
+    {
+        emit RecordStatuChanged(bStart);
     }
 }
 
@@ -122,19 +135,50 @@ void PreviewRealWnd::StopPreview()
     SetRuningStatu(Status::Empty);
 }
 
+void PreviewRealWnd::UpdateRecordStatu(bool bStart)
+{
+    if (m_pRecordBtn)
+    {
+        if (bStart)
+        {
+            m_pRecordBtn->setText("录像中");
+        }
+        else
+        {
+            m_pRecordBtn->setText("");
+        }
+
+        m_bRecord = bStart;
+    }
+}
+
 void PreviewRealWnd::CallConfig()
 {
     ConfigDlg config(m_pChannel, this);
     config.exec();
 }
 
-bool PreviewRealWnd::SnapShot()
+void PreviewRealWnd::SnapShot()
 {
     if (m_DrawWnd && m_pChannel)
     {
-        return m_DrawWnd->SnapShot(QString::fromStdString(m_pChannel->GetName()));
+        m_DrawWnd->SnapShot(QString::fromStdString(m_pChannel->GetName()));
     }
-    return false;
+}
+
+void PreviewRealWnd::DoRecord()
+{
+    if (m_pChannel)
+    {
+        if (m_bRecord)
+        {
+            m_pChannel->StopRecord();
+        }
+        else
+        {
+            m_pChannel->StartRecord();
+        }
+    }
 }
 
 void PreviewRealWnd::Clear()
@@ -283,32 +327,29 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
 
             pBtnClose->setObjectName("btn_stop_preview");
             pBtnClose->setToolTip(QStringLiteral("停止预览"));
-            pBtnClose->setFixedWidth(60);
-            pBtnClose->setText(QStringLiteral("关闭"));
+            pBtnClose->setFixedWidth(32);
 
             pBtnRecord->setObjectName("btn_record");
-            pBtnRecord->setText(QStringLiteral("录像"));
             pBtnRecord->setToolTip(QStringLiteral("录像"));
-            pBtnRecord->setFixedWidth(60);
+            pBtnRecord->setFixedWidth(32);
 
             pBtnSnap->setObjectName("btn_snapshot");
-            pBtnSnap->setText(QStringLiteral("截图"));
             pBtnSnap->setToolTip(QStringLiteral("截图"));
-            pBtnSnap->setFixedWidth(60);
+            pBtnSnap->setFixedWidth(32);
 
             pBtnConfig->setObjectName("btn_config");
-            pBtnConfig->setText(QStringLiteral("配置"));
             pBtnConfig->setToolTip(QStringLiteral("配置"));
-            pBtnConfig->setFixedWidth(60);
+            pBtnConfig->setFixedWidth(32);
 
             pLayout->addStretch();
-            pLayout->setSpacing(10);
+            pLayout->setSpacing(5);
             pLayout->addWidget(pBtnRecord);
             pLayout->addWidget(pBtnSnap);
             pLayout->addWidget(pBtnClose);
             pLayout->addWidget(pBtnConfig);
 
-            pBtnRecord->setEnabled(false);
+            m_pRecordBtn = pBtnRecord;
+            //pBtnRecord->setEnabled(false);
 
             connect(pBtnClose, &QPushButton::clicked, this, [this](bool) {
                 if (this->GetRuningStatu() == PreviewRealWnd::Status::Reconnecting)
@@ -319,14 +360,12 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
                 this->StopPreview();
             });
 
-            connect(pBtnSnap, &QPushButton::clicked, this, [this](bool) {
-                this->SnapShot();
-            });
+            connect(pBtnSnap, &QPushButton::clicked, this, &PreviewRealWnd::SnapShot);
             
-            connect(pBtnConfig, &QPushButton::clicked, this, [this](bool) {
-                this->CallConfig();
-            });
+            connect(pBtnConfig, &QPushButton::clicked, this, &PreviewRealWnd::CallConfig);
 
+            connect(pBtnRecord, &QPushButton::clicked, this, &PreviewRealWnd::DoRecord);
+            //pBtnRecord->hide();
         }
     }
     return pBottomBar;

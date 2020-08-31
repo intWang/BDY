@@ -114,6 +114,9 @@ struct DevNode :public TreeNode
     void StartPreview();
     void StopPreview();
 
+    void StartRecord();
+    void StopRecord();
+
     void SetWifiList(const IPCNetWifiAplist::Ptr& pData);
     IPCNetWifiAplist::Ptr GetWifiList();
 

@@ -81,6 +81,21 @@
         <file>res/flip_unchecked.png</file>
         <file>res/flip_unchecked_hover.png</file>
         <file>res/flip_unchecked_press.png</file>
+        <file>res/switch_left_disable.png</file>
+        <file>res/switch_right_disable.png</file>
+        <file>res/-.png</file>
+        <file>res/+.png</file>
+        <file>res/arrow_down.png</file>
+        <file>res/1X1.png</file>
+        <file>res/2X2.png</file>
+        <file>res/3X3.png</file>
+        <file>res/4X3.png</file>
+        <file>res/camera.png</file>
+        <file>res/config.png</file>
+        <file>res/eye.png</file>
+        <file>res/recorder.png</file>
+        <file>res/last.png</file>
+        <file>res/next.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>

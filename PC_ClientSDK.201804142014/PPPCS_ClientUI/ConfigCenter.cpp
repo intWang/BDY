@@ -1,5 +1,6 @@
 #include "ConfigCenter.h"
-
+#include "utils.h"
+#include <QDateTime>
 ConfigCenter& ConfigCenter::GetInstance()
 {
     static ConfigCenter m_Instance(nullptr);
@@ -23,4 +24,13 @@ QString ConfigCenter::GetSnapShotSavepath()
 QString ConfigCenter::GetRecordSavepath()
 {
     return m_strRecordSavePath;
+}
+
+QString ConfigCenter::GetRecordSaveFileName(std::string& strUID)
+{
+    auto strPath = m_strRecordSavePath;
+    auto strName = QString::fromStdString(strUID);
+    utils::MakePathExist(strPath);
+    QString strFileName = strPath + strName + QDateTime::currentDateTime().toString("_yyMMdd_hh_mm_ss") + ".mp4";
+    return strFileName;
 }

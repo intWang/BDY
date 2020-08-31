@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+#include "TransferTask.h"
 extern "C"
 {
 #include <libavcodec/avcodec.h>
@@ -83,16 +83,12 @@ static std::string generate()
     return std::move(std::string(buf));
 }
 
-void SaveBuf(const unsigned char* pData, int len)
+void SaveBuf(const unsigned char* pData, int len, FILE* pFile)
 {
-    FILE *f;
-    int i;
-    std::string strTmpPath = "C:\\Users\\xiaohwa2\\AppData\\Local\\Temp\\PPCS_Client\\Pic\\";
-    std::string strUID = generate();
-    strUID = strTmpPath + strUID + ".yuv";
-    fopen_s(&f, strUID.c_str(), "wb");
-    fwrite(pData, len, 1, f);
-    fclose(f);
+    if (pFile)
+    {
+        fwrite(pData, len, 1, pFile);
+    }
 }
 
 void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize,
@@ -117,6 +113,54 @@ void H264Decode::DataCallBack(const unsigned char* pData, int width, int height,
     if (m_pDataCallBack)
     {
         m_pDataCallBack(m_strUserCode.c_str(), pData, width, height, len);
+    }
+}
+
+void H264Decode::CreateRecordFile(const std::string& strTmpDataFile)
+{
+    if (!m_pRecordFile)
+    {
+        m_strCurRecordFile = strTmpDataFile;
+        fopen_s(&m_pRecordFile, m_strCurRecordFile.c_str(), "wb");
+    }
+}
+
+void H264Decode::CloseRecordFile()
+{
+    if (m_pRecordFile)
+    {
+        fflush(m_pRecordFile);
+        fclose(m_pRecordFile);
+        m_pRecordFile = nullptr;
+    }
+}
+
+void H264Decode::WriteRecordFile(unsigned char*data, int len)
+{
+    if (m_pRecordFile)
+    {
+        SaveBuf(data, len, m_pRecordFile);
+    }
+}
+
+void H264Decode::OnTransferTask(TransferTask::TransferStatu emStatu, const std::string & strInfo)
+{
+    if (m_pDataStatuCallBack)
+    {
+        switch (emStatu)
+        {
+        case TransferTask::Start:
+            m_pDataStatuCallBack(m_strUserCode.c_str(), DecodeStatus::Start_Transfer, (void *)strInfo.c_str());
+            break;
+        case TransferTask::End_Succeed:
+            m_pDataStatuCallBack(m_strUserCode.c_str(), DecodeStatus::Complete_Transfer, (void *)strInfo.c_str());
+            break;
+        case TransferTask::End_Failed:
+            m_pDataStatuCallBack(m_strUserCode.c_str(), DecodeStatus::Complete_Transfer, (void *)strInfo.c_str());
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -190,6 +234,8 @@ bool H264Decode::Destory()
 {
     if (m_init)
     {
+        CloseRecordFile();
+
         m_bQuit.store(true);
         if (m_thDecode.joinable())
         {
@@ -229,6 +275,14 @@ bool H264Decode::Destory()
             m_pImgConvertCtx = nullptr;
         }
 
+        while (m_queTransferTasks.size())
+        {
+            if (auto pTask = m_queTransferTasks.front())
+            {
+                pTask->EndTask();
+            }
+            m_queTransferTasks.pop();
+        }
         m_init = false;
     }
     return true;
@@ -241,6 +295,8 @@ void H264Decode::InputData(unsigned char*data, int data_size)
     {
         return;
     }
+
+    WriteRecordFile(data, data_size);
 
     AVPacket packet = { 0 };
     packet.data = (uint8_t*)data;    //这里填入一个指向完整H264数据帧的指针  
@@ -264,7 +320,6 @@ void H264Decode::RunDecodeThread()
     while (true)
     {
         auto waitRet = m_covDataCome.wait_for(lock, std::chrono::milliseconds(1000));
-        auto pFrameYuv = m_pFrameYUV;
         while (true)
         {
             if (m_bQuit.load())
@@ -272,26 +327,29 @@ void H264Decode::RunDecodeThread()
                 return;
             }
 
+            int width = 0;
+            int height = 0;
             int ret = 0;
             {
                 std::lock_guard<std::mutex> guard(m_mxLockFrame);
-                ret = avcodec_receive_frame(m_pCodecContext, pFrameYuv);
+                ret = avcodec_receive_frame(m_pCodecContext, m_pFrameYUV);
             }
 
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF || ret < 0)
             {
                 break;
             }
+            width = m_pCodecContext->width;
+            height = m_pCodecContext->height;
+            //crash 在 sws_scale的问题，改一下av_image_fill_arrays 最后一个参数，对齐顺序就可以解决了。
+            av_image_fill_arrays(m_pFrameRGB->data, m_pFrameRGB->linesize, m_pRGBBuffer, AV_PIX_FMT_RGB32, width, height, 4);
+            sws_scale(m_pImgConvertCtx,
+                (uint8_t const * const *)m_pFrameYUV->data,
+                m_pFrameYUV->linesize, 0, height, m_pFrameRGB->data,
+                m_pFrameRGB->linesize);
 
             if (m_pRGBBuffer)
             {
-                auto width = m_pCodecContext->width;
-                auto height = m_pCodecContext->height;
-                av_image_fill_arrays(m_pFrameRGB->data, m_pFrameRGB->linesize, m_pRGBBuffer, AV_PIX_FMT_RGB32, width, height, 1);
-                sws_scale(m_pImgConvertCtx,
-                    (uint8_t const * const *)m_pFrameYUV->data,
-                    m_pFrameYUV->linesize, 0, height, m_pFrameRGB->data,
-                    m_pFrameRGB->linesize);
                 DataCallBack(m_pRGBBuffer, width, height, height*m_pFrameRGB->linesize[0]);
             }
         }
@@ -308,31 +366,30 @@ const char* H264Decode::GetUserCode()
     return m_strUserCode.c_str();
 }
 
-bool H264Decode::StartRecord()
+bool H264Decode::StartRecord(const char* pSavePath, const char* pUserName, pfnDecodeStatuCallBack pStatusCB)
 {
-    return false;
-}
-
-bool H264Decode::StopRecord()
-{
-    return false;
-}
-
-H264Decode::BufferData::BufferData(const unsigned char* data, int len)
-{
-    AllocateBuf(len);
-}
-
-void H264Decode::BufferData::AllocateBuf(int len)
-{
-    pBufData = new unsigned char[len];
-    nBuffLen = len;
-}
-
-H264Decode::BufferData::~BufferData()
-{
-    if (pBufData)
+    m_strSavePath = pSavePath;
+    m_strTmpPath = m_strSavePath.substr(0, max(m_strSavePath.rfind('\\'), m_strSavePath.rfind('/')));
+    std::string strTmpFile = m_strTmpPath + m_strUserCode + generate() + ".h264";
+    m_pDataStatuCallBack = pStatusCB;
+    CreateRecordFile(strTmpFile);
+    if (m_pDataStatuCallBack)
     {
-        delete[] pBufData;
+        m_pDataStatuCallBack(m_strUserCode.c_str(), Start_Record, 0);
     }
+    return true;
+}
+
+bool H264Decode::StopRecord(const char* pEndTimeStr)
+{
+    CloseRecordFile();
+    if (m_pDataStatuCallBack)
+    {
+        m_pDataStatuCallBack(m_strUserCode.c_str(), Stop_Record, 0);
+    }
+    //更改录像文件名称
+    m_strSavePath.insert(m_strSavePath.rfind('.'), pEndTimeStr);
+    auto pTransferTask = std::make_shared<TransferTask>(std::bind(&H264Decode::OnTransferTask, this, std::placeholders::_1, std::placeholders::_2), m_strCurRecordFile, m_strSavePath);
+    m_queTransferTasks.push(pTransferTask);
+    return false;
 }

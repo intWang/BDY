@@ -102,19 +102,19 @@ BarWidget::Ptr ChannelCtrlWidget::InitTopBar()
     auto pBtnParam = MQ(QPushButton)(this);
     auto pBtnDecode = MQ(QPushButton)(this);
 
-    pBtnPtz->setFixedSize(60, m_nTopHeight);
-    pBtnParam->setFixedSize(60, m_nTopHeight);
-    pBtnDecode->setFixedSize(60, m_nTopHeight);
+    pBtnPtz->setFixedSize(90, m_nTopHeight);
+    pBtnParam->setFixedSize(90, m_nTopHeight);
+    pBtnDecode->setFixedSize(90, m_nTopHeight);
 
     pBtnPtz->setObjectName("TabBtn");
     pBtnPtz->setProperty("SelStatu", "On");
-    pBtnPtz->setText("PTZ");
+    pBtnPtz->setText("云台监控");
     pBtnParam->setObjectName("TabBtn");
     pBtnParam->setProperty("SelStatu", "Off");
-    pBtnParam->setText("Param1");
+    pBtnParam->setText("视频采集参数");
     pBtnDecode->setObjectName("TabBtn");
     pBtnDecode->setProperty("SelStatu", "Off");
-    pBtnDecode->setText("Decoder");
+    pBtnDecode->setText("视频编码参数");
 
     pTopLayout->addWidget(pBtnPtz);
     pTopLayout->addWidget(pBtnParam);

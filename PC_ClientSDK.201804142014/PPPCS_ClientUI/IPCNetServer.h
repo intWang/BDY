@@ -22,12 +22,12 @@ namespace ls
         virtual void AudioControl(std::string& strUid, bool bStatu, int param1 = 0) override;
         virtual int VideoParamCtrl(std::string& strUid, bool bSet, VideoParam tagParam, int nParamValue) override;
 
-
         virtual void onStatus(const char* uuid, int status) override;
         virtual void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp) override;
         virtual void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp) override;
         virtual void onJSONString(const char* uuid, int msg_type, const char* jsonstr) override;
         virtual void OnDecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len);
+        virtual void OnDecodeStatuCallBack(const char* pUserCode, DecodeStatus emStatus, void* pParam);
         virtual void OnNetOperteResult(int cmd, const char*uuid, const char*json) override;
 
         virtual void RestartDevice(std::string& strUid) override;
@@ -46,11 +46,12 @@ namespace ls
         virtual void GetFlipMirror(std::string& strUid) override;
         virtual void SetFlipMirror(std::string& strUid, int nFilp, int nMirror) override;
         virtual void SwitchStream(std::string& strUid, int nStream) override;
+        virtual void RecordControl(std::string& strUi, std::string& strName, bool bStart) override;
 
     protected:
         void PrepareDecoder(const std::string& strUid);
         void RecycleDecoder(const std::string& strUid);
-
+        //void OnRecordStatuCB(const std::string & strUID, IRecoder::RecordStatu emStatu);
         void onParamCmd(std::string& strUid, IPCNetCamColorCfg_st& stIPCNetCamColorCfg);
         void onDevTimeCmd(std::string& strUid, IPCNetTimeCfg_st& stIPCNetTimeCfg);
         void onSearchWifiCmd(std::string& strUid, IPCNetWifiAplist::Ptr& stNetWirelessConfig);
@@ -95,6 +96,7 @@ namespace ls
         virtual void onGetNetStrategy(std::string& strUid, const IPCNetNetworkStrategy::Ptr& pData) override;
         virtual void onGetClarityCmd(std::string& strUid, const IPCNetStreamInfo::Ptr& pData) override;
         virtual void onGetFlipMirrorCmd(std::string& strUid, const IPCNetPicOverTurn::Ptr& pData) override;
+        virtual void OnRecordStatuNotify(const std::string& strUid, bool bStart) override;
 
     protected:
         void DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len);

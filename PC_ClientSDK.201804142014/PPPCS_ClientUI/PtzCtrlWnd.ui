@@ -60,7 +60,7 @@
           </size>
          </property>
          <property name="text">
-          <string>In</string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -85,7 +85,7 @@
           </size>
          </property>
          <property name="text">
-          <string>Out</string>
+          <string/>
          </property>
         </widget>
        </item>

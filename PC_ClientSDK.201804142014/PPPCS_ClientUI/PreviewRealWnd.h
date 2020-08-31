@@ -24,11 +24,11 @@ public:
     ~PreviewRealWnd();
 
     void OnFrameData(const std::string& strUid, FrameData::Ptr pFrame);
+    void OnRecordNotify(const std::string& strUid, bool bStart);
 
     void StartPreview(DevNode::Ptr pChannel);
     void StopPreview();
-    void CallConfig();
-    bool SnapShot();
+    
 
     void Clear();
     void SetSelectStatu(bool bSelect);
@@ -45,21 +45,29 @@ public:
     bool CheckDevLostConnect(const std::string& strLostDev);
 public slots:
     void OnPtzCtrl(PtzCommand emCmd, int nParam);
+    void CallConfig();
+    void SnapShot();
+    void DoRecord();
+    void UpdateRecordStatu(bool bStart);
 
 signals:
     void PreviewWndUserClick();
     void PreviewWndUserDBClick(bool bFull);
     void PreviewWndStopPreview(const QString& strUid, PreviewRealWnd::Ptr pWnd);
+    void RecordStatuChanged(bool bStart);
 private:
     //Ui::PreviewRealWnd ui;
     Status m_curStatus = Status::Empty;
-    bool m_bSelected = false;
     DrawWnd::Ptr m_DrawWnd = nullptr;
     DevNode::Ptr m_pChannel = nullptr;
     ls::IIPCNetServerCallBack::CallBackFunc::Ptr m_CallBackFunc = nullptr;
     time_t m_tmBusy = 0;
     bool m_bFull = false;
-    VideoParamData m_stVideParam = {0};
+    bool m_bSelected = false;
+    bool m_bRecord = false;
+    VideoParamData m_stVideParam = { 0 };
+
+    QPushButtonPtr m_pRecordBtn = nullptr;
 
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;

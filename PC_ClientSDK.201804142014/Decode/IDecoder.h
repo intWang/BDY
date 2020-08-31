@@ -12,6 +12,6 @@ public:
     virtual void SetUserCode(const char* pStrCode) = 0;
     virtual const char* GetUserCode() = 0;
 
-    virtual bool StartRecord() = 0;
-    virtual bool StopRecord() = 0;
+    virtual bool StartRecord(const char* pSavePath, const char* pUserName, pfnDecodeStatuCallBack pStatusCB) = 0;
+    virtual bool StopRecord(const char* pEndTimeStr) = 0;
 };

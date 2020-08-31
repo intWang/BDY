@@ -3,7 +3,6 @@
 #include <QWidget>
 #include "ui_ParamWnd.h"
 #include "IServer.h"
-
 class ParamWnd : public QWidget
 {
     Q_OBJECT
@@ -27,4 +26,5 @@ private:
     std::mutex m_mxLockDevNode;
     DevNode::Ptr m_pDevNode = nullptr;
     VideoParamData m_origionalData = {0};
+    std::vector<QSlider*> m_vcSlds;
 };

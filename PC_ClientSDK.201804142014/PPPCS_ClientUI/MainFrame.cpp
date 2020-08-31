@@ -7,7 +7,7 @@ ls::ICallBackEngin::Ptr g_pCallBack = ls::CreateCallbackEngine();
 MainFrame::MainFrame(QWidget *parent)
     :BaseDialog(parent)
 {
-    setWindowTitle("视频监控系统V0.1");
+    setWindowTitle("视频监控系统V0.2(临时版本)");
     resize(1200, 900);
     m_pMainViewWiget = MQ(MainViewWidget)(this);
     auto pLayout = GetLayout();

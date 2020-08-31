@@ -74,6 +74,9 @@ namespace ls
             std::function<void(const std::string&, const IPCNetNetworkStrategy::Ptr&)> funcOnGetNetStrategyData = nullptr;
             std::function<void(const std::string&, const IPCNetStreamInfo::Ptr&)> funconGetClarityData = nullptr;
             std::function<void(const std::string&, const IPCNetPicOverTurn::Ptr&)> funconGetFlipMirrorData = nullptr;
+            std::function<void(const std::string&, bool)> funcOnRecordNotify = nullptr;
+
+            
             virtual ~CallBackFunc() {};
         };
 
@@ -91,6 +94,7 @@ namespace ls
         virtual void onGetNetStrategy(std::string& strUid, const IPCNetNetworkStrategy::Ptr& pData) = 0;
         virtual void onGetClarityCmd(std::string& strUid, const IPCNetStreamInfo::Ptr& pData) = 0;
         virtual void onGetFlipMirrorCmd(std::string& strUid, const IPCNetPicOverTurn::Ptr& pData) = 0;
+        virtual void OnRecordStatuNotify(const std::string& strUid, bool bRecord) = 0;
     private:
     };
 
@@ -148,16 +152,17 @@ namespace ls
         virtual void GetFlipMirror(std::string& strUid) = 0;
         virtual void SetFlipMirror(std::string& strUid, int nFilp, int nMirror) = 0;
         virtual void SwitchStream(std::string& strUid, int nStream) = 0;
+        virtual void RecordControl(std::string& strUi, std::string& strName, bool bStart) = 0;
 
         virtual void onStatus(const char* uuid, int status) = 0;
         virtual void onVideoData(const char* uuid, int type, unsigned char*data, int len, long timestamp) = 0;
         virtual void onAudioData(const char* uuid, int type, unsigned char*data, int len, long timestamp) = 0;
         virtual void onJSONString(const char* uuid, int msg_type, const char* jsonstr) = 0;
         virtual void OnDecodeCallBack(const char* pUserCode, const unsigned char* pBuf, int width, int height, int len) = 0;
+        virtual void OnDecodeStatuCallBack(const char* pUserCode, DecodeStatus emStatus, void* pParam) = 0;
         virtual void OnNetOperteResult(int cmd, const char*uuid, const char*json) = 0;
     private:
     };
-
 
     class IHintServer :public IService
     {

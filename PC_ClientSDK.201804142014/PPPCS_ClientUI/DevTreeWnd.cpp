@@ -169,8 +169,8 @@ BarWidget::Ptr DevTreeWnd::InitTopBar( )
                 SelNext();
             });
 
-            pBtnNextPag->setText("Next");
-            pBtnLastPag->setText("Last");
+            pBtnNextPag->setObjectName("btnNext");
+            pBtnLastPag->setObjectName("btnLast");
             pTopLayout->addWidget(pLabelLoaded);
             pTopLayout->addWidget(pLabelTotal);
             pTopLayout->addWidget(pBtnNextPag);
@@ -810,7 +810,7 @@ void DevTreeWnd::OnDeviceConnectedCB(const DeviceData& devData)
     if (pTreeNode)
     {
         auto pDevNode = std::dynamic_pointer_cast<DevNode>(pTreeNode);
-        if (pDevNode)
+        if (pDevNode && !pDevNode->IsDevLoaded())
         {
             std::string strOldName = pDevNode->GetName();
             pDevNode->UpdateDevData(devData);

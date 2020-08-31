@@ -107,6 +107,7 @@
     <PostBuildEvent>
       <Command>Copy "$(ProjectDir)\Decode.h" "$(SolutionDir)\PPPCS_ClientUI\Dependencies\include"
 Copy "$(ProjectDir)\IDecoder.h" "$(SolutionDir)\PPPCS_ClientUI\Dependencies\include"
+Copy "$(ProjectDir)\IRecoder.h" "$(SolutionDir)\PPPCS_ClientUI\Dependencies\include"
 Copy "$(ProjectDir)\DeocodeDataDefine.h" "$(SolutionDir)\PPPCS_ClientUI\Dependencies\include"
 Copy "$(SolutionDir)\Release\Decode.lib" "$(SolutionDir)\PPPCS_ClientUI\Dependencies\lib"</Command>
     </PostBuildEvent>
@@ -162,22 +163,29 @@ Copy "$(SolutionDir)\Release\Decode.lib" "$(SolutionDir)\PPPCS_ClientUI\Dependen
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Decode.h" />
+    <ClInclude Include="DecodeUtils.h" />
     <ClInclude Include="DeocodeDataDefine.h" />
     <ClInclude Include="H264Decode.h" />
     <ClInclude Include="IDecoder.h" />
+    <ClInclude Include="IRecoder.h" />
+    <ClInclude Include="Recorder.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TransferTask.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Decode.cpp" />
+    <ClCompile Include="DecodeUtils.cpp" />
     <ClCompile Include="dllmain.cpp" />
     <ClCompile Include="H264Decode.cpp" />
+    <ClCompile Include="Recorder.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="TransferTask.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Decode.def" />

@@ -1,4 +1,5 @@
 #include "ParamWnd.h"
+#include <vector>
 
 ParamWnd::ParamWnd(QWidget *parent)
     : QWidget(parent)
@@ -16,6 +17,29 @@ ParamWnd::ParamWnd(QWidget *parent)
         this->Restore();
     });
     
+    std::map<QSlider*, QLabel*> mapSlds =
+    { 
+        {ui.sldBrightness, ui.lblBrightness}, 
+        {ui.sldTone , ui.lblTone},
+        {ui.sldContrast, ui.lblContrast},
+        {ui.sldSaturation, ui.lblSaturation}
+    };
+
+    for (auto pair: mapSlds)
+    {
+        auto pSld = pair.first;
+        auto pLabel = pair.second;
+        pSld->setMinimum(0);
+        pSld->setMaximum(255);
+        pSld->setSingleStep(1);
+        pSld->setPageStep(10);
+
+        connect(pSld, &QSlider::valueChanged, this, [pLabel](int nValue) {
+            pLabel->setText(QVariant(nValue).toString());
+        });
+    }
+
+    setEnabled(false);
 }
 
 ParamWnd::~ParamWnd()
@@ -30,21 +54,11 @@ void ParamWnd::BindDevNode(DevNode::Ptr pDevNode)
     UpdateData();
     if (m_pDevNode)
     {
-        ui.spinBrightness->setEnabled(true);
-        ui.spinContrast->setEnabled(true);
-        ui.spinSaturation->setEnabled(true);
-        ui.spinTone->setEnabled(true);
-        ui.btnApply->setEnabled(true);
-        ui.btnRestoreParam->setEnabled(true);
+        setEnabled(true);
     }
     else
     {
-        ui.spinBrightness->setEnabled(false);
-        ui.spinContrast->setEnabled(false);
-        ui.spinSaturation->setEnabled(false);
-        ui.spinTone->setEnabled(false);
-        ui.btnApply->setEnabled(false);
-        ui.btnRestoreParam->setEnabled(false);
+        setEnabled(false);
     }
 }
 
@@ -92,38 +106,38 @@ void ParamWnd::UpdateData()
     {
         m_origionalData = { 0 };
     }
-    ui.spinBrightness->setValue(m_origionalData.brightness);
-    ui.spinContrast->setValue(m_origionalData.contrast);
-    ui.spinSaturation->setValue(m_origionalData.saturation);
-    ui.spinTone->setValue(m_origionalData.tone);
+    ui.sldBrightness->setValue(m_origionalData.brightness);
+    ui.sldContrast->setValue(m_origionalData.contrast);
+    ui.sldSaturation->setValue(m_origionalData.saturation);
+    ui.sldTone->setValue(m_origionalData.tone);
 }
 
 void ParamWnd::Applay()
 {
     if (m_pDevNode && m_pServer)
     {
-        int value = ui.spinBrightness->value();
+        int value = ui.sldBrightness->value();
         if (value != m_origionalData.brightness)
         {
             m_origionalData.brightness = value;
             m_pServer->VideoParamCtrl(m_pDevNode->GetDevUid(), true, ls::IIPCNetServer::VideoParam::Brightness, value);
         }
 
-        value = ui.spinContrast->value();
+        value = ui.sldContrast->value();
         if (value != m_origionalData.contrast)
         {
             m_origionalData.contrast = value;
             m_pServer->VideoParamCtrl(m_pDevNode->GetDevUid(), true, ls::IIPCNetServer::VideoParam::Contrast, value);
         }
 
-        value = ui.spinSaturation->value();
+        value = ui.sldSaturation->value();
         if (value != m_origionalData.saturation)
         {
             m_origionalData.saturation = value;
             m_pServer->VideoParamCtrl(m_pDevNode->GetDevUid(), true, ls::IIPCNetServer::VideoParam::Saturation, value);
         }
 
-        value = ui.spinTone->value();
+        value = ui.sldTone->value();
         if (value != m_origionalData.tone)
         {
             m_origionalData.tone = value;

@@ -5,6 +5,7 @@
 #include "ui_PreviewPanel.h"
 #include "PreviewRealWnd.h"
 #include "DataStruct.h"
+#include <QIcon>
 class PreviewPanel : public AreableWidget<QWidget>
 {
     Q_OBJECT
@@ -51,4 +52,9 @@ private:
     DevideScreen m_curScreenMode = DevideScreen::Screen_1X1;
     QGridLayoutPtr m_pRealWnds = nullptr;
     QComboBoxPtr m_pCbbDevideScreen = nullptr;
+
+    QIcon m_icon1X1;
+    QIcon m_icon2X2;
+    QIcon m_icon3X3;
+    QIcon m_icon4X3;
 };

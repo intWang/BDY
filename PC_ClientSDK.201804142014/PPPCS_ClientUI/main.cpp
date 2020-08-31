@@ -5,27 +5,32 @@
 #include <process.h>
 #include <QFile>
 #include "IServer.h"
-
+#include <QDateTime>
+#include "MessageBoxWnd.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-
-    if (auto pLogManager = LogManager::GetInstance())
-    {
-        pLogManager->Init();
-    }
-
     QFile qss(":/qss/style_blk.qss");
     if (qss.open(QFile::ReadOnly))
     {
-        LogDebug("open qss success");
         QString style = QLatin1String(qss.readAll());
         a.setStyleSheet(style);
         qss.close();
     }
-    else
+  
+    QString str = "2020-09-30 12:00:01";
+    QDateTime expired_time = QDateTime::fromString(str, "yyyy-MM-dd hh:mm:ss");
+    time_t expired = expired_time.toTime_t();
+    time_t now = time(NULL);
+    if (now > expired)
     {
-        LogWarning("open qss failed");
+        msg::showError(nullptr, "临时版本已过期", "请联系作者更新版本");
+        return 0;
+    }
+
+    if (auto pLogManager = LogManager::GetInstance())
+    {
+        pLogManager->Init();
     }
 
     int processid = getpid();
@@ -41,6 +46,8 @@ int main(int argc, char *argv[])
     {
         LogError("engine error %d %d ", g_pEngine, g_pCallBack);
     }
+
+    
     MainFrame w;
     w.show();
     return a.exec();
