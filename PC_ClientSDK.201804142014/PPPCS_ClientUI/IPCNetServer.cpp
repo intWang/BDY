@@ -253,14 +253,15 @@ namespace ls
     void IPCNetServer::OnDecodeStatuCallBack(const char* pUserCode, DecodeStatus emStatus, void* pParam)
     {
         std::string strHint = "";
+        std::string strDevUid = pUserCode;
         switch (emStatus)
         {
         case Start_Record:
-            fireNotification(std::bind(&IIPCNetServerCallBack::OnRecordStatuNotify, std::placeholders::_1, strUID, true));
+            fireNotification(std::bind(&IIPCNetServerCallBack::OnRecordStatuNotify, std::placeholders::_1, strDevUid, true));
             strHint = "录像开始！";
             break;
         case Stop_Record:
-            fireNotification(std::bind(&IIPCNetServerCallBack::OnRecordStatuNotify, std::placeholders::_1, strUID, false));
+            fireNotification(std::bind(&IIPCNetServerCallBack::OnRecordStatuNotify, std::placeholders::_1, strDevUid, false));
             strHint = "录像结束！";
             break;
         case Start_Transfer:
@@ -628,11 +629,11 @@ namespace ls
 
         if (bStart)
         {
-            pRecoder->StartRecord(ConfigCenter::GetInstance().GetRecordSaveFileName(strUiD).toStdString().c_str(), strName.c_str(), DecodeStatuCallBack);
+            pRecoder->StartRecord(ConfigCenter::GetInstance().GetRecordSaveFileName(strName).toStdString().c_str(), strName.c_str(), DecodeStatuCallBack);
         }
         else
         {
-            QString tmNow = QDateTime::currentDateTime().toString("-dd_hh_mm_ss");
+            QString tmNow = QDateTime::currentDateTime().toString("~hhmmss");
             pRecoder->StopRecord(tmNow.toStdString().c_str());
         }
     }

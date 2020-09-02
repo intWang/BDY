@@ -26,11 +26,11 @@ QString ConfigCenter::GetRecordSavepath()
     return m_strRecordSavePath;
 }
 
-QString ConfigCenter::GetRecordSaveFileName(std::string& strUID)
+QString ConfigCenter::GetRecordSaveFileName(std::string& _strName)
 {
     auto strPath = m_strRecordSavePath;
-    auto strName = QString::fromStdString(strUID);
+    auto strName = QString::fromStdString(_strName);
     utils::MakePathExist(strPath);
-    QString strFileName = strPath + strName + QDateTime::currentDateTime().toString("_yyMMdd_hh_mm_ss") + ".mp4";
+    QString strFileName = strPath + strName + QDateTime::currentDateTime().toString("-yyyyMMdd-hhmmss") + ".mp4";
     return strFileName;
 }

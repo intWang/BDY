@@ -9,7 +9,8 @@ PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
 
     SetArea(0, 30);
     SetAreaBk(s_qcl292C39, s_qcl292C39, s_qcl444858);
-
+    m_iconRecordOff = QIcon(":/Black/res/record-off.png");
+    m_iconRecordOn = QIcon(":/Black/res/recorder.png");
     auto pMainLayout = MQ(QVBoxLayout)(this);
     m_DrawWnd = new DrawWnd(nIndex, this);
     if (m_DrawWnd)
@@ -110,6 +111,11 @@ void PreviewRealWnd::StartPreview(DevNode::Ptr pChannel)
 
 void PreviewRealWnd::StopPreview()
 {
+    if (m_bRecord)
+    {
+        DoRecord();
+    }
+
     if (m_pChannel && (GetRuningStatu() == Status::InPreview || GetRuningStatu() == Status::StartingPreview))
     {
         auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
@@ -141,11 +147,11 @@ void PreviewRealWnd::UpdateRecordStatu(bool bStart)
     {
         if (bStart)
         {
-            m_pRecordBtn->setText("录像中");
+            m_pRecordBtn->setIcon(m_iconRecordOff);
         }
         else
         {
-            m_pRecordBtn->setText("");
+            m_pRecordBtn->setIcon(m_iconRecordOn);
         }
 
         m_bRecord = bStart;
@@ -357,6 +363,7 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
                     msg::showInformation(this, "信息", "设备正在重连，请稍后再试!");
                     return;
                 }
+ 
                 this->StopPreview();
             });
 

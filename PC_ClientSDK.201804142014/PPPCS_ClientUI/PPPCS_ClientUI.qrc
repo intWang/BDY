@@ -96,6 +96,8 @@
         <file>res/recorder.png</file>
         <file>res/last.png</file>
         <file>res/next.png</file>
+        <file>res/record-off.png</file>
+        <file>res/control_center.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>

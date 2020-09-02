@@ -5,6 +5,7 @@
 #include "DataStruct.h"
 #include "DrawWnd.h"
 #include "IServer.h"
+#include <QIcon>
 class PreviewRealWnd : public AreableWidget<QWidget>
 {
     Q_OBJECT
@@ -68,7 +69,8 @@ private:
     VideoParamData m_stVideParam = { 0 };
 
     QPushButtonPtr m_pRecordBtn = nullptr;
-
+    QIcon m_iconRecordOff;
+    QIcon m_iconRecordOn;
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual BarWidget::Ptr InitBottomBar() override;

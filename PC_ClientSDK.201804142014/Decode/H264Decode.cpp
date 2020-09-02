@@ -88,6 +88,7 @@ void SaveBuf(const unsigned char* pData, int len, FILE* pFile)
     if (pFile)
     {
         fwrite(pData, len, 1, pFile);
+        fflush(pFile);
     }
 }
 
@@ -200,7 +201,7 @@ bool H264Decode::Init(pfnDecodeCallBack pfnCallBack)
     m_pCodecContext->frame_number = 1; //每包一个视频帧  
     m_pCodecContext->codec_type = AVMEDIA_TYPE_VIDEO;
     m_pCodecContext->bit_rate = 0;
-    m_pCodecContext->time_base.den = 25;//帧率  
+    m_pCodecContext->time_base.den = 15;//帧率  
     m_pCodecContext->width = 0;//视频宽  
     m_pCodecContext->height = 0;//视频高 
     m_pCodecContext->pix_fmt = AV_PIX_FMT_YUVJ420P;
@@ -215,7 +216,7 @@ bool H264Decode::Init(pfnDecodeCallBack pfnCallBack)
     const int maxWidth = 1920;
     const int maxHeight = 1080;
     m_pFrameRGB = av_frame_alloc();
-    int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB32, maxWidth, maxHeight, 1);
+    int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB32, maxWidth, maxHeight, 32);
 
     m_pRGBBuffer = (uint8_t *)av_malloc(numBytes * sizeof(uint8_t));
     int yuvSize = maxWidth * maxHeight * 3 / 2;
@@ -329,10 +330,11 @@ void H264Decode::RunDecodeThread()
 
             int width = 0;
             int height = 0;
+            auto pFrameYUV = m_pFrameYUV;
             int ret = 0;
             {
                 std::lock_guard<std::mutex> guard(m_mxLockFrame);
-                ret = avcodec_receive_frame(m_pCodecContext, m_pFrameYUV);
+                ret = avcodec_receive_frame(m_pCodecContext, pFrameYUV);
             }
 
             if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF || ret < 0)
@@ -342,10 +344,10 @@ void H264Decode::RunDecodeThread()
             width = m_pCodecContext->width;
             height = m_pCodecContext->height;
             //crash 在 sws_scale的问题，改一下av_image_fill_arrays 最后一个参数，对齐顺序就可以解决了。
-            av_image_fill_arrays(m_pFrameRGB->data, m_pFrameRGB->linesize, m_pRGBBuffer, AV_PIX_FMT_RGB32, width, height, 4);
+            av_image_fill_arrays(m_pFrameRGB->data, m_pFrameRGB->linesize, m_pRGBBuffer, AV_PIX_FMT_RGB32, width, height, 32);
             sws_scale(m_pImgConvertCtx,
-                (uint8_t const * const *)m_pFrameYUV->data,
-                m_pFrameYUV->linesize, 0, height, m_pFrameRGB->data,
+                (uint8_t const * const *)pFrameYUV->data,
+                pFrameYUV->linesize, 0, height, m_pFrameRGB->data,
                 m_pFrameRGB->linesize);
 
             if (m_pRGBBuffer)
@@ -369,8 +371,7 @@ const char* H264Decode::GetUserCode()
 bool H264Decode::StartRecord(const char* pSavePath, const char* pUserName, pfnDecodeStatuCallBack pStatusCB)
 {
     m_strSavePath = pSavePath;
-    m_strTmpPath = m_strSavePath.substr(0, max(m_strSavePath.rfind('\\'), m_strSavePath.rfind('/')));
-    std::string strTmpFile = m_strTmpPath + m_strUserCode + generate() + ".h264";
+    std::string strTmpFile = m_strSavePath + ".h264";
     m_pDataStatuCallBack = pStatusCB;
     CreateRecordFile(strTmpFile);
     if (m_pDataStatuCallBack)

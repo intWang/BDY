@@ -35,7 +35,7 @@ private:
     QPushButtonPtr m_pSearchBtn = nullptr;
     QPushButtonPtr m_pNextBtn = nullptr;
     QPushButtonPtr m_pLastBtn = nullptr;
-
+    QStandardItemPtr m_pRootItem = nullptr;
     QList<QStandardItem*> m_FindResult;
     int m_nSearchIndex = 0;
 protected:

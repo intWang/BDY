@@ -48,6 +48,8 @@ private:
     Ui::PreviewPanel ui;
     PanelMode m_curPanelmode = PanelMode::PreviewMode;
     std::vector<PreviewRealWnd::Ptr> m_vcPreviewRealWnds;
+    std::vector<QWidgetPtr> m_vcWidget4PreviewMode;
+    std::vector<QWidgetPtr> m_vcWidget4SnapMode;
     PreviewRealWnd::Ptr m_pCurSelWnd = nullptr;
     DevideScreen m_curScreenMode = DevideScreen::Screen_1X1;
     QGridLayoutPtr m_pRealWnds = nullptr;

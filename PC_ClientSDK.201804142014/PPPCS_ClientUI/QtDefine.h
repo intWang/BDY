@@ -115,8 +115,8 @@ static QColor s_qclGroupBtnSel(COLOR_GROUP_BTN_SEL);
 static QColor s_qclBK283248(COLOR_BK);
 
 
-#define TREEROOTID 0
-#define BASEID 1
+#define TREEROOTID 1
+#define BASEID 2
 #define BASESPACE_DEVICE 1000
 #define MAKEDEVID(nGroupID, nDevIndex) (nGroupID*BASESPACE_DEVICE + nDevIndex)
 #define MAKECHANNELID(nDevID, nChannlIndex) (nDevID*100 + nChannlIndex)

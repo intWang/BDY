@@ -28,6 +28,7 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         {"pause_g", QIcon(QStringLiteral(":/Black/res/pause_g.png"))},
         {"connecting_b", QIcon(QStringLiteral(":/Black/res/connecting_b.png"))},
         {"connecting_g", QIcon(QStringLiteral(":/Black/res/connecting_g.png"))},
+        {"control_center", QIcon(QStringLiteral(":/Black/res/control_center.png"))},
     };
 
     auto pTopWnd = InitTopBar();
@@ -273,16 +274,16 @@ void DevTreeWnd::BuildTree(QStandardItemModelPtr pParent)
     if (pParent)
     {
         LoadTreeData();
-        auto vcChildren = GetTreeIteByGroup(TREEROOTID);
-        for (auto pSubData : vcChildren)
+        int nRootID = TREEROOTID;
+        QStandardItemPtr pRootItem = new QStandardItem(QString::fromStdString("控制中心"));
+        if (pRootItem)
         {
-            QStandardItemPtr pSubItem = new QStandardItem(QString::fromStdString(pSubData->GetName()));
-            pSubItem->setData(QVariant::fromValue(pSubData->GetNodeID()));
-            BuildSubTree(pSubItem);
-            pSubItem->setIcon(m_mapIcon["group_g"]);
-            pParent->appendRow(pSubItem);
+            pRootItem->setIcon(m_mapIcon["control_center"]);
+            pRootItem->setData(QVariant::fromValue(nRootID));
+            pParent->appendRow(pRootItem);
+            m_pRootItem = pRootItem;
+            BuildSubTree(pRootItem);
         }
-
     }
 }
 
@@ -866,7 +867,7 @@ void DevTreeWnd::OnDataConfiged(ConfigData::Ptr pData)
 {
     if (pData)
     {
-        auto pParentItem = GetTreeItem(m_pTree->currentIndex());
+        auto pParentItem = GetSelItem();
         if (pParentItem)
         {
             int nParentID = pParentItem->data().toInt();
@@ -874,6 +875,10 @@ void DevTreeWnd::OnDataConfiged(ConfigData::Ptr pData)
             {
                 pParentItem = pParentItem->parent();
             }
+        }
+        else
+        {
+            pParentItem = m_pRootItem;
         }
         switch (pData->emType)
         {
@@ -902,22 +907,7 @@ void DevTreeWnd::OnClicked()
 
     if (pButton == m_pAddDeviceBtn)
     {
-        auto pSelItem = GetSelItem();
-        if (!pSelItem)
-        {
-            if (g_pEngine)
-            {
-                auto pHintServer = g_pEngine->GetHintServer();
-                if (pHintServer)
-                {
-                    pHintServer->OnUserOperateHint("请选择一个分组再添加设备!", ls::HintLevel::Info);
-                }
-            }
-        }
-        else
-        {
-            this->CallConfigWnd(ConfigType::AddDevice);
-        }
+        this->CallConfigWnd(ConfigType::AddDevice);
     }
     else if (pButton == m_pAddGroupBtn)
     {
