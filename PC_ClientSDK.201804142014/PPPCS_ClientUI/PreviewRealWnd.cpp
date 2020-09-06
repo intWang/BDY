@@ -2,31 +2,58 @@
 #include "OpenGLDrawWnd.h"
 #include "ConfigDlg.h"
 #include "MessageBoxWnd.h"
+#include "ConfigCenter.h"
 PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
     : AreableWidget<QWidget>(parent)
 {
-    //ui.setupUi(this);
-
-    SetArea(0, 30);
+    HideBottom(true);
     SetAreaBk(s_qcl292C39, s_qcl292C39, s_qcl444858);
     m_iconRecordOff = QIcon(":/Black/res/record-off.png");
     m_iconRecordOn = QIcon(":/Black/res/recorder.png");
     auto pMainLayout = MQ(QVBoxLayout)(this);
+    m_pSliderPB = MQ(QSlider)(this);
     m_DrawWnd = new DrawWnd(nIndex, this);
+    m_pTimerAutoPlay = new QTimer(this);
+    m_pTimerHideBottom = new QTimer(this);
+    connect(m_pTimerAutoPlay, &QTimer::timeout, this, &PreviewRealWnd::OnTimeout);
+    connect(m_pTimerHideBottom, &QTimer::timeout, this, &PreviewRealWnd::OnTimeout);
     if (m_DrawWnd)
     {
         pMainLayout->addWidget(m_DrawWnd);
         m_DrawWnd->setAttribute(Qt::WA_TransparentForMouseEvents);
+        connect(m_DrawWnd, &DrawWnd::PBDataReady, this, &PreviewRealWnd::OnPBDataReady);
+        connect(m_DrawWnd, &DrawWnd::CustomedSnap, this, &PreviewRealWnd::OnCustomedSnap);
+
+        connect(this, &PreviewRealWnd::MouseMove, m_DrawWnd, &DrawWnd::OnMouseMove);
+        connect(this, &PreviewRealWnd::MouseLeave, m_DrawWnd, &DrawWnd::OnMouseLeave, Qt::QueuedConnection);
+        connect(this, &PreviewRealWnd::MouseClicked, m_DrawWnd, &DrawWnd::OnMouseClicked, Qt::QueuedConnection);
+        if (m_pSliderPB)
+        {
+
+            m_pSliderPB->setOrientation(Qt::Horizontal);
+            connect(m_pSliderPB, &QSlider::valueChanged, m_DrawWnd, &DrawWnd::OnPBCtrl);
+            connect(m_pSliderPB, &QSlider::sliderPressed, this, [this]() {
+                this->PauseResumePlayBack();
+            });
+            connect(m_pSliderPB, &QSlider::sliderReleased, this, [this]() {
+                this->PauseResumePlayBack(false);
+            });
+            m_pSliderPB->setFixedHeight(20);
+            pMainLayout->addWidget(m_pSliderPB);
+            m_pSliderPB->hide();
+        }
     }
 
     if (auto pBottomBar = InitBottomBar())
     {
+        //pBottomBar->hide();
         pMainLayout->addWidget(pBottomBar);
         //pBottomBar->setAttribute(Qt::WA_TransparentForMouseEvents);
+        //pBottomBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
-
     pMainLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(pMainLayout);
+    //setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
 
 
     m_CallBackFunc = std::make_shared<ls::IIPCNetServerCallBack::CallBackFunc>();
@@ -50,10 +77,27 @@ PreviewRealWnd::~PreviewRealWnd()
 
 void PreviewRealWnd::OnFrameData(const std::string& strUid, FrameData::Ptr pFrame)
 {
-    if (m_DrawWnd && m_pChannel &&( strUid == m_pChannel->strUID))
+    switch (m_nWndMode.load())
     {
-        SetRuningStatu(Status::InPreview);
-        m_DrawWnd->InputFrameData(pFrame);
+    case PanelMode::PreviewMode:
+    {
+        if (m_DrawWnd && m_pChannel && (strUid == m_pChannel->strUID))
+        {
+            SetRuningStatu(Status::InPreview);
+            m_DrawWnd->InputFrameData(pFrame);
+        }
+    }
+    break;
+    case PanelMode::SnapMode:
+    {
+        if (m_DrawWnd && m_pChannel && (strUid == m_pChannel->strUID))
+        {
+            SetRuningStatu(Status::InSync);
+            m_DrawWnd->InputFrameData(pFrame);
+        }
+    }
+    default:
+        break;
     }
 }
 
@@ -83,20 +127,7 @@ void PreviewRealWnd::StartPreview(DevNode::Ptr pChannel)
     {
         SetRuningStatu(Status::StartingPreview);
         LogInfo("start preview %s", pChannel->strUID.c_str());
-        m_pChannel = pChannel;
-        auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
-        if (pIPCServer)
-        {
-            auto pStreamInfo = m_pChannel->GetStreamData();
-            int nStreamData = pStreamInfo ? pStreamInfo->EncCh : 1;
-            pIPCServer->VideoControl(pChannel->strUID, true, nStreamData);
-        }
-
-        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
-        if (pIPCCallBack)
-        {
-            pIPCCallBack->Register(m_CallBackFunc);
-        }
+        StartStream(pChannel);
 
         if (m_DrawWnd)
         {
@@ -106,6 +137,8 @@ void PreviewRealWnd::StartPreview(DevNode::Ptr pChannel)
         }
 
         pChannel->StartPreview();
+        emit PreviewWndStartPreview(QString::fromStdString(m_pChannel->GetDevUid()), this);
+        StartHideBottomTimer();
     }
 }
 
@@ -118,18 +151,7 @@ void PreviewRealWnd::StopPreview()
 
     if (m_pChannel && (GetRuningStatu() == Status::InPreview || GetRuningStatu() == Status::StartingPreview))
     {
-        auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
-        if (pIPCCallBack)
-        {
-            pIPCCallBack->UnRegister(m_CallBackFunc);
-        }
-
-        auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
-        if (pIPCServer)
-        {
-            pIPCServer->VideoControl(m_pChannel->strUID, false);
-        }
-
+        StopStream();
         if (m_DrawWnd)
         {
             m_DrawWnd->SetPreviewStatu(false);
@@ -137,6 +159,94 @@ void PreviewRealWnd::StopPreview()
         m_pChannel->StopPreview();
         emit PreviewWndStopPreview(QString::fromStdString(m_pChannel->GetDevUid()), this);
         m_pChannel = nullptr;
+    }
+    StopHideBottomTimer();
+    SetRuningStatu(Status::Empty);
+}
+
+void PreviewRealWnd::StartStream(DevNode::Ptr pChannel)
+{
+    m_pChannel = pChannel;
+    auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pIPCServer)
+    {
+        auto pStreamInfo = m_pChannel->GetStreamData();
+        int nStreamData = pStreamInfo ? pStreamInfo->EncCh : 1;
+        pIPCServer->VideoControl(pChannel->strUID, true, nStreamData);
+    }
+
+    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+    if (pIPCCallBack)
+    {
+        pIPCCallBack->Register(m_CallBackFunc);
+    }
+}
+
+void PreviewRealWnd::StopStream()
+{
+    auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
+    if (pIPCCallBack)
+    {
+        pIPCCallBack->UnRegister(m_CallBackFunc);
+    }
+
+    auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
+    if (pIPCServer)
+    {
+        pIPCServer->VideoControl(m_pChannel->strUID, false);
+    }
+
+}
+
+void PreviewRealWnd::StartSync(DevNode::Ptr pChannel)
+{
+    StopPlayBack();
+    if (GetRuningStatu() == Status::InSync)
+    {
+        if (pChannel->GetDevUid() != m_pChannel->GetDevUid())
+        {
+            StopSync();
+        }
+        else
+        {
+            LogInfo("start sync %s duplicate", pChannel->strUID.c_str());
+            return;
+        }
+    }
+    if (pChannel)
+    {
+        LoadSnapModeParam();
+        SetWndMode(SnapMode);
+        SetRuningStatu(Status::InSync);
+        LogInfo("start sync %s", pChannel->strUID.c_str());
+        StartStream(pChannel);
+        if (m_DrawWnd)
+        {
+            QString strWndHint = "监控点 [" + QString::fromStdString(pChannel->GetName()) + "]  正在同步....";
+            m_DrawWnd->SetHintString(strWndHint);
+            m_DrawWnd->SetPreviewStatu(true);
+            m_DrawWnd->StartSync(m_pSnapModeParam);
+        }
+        pChannel->StartPreview();
+        emit PreviewWndStartPreview(QString::fromStdString(m_pChannel->GetDevUid()), this);
+    }
+}
+
+void PreviewRealWnd::StopSync()
+{
+    if (m_pChannel && (GetRuningStatu() == Status::InSync))
+    {
+        StopStream();
+        if (m_DrawWnd)
+        {
+            m_DrawWnd->SetPreviewStatu(false);
+            m_DrawWnd->StopSync();
+        }
+        m_pChannel->StopPreview();
+        emit PreviewWndStopPreview(QString::fromStdString(m_pChannel->GetDevUid()), this);
+
+        m_nCurDir = 0;
+        m_nCurIndex = 0;
     }
     SetRuningStatu(Status::Empty);
 }
@@ -156,6 +266,67 @@ void PreviewRealWnd::UpdateRecordStatu(bool bStart)
 
         m_bRecord = bStart;
     }
+}
+
+void PreviewRealWnd::StartPlayBack(bool bPre)
+{
+    SetWndMode(PanelMode::PictureMode);
+    if (m_pSliderPB && m_DrawWnd)
+    {
+        m_nTotalFrame = m_DrawWnd->GetPlayBackSize();
+        m_pSliderPB->setMinimum(0);
+        m_pSliderPB->setMaximum(m_nTotalFrame);
+        m_pSliderPB->setSingleStep(1);
+        m_pSliderPB->setPageStep(10);
+        m_pSliderPB->show();
+
+        if (m_nCurIndex == 0 && bPre)
+        {
+            m_nCurIndex = m_nTotalFrame;
+        }
+        else if(m_nCurIndex == m_nTotalFrame && !bPre)
+        {
+            m_nCurIndex = 0;
+        }
+       
+        m_nCurDir = bPre ? -1 : 1;
+        m_pSliderPB->setValue(m_nCurIndex);
+    }
+
+    StartPlayBackTimer();
+}
+
+void PreviewRealWnd::StopPlayBack()
+{
+    StopPlayBackTimer();
+    SetWndMode(PanelMode::SnapMode);
+    if (m_pSliderPB)
+    {
+        m_pSliderPB->hide();
+    }
+}
+
+void PreviewRealWnd::PauseResumePlayBack(bool bPause)
+{
+    if (bPause)
+    {
+        StopPlayBackTimer();
+    }
+    else
+    {
+        m_nCurIndex = m_pSliderPB->value();
+        StartPlayBackTimer();
+    }
+}
+
+void PreviewRealWnd::OnPBDataReady(int nDataSize)
+{
+    emit PBDataReady(nDataSize);
+}
+
+void PreviewRealWnd::OnCustomedSnap(SnapData::Ptr pSnap)
+{
+    emit CustomedSnap(pSnap);
 }
 
 void PreviewRealWnd::CallConfig()
@@ -200,6 +371,18 @@ void PreviewRealWnd::Clear()
     }
 }
 
+void PreviewRealWnd::ClearPicture()
+{
+    if (GetRuningStatu() == Status::InPicture)
+    {
+        if (m_DrawWnd)
+        {
+            m_DrawWnd->ClearPicture();
+        }
+        SetRuningStatu(Status::Empty);
+    }
+}
+
 void PreviewRealWnd::SetSelectStatu(bool bSelect)
 {
     m_bSelected = bSelect;
@@ -232,6 +415,9 @@ void PreviewRealWnd::SetRuningStatu(Status state)
     case PreviewRealWnd::Record:
         SetBottomEnable(true);
         break;
+    case PreviewRealWnd::InPicture:
+        m_tmBusy = time(0);
+        break;
     default:
         break;
     }
@@ -246,16 +432,6 @@ PreviewRealWnd::Status PreviewRealWnd::GetRuningStatu()
 time_t PreviewRealWnd::GetBusyTime()
 {
     return m_tmBusy;
-}
-
-bool PreviewRealWnd::IsFull()
-{
-    return m_bFull;
-}
-
-void PreviewRealWnd::SetFull(bool bValue)
-{
-    m_bFull = bValue;
 }
 
 int PreviewRealWnd::GetPtzSpeed()
@@ -287,6 +463,15 @@ DevNode::Ptr PreviewRealWnd::GetDevNode()
     return m_pChannel;
 }
 
+SnapData::Ptr  PreviewRealWnd::StreamSnapShot()
+{
+    if (m_DrawWnd && m_pChannel)
+    {
+        return m_DrawWnd->SnapShot();
+    }
+    return nullptr;
+}
+
 bool PreviewRealWnd::CheckDevLostConnect(const std::string& strLostDev)
 {
     if (m_pChannel && m_pChannel->GetDevUid() == strLostDev)
@@ -297,6 +482,109 @@ bool PreviewRealWnd::CheckDevLostConnect(const std::string& strLostDev)
         SetRuningStatu(Status::Reconnecting);
     }
     return false;
+}
+
+void PreviewRealWnd::SetWndMode(PanelMode emMode)
+{
+    m_nWndMode.store(emMode);
+    if (m_DrawWnd)
+    {
+        m_DrawWnd->SetWndMode(emMode);
+    }
+
+    switch (emMode)
+    {
+    case PreviewMode:
+        StartPreview(m_stageInfo.pChannel);
+        SetSelectStatu(m_stageInfo.bSelected);
+        m_stageInfo.Clear();
+        ShowFrame(nullptr);
+        break;
+    case PictureMode:
+        m_stageInfo.pChannel = m_pChannel;
+        m_stageInfo.bSelected = m_bSelected;
+        StopPreview();
+        break;
+    default:
+        break;
+    }
+}
+
+void PreviewRealWnd::StartPlayBackTimer()
+{
+    StopPlayBackTimer();
+    if (m_pTimerAutoPlay)
+    {
+        m_pTimerAutoPlay->start(300);
+    }
+}
+
+void PreviewRealWnd::StopPlayBackTimer()
+{
+    if (m_pTimerAutoPlay && m_pTimerAutoPlay->isActive())
+    {
+        m_pTimerAutoPlay->stop();
+    }
+}
+
+void PreviewRealWnd::StartHideBottomTimer()
+{
+    StopHideBottomTimer();
+    if (m_pTimerHideBottom)
+    {
+        m_pTimerHideBottom->start(1000);
+    }
+}
+
+void PreviewRealWnd::StopHideBottomTimer()
+{
+    if (m_pTimerHideBottom && m_pTimerHideBottom->isActive())
+    {
+        m_pTimerHideBottom->stop();
+    }
+}
+
+void PreviewRealWnd::OnTimeout()
+{
+    auto pTimer = qobject_cast<QTimer*>(sender());
+    if (pTimer == m_pTimerAutoPlay)
+    {
+        if (m_pSliderPB)
+        {
+            m_nCurIndex += m_nCurDir;
+            m_nCurIndex = max(m_nCurIndex, 0);
+            m_nCurIndex = min(m_nTotalFrame, m_nCurIndex);
+            m_pSliderPB->setValue(m_nCurIndex);
+        }
+    }
+    if (pTimer == m_pTimerHideBottom)
+    {
+        if (time(NULL) - m_tmLastMove > 7)
+        {
+            HideBottom(true);
+        }
+    }
+}
+
+void PreviewRealWnd::ShowFrame(SnapData::Ptr pFrame)
+{
+    if (m_DrawWnd)
+    {
+        if (pFrame)
+        {
+            SetRuningStatu(Status::InPicture);
+            m_DrawWnd->ShowFrame(pFrame);
+        }
+        else
+        {
+            ClearPicture();
+        }
+    }\
+}
+
+void PreviewRealWnd::ResetFullLevel(int nLevel)
+{
+    m_nfullLevel = nLevel;
 }
 
 void PreviewRealWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
@@ -314,6 +602,8 @@ void PreviewRealWnd::mousePressEvent(QMouseEvent *event)
     if (rcCenter.contains(mapFromGlobal(ptCurrent)))
     {
         emit PreviewWndUserClick();
+        emit MouseClicked();
+
         return;
     }
     AreableWidget<QWidget>::mousePressEvent(event);
@@ -353,6 +643,7 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
             pLayout->addWidget(pBtnSnap);
             pLayout->addWidget(pBtnClose);
             pLayout->addWidget(pBtnConfig);
+            pLayout->setContentsMargins(0,1,0,0);
 
             m_pRecordBtn = pBtnRecord;
             //pBtnRecord->setEnabled(false);
@@ -381,6 +672,82 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
 
 void PreviewRealWnd::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    emit PreviewWndUserDBClick(!m_bFull);
-    m_bFull = !m_bFull;
+    m_nfullLevel = (++m_nfullLevel) % 3;
+    emit PreviewWndUserDBClick(m_nfullLevel);
 }
+
+void PreviewRealWnd::enterEvent(QEvent *event)
+{
+    setMouseTracking(true);
+    if (m_nWndMode.load() == PanelMode::PreviewMode)
+    {
+        auto pBottomBar = GetBottomWnd();
+        if (pBottomBar )
+        {
+            HideBottom(false);
+        }
+    }
+    else
+    {
+        BaseClass::enterEvent(event);
+    }
+}
+
+void PreviewRealWnd::leaveEvent(QEvent *event)
+{
+    if (m_nWndMode.load() == PanelMode::PreviewMode)
+    {
+        auto pBottomBar = GetBottomWnd();
+        if (pBottomBar && !m_bHideBottom)
+        {
+            HideBottom(true);
+        }
+    }
+    else
+    {
+        emit MouseLeave();
+
+        BaseClass::leaveEvent(event);
+    }
+    setMouseTracking(false);
+}
+
+void PreviewRealWnd::mouseMoveEvent(QMouseEvent *event)
+{
+    switch (m_nWndMode.load())
+    {
+    case PanelMode::SnapMode:
+    case PanelMode::PictureMode:
+        if (m_DrawWnd)
+        {
+            emit MouseMove(event->pos());
+        }
+        break;
+    case PanelMode::PreviewMode:
+        HideBottom(false);
+        m_tmLastMove = time(NULL);
+        break;
+    default:
+        break;
+    }
+}
+
+void PreviewRealWnd::LoadSnapModeParam()
+{
+    m_pSnapModeParam = ConfigCenter::GetInstance().GetSnapModeParam();
+}
+
+void PreviewRealWnd::HideBottom(bool bHide)
+{
+    if (bHide && !m_bHideBottom)
+    {
+        SetArea(0, 1);
+        m_bHideBottom = bHide;
+    }
+    else if(!bHide && m_bHideBottom)
+    {
+        SetArea(0, 30);
+        m_bHideBottom = false;
+    }
+}
+

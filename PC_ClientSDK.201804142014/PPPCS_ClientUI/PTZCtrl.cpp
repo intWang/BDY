@@ -21,13 +21,20 @@ PTZCtrl::PTZCtrl(QWidget *parent)
 //     int base = 0;
 //     QMatrix matrix;
 //     m_pixDirMask.load(":/Black/res/dirb4_l.png");
-    utils::TravelVector(m_vcBtns, [/*&matrix, &base, */this](QPushButtonPtr pItem) {
+    utils::TravelVector(m_vcBtns, [this](QPushButtonPtr pItem) {
         if (pItem)
         {
 //             matrix.rotate(45);
 //             auto pixMap = m_pixDirMask.transformed(matrix, Qt::SmoothTransformation);
 //             pixMap.save(QVariant::fromValue(base++).toString() + ".png");
+            if (pItem != this->ui.btnRestore)
+            {
+                pItem->setAutoRepeat(true); //启用长按
+                pItem->setAutoRepeatDelay(400);//触发长按的时间
+                pItem->setAutoRepeatInterval(100);//长按时click信号间隔
+            }
             pItem->setText("");
+
             connect(pItem, &QPushButton::clicked, this, &PTZCtrl::OnBtnClick);
         }
         return false;

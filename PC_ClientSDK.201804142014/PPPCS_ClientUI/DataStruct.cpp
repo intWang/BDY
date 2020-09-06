@@ -51,10 +51,12 @@ std::string TreeNode::GetStatuProperty()
     return strRet;
 }
 
-DevNode::DevNode(const std::string& strUid, const std::string& strPwd, const std::string& strName, int nGroupID)
+DevNode::DevNode(const std::string& strUid, const std::string& strPwd
+    , const std::string& strName, const std::string& _strShortID, int nGroupID)
     : strUID(strUid)
     , strPwd(strPwd)
     , strCustomName(strName)
+    , strShortID(_strShortID)
 {
     emNodeType = DevTreeNodeType::Device;
     nParentId = nGroupID;
@@ -69,15 +71,13 @@ DevNode::~DevNode()
 
 std::string DevNode::GetName()
 {
-    if (strCustomName.size())
+    std::string labelName = strCustomName;
+    std::string labelID = strShortID.size() ? strShortID : strUID;
+    if (labelName != labelID)
     {
-        return strCustomName;
+        labelName = labelName + "(" + labelID + ")";
     }
-    if (stDevice.name.empty())
-    {
-        return strUID;
-    }
-    return stDevice.name;
+    return labelName;
 }
 
 QJsonObject DevNode::GenerateJsonObj()
@@ -89,6 +89,7 @@ QJsonObject DevNode::GenerateJsonObj()
     obj.insert("strCustomName", QString::fromStdString(strCustomName));
     obj.insert("strUID", QString::fromStdString(strUID));
     obj.insert("strPwd", QString::fromStdString(strPwd));
+    obj.insert("strShortID", QString::fromStdString(strShortID));
     //TODO
     return obj;
 }
@@ -101,6 +102,7 @@ void DevNode::ReadDataJsonObj(QJsonObject& obj)
     strCustomName = utils::GetValueFromJsonObj(obj, "strCustomName").toString().toStdString();
     strUID = utils::GetValueFromJsonObj(obj, "strUID").toString().toStdString();
     strPwd = utils::GetValueFromJsonObj(obj, "strPwd").toString().toStdString();
+    strShortID = utils::GetValueFromJsonObj(obj, "strShortID").toString().toStdString();
 
     s_nDevCount = max(GETDEVID(nNodeId), s_nDevCount);
 }
@@ -473,5 +475,48 @@ FrameData::~FrameData()
     {
         delete[] pBufData;
         pBufData = nullptr;
+    }
+}
+
+void SnapModeParam::SetSpeed(SyncSpeed emSpeed)
+{
+    nSyncSpped.store(emSpeed);
+}
+
+int SnapModeParam::GetSpeedCoe()
+{
+    int nCoe = 1;
+    switch (nSyncSpped.load())
+    {
+    case Sync_1:
+        nCoe = 1;
+        break;
+    case Sync_2:
+        nCoe = 2;
+        break;
+    case Sync_4:
+        nCoe = 4;
+        break;
+    case Sync_8:
+        nCoe = 8;
+        break;
+    case Sync_16:
+        nCoe = 16;
+        break;
+    default:
+        break;
+    }
+    return nCoe;
+}
+
+SnapData::SnapData(FrameData::Ptr _pFrame)
+{
+    pFrame = _pFrame;
+    if (_pFrame)
+    {
+        x = 0;
+        y = 0;
+        nWidth = _pFrame->nPicWidth;
+        nHeight = _pFrame->nPicHeight;
     }
 }

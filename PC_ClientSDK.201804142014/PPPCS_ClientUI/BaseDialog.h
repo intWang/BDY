@@ -14,6 +14,8 @@ public:
     QVBoxLayoutPtr GetLayout();
     HintBar::Ptr GetBottomBar();
     void SetNoBottomBar();
+    void SetBorder(int nBorderWidth);
+    void FullScreen();
 public slots:
     void OnCloseCmd();
 private:
@@ -24,6 +26,8 @@ protected:
     void setMinimizeVisible(bool bVisiable);
     void setMaximizeVisible(bool bVisiable);
     void setWidgetResizable(bool bVisiable);
-    void DeletBottomBar();
+
+    virtual void keyPressEvent(QKeyEvent *) override;
+
 };
 

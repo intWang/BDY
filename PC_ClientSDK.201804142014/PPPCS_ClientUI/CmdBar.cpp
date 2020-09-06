@@ -41,9 +41,9 @@ CmdBar::CmdBar(QWidget *parent)
     m_pMaximizeButton->setObjectName("maximizeButton");
     m_pCloseButton->setObjectName("closeButton");
 
-    m_pMinimizeButton->setToolTip("Minimize");
-    m_pMaximizeButton->setToolTip("Maximize");
-    m_pCloseButton->setToolTip("Close");
+    m_pMinimizeButton->setToolTip("最小化");
+    m_pMaximizeButton->setToolTip("最大化");
+    m_pCloseButton->setToolTip("关闭");
 
     pLayout->addWidget(m_pIconLabel);
     pLayout->addSpacing(5);
@@ -87,6 +87,15 @@ void CmdBar::setWidgetResizable(bool bVisiable)
     
 }
 
+void CmdBar::FullScreen()
+{
+    QWidget *pWindow = this->window();
+    if (pWindow && pWindow->isTopLevel() && !pWindow->isMaximized())
+    {
+        emit m_pMaximizeButton->clicked(0);
+    }
+}
+
 void CmdBar::onClicked()
 {
     QPushButton *pButton = qobject_cast<QPushButton *>(sender());
@@ -99,7 +108,16 @@ void CmdBar::onClicked()
         }
         else if (pButton == m_pMaximizeButton)
         {
-            pWindow->isMaximized() ? pWindow->showNormal() : pWindow->showMaximized();
+            if (pWindow->isMaximized())
+            {
+                pWindow->showNormal();
+                m_bMax = false;
+            }
+            else
+            {
+                pWindow->showMaximized();
+                m_bMax = true;
+            }
         }
         else if (pButton == m_pCloseButton)
         {
@@ -113,7 +131,7 @@ void CmdBar::updateMaximize()
     QWidget *pWindow = this->window();
     if (pWindow->isTopLevel())
     {
-        bool bMaximize = pWindow->isMaximized();
+        bool bMaximize = m_bMax;
         if (bMaximize)
         {
             m_pMaximizeButton->setToolTip(tr("Restore"));

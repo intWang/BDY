@@ -97,7 +97,8 @@ struct DevNode :public TreeNode
     IPCNetWiFiAPInfo_t::Ptr pHotSpot = nullptr;
     IPCNetStreamInfo::Ptr pStreamInfo = nullptr;
     DevNode() = default;
-    DevNode(const std::string& strUid, const std::string& strPwd, const std::string& strName, int nGroupID);
+    DevNode(const std::string& strUid, const std::string& strPwd
+        , const std::string& strName, const std::string& strShortID, int nGroupID);
         
     virtual ~DevNode();
     virtual std::string GetName() override;
@@ -197,4 +198,35 @@ struct FrameData :public StreamData
     int nBuffLen;
     int nPicWidth;
     int nPicHeight;
+};
+
+struct SnapData
+{
+    using Ptr = std::shared_ptr<SnapData>;
+    FrameData::Ptr pFrame = nullptr;
+    int x = 0;
+    int y = 0;
+    int nWidth = 0;
+    int nHeight = 0;
+
+    SnapData(FrameData::Ptr _pFrame);
+};
+
+
+struct SnapModeParam
+{
+    using Ptr = std::shared_ptr<SnapModeParam>;
+    std::atomic<int> nSelRectWidth = 200;
+    std::atomic<int> nSelRectHeight = 100;
+    std::atomic<SyncSpeed> nSyncSpped = SyncSpeed::Sync_1;
+    std::atomic<int> nWndRows = 2;
+    std::atomic<int> nWndColumns = 2;
+    std::atomic<int> nAutoStop = 120;
+    std::atomic<int> nMaxAutoStop = 120;
+    std::atomic<bool> bLockProp = false;
+    std::atomic<bool> bRowFirst = false;
+    std::atomic<bool> bPopFull = false;
+
+    void SetSpeed(SyncSpeed emSpeed);
+    int GetSpeedCoe();
 };

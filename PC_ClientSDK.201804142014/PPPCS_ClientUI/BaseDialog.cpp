@@ -25,6 +25,8 @@ BaseDialog::BaseDialog(QWidget *parent)
     pLayout->setStretch(1,10);
     pLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(pLayout);
+
+
 }
 
 
@@ -34,7 +36,7 @@ BaseDialog::~BaseDialog()
 
 QVBoxLayoutPtr BaseDialog::GetLayout()
 {
-    return dynamic_cast<QVBoxLayoutPtr>(m_pMainLayout);
+    return m_pMainLayout;
 }
 
 HintBar::Ptr BaseDialog::GetBottomBar()
@@ -48,6 +50,23 @@ void BaseDialog::SetNoBottomBar()
     {
         layout()->removeWidget(pBottomBar);
         pBottomBar->hide();
+    }
+}
+
+void BaseDialog::SetBorder(int nBorderWidth)
+{
+    if (m_pMainLayout)
+    {
+        m_pMainLayout->setContentsMargins(nBorderWidth, 0, nBorderWidth, nBorderWidth);
+    }
+    AreableWidget<QDialog>::SetBorder(nBorderWidth);
+}
+
+void BaseDialog::FullScreen()
+{
+    if (m_pTitleBar)
+    {
+        m_pTitleBar->FullScreen();
     }
 }
 
@@ -80,6 +99,13 @@ void BaseDialog::setWidgetResizable(bool bVisiable)
     }
 }
 
-void BaseDialog::DeletBottomBar()
+void BaseDialog::keyPressEvent(QKeyEvent * event)
 {
+    if (event->key() == Qt::Key_Escape)
+    {
+        return;
+    }
+    AreableWidget<QDialog>::keyPressEvent(event);
+
 }
+

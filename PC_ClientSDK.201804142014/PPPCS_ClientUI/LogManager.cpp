@@ -85,7 +85,7 @@ void LogManager::OnMessage(qint64 processID, QtMsgType type, const QMessageLogCo
     }
     QString context_info = QString("File:(%1) Line:(%2)").arg(QString(context.file)).arg(context.line);
     QString current_date = QDate::currentDate().toString("yyyy-MM-dd");
-    QString current_date_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss ddd");
+    QString current_date_time = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss.zzz");
 
     QString message = QString("%1 %2 %3 %4").arg(current_date_time).arg(text).arg(context_info).arg(msg);
     QString log_file_path = m_logFilePath;

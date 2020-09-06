@@ -53,7 +53,8 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         }
     }
 
-    connect(this, &DevTreeWnd::AddNewGroup, this, [this](const QString& strGroupName, QStandardItemPtr pParent) {
+    connect(this, &DevTreeWnd::AddNewGroup, this, [this](AddGroupData::Ptr pAddData, QStandardItemPtr pParent) {
+        QString strGroupName = QString::fromStdString(pAddData->strGroupName);
         int nParentID = TREEROOTID;
         if (pParent)
         {
@@ -66,8 +67,11 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         }
     });
 
-    connect(this, &DevTreeWnd::AddNewDevice, this, [this](const QString& strDeviceUid, const QString& strDevicePwd
-        , const QString& strDeviceName, QStandardItemPtr pParent) {
+    connect(this, &DevTreeWnd::AddNewDevice, this, [this](AddDeviceData::Ptr pAddData, QStandardItemPtr pParent) {
+        QString strDeviceUid = QString::fromStdString(pAddData->strUID);
+        QString strDevicePwd = QString::fromStdString(pAddData->strPwd);
+        QString strDeviceName = QString::fromStdString(pAddData->strDevName);
+
         int nParentID = TREEROOTID;
         if (pParent)
         {
@@ -82,8 +86,8 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
             msg::showInformation(this, QStringLiteral("警告"), strInfo);
             return;
         }
-        TreeNode::Ptr pData = std::make_shared<DevNode>(strDeviceUid.toStdString(), strDevicePwd.toStdString()
-            , strDeviceName.toStdString(), nParentID);
+        TreeNode::Ptr pData = std::make_shared<DevNode>(pAddData->strUID, pAddData->strPwd
+            , pAddData->strDevName, pAddData->strShortUID, nParentID);
         if (pData)
         {
             pData->SetStatu(DevTreeNodeStatu::Connecting);
@@ -198,28 +202,39 @@ BarWidget::Ptr  DevTreeWnd::InitBottomBar()
             auto pBtnAddDevice = MQ(QPushButton)(this);
             auto pBtnAddGroup = MQ(QPushButton)(this);
             auto pBtnDelete = MQ(QPushButton)(this);
+            auto pBtnModify = MQ(QPushButton)(this);
 
             pBtnAddDevice->setFixedSize({40,40});
             pBtnAddGroup->setFixedSize({ 40,40 });
             pBtnDelete->setFixedSize({ 40,40 });
+            pBtnModify->setFixedSize({ 40,40 });
 
             pBtnAddDevice->setObjectName("AddDevice");
             pBtnAddGroup->setObjectName("AddGroup");
             pBtnDelete->setObjectName("DeleteItem");
+            pBtnModify->setObjectName("Modify");
+
+            pBtnAddDevice->setToolTip("添加设备");
+            pBtnAddGroup->setToolTip("新建分组");
+            pBtnDelete->setToolTip("删除");
+            pBtnModify->setToolTip("修改");
 
             pLayout->addStretch();
             pLayout->addWidget(pBtnAddDevice);
             pLayout->addWidget(pBtnAddGroup);
+            pLayout->addWidget(pBtnModify);
             pLayout->addWidget(pBtnDelete);
             pLayout->setContentsMargins(0,0,20,5);
 
             connect(pBtnAddDevice, &QPushButton::clicked, this, &DevTreeWnd::OnClicked);
             connect(pBtnAddGroup, &QPushButton::clicked, this, &DevTreeWnd::OnClicked);
             connect(pBtnDelete, &QPushButton::clicked, this, &DevTreeWnd::OnClicked);
+            connect(pBtnModify, &QPushButton::clicked, this, &DevTreeWnd::OnClicked);
 
             m_pAddDeviceBtn = pBtnAddDevice;
             m_pAddGroupBtn = pBtnAddGroup;
             m_pDeleteBtn = pBtnDelete;
+            m_pModifyBtn = pBtnModify;
         }
     }
     return pBarWidget;
@@ -605,12 +620,12 @@ void DevTreeWnd::ClearTree()
     }
 }
 
-void DevTreeWnd::CallConfigWnd(ConfigType type)
+void DevTreeWnd::CallConfigWnd(ConfigType type, TreeNode::Ptr pNode)
 {
-    auto pConfigWnd = new ConfigWidget(type);
-    connect(pConfigWnd, &ConfigWidget::OnDataConfiged, this, &DevTreeWnd::OnDataConfiged);
-    pConfigWnd->setAttribute(Qt::WA_ShowModal);
-    pConfigWnd->show();
+    ConfigWidget configDlg(type, this, pNode);
+    connect(&configDlg, &ConfigWidget::OnDataConfiged, this, &DevTreeWnd::OnDataConfiged);
+    connect(&configDlg, &ConfigWidget::OnDataModified, this, &DevTreeWnd::OnDataModified);
+    configDlg.exec();
 }
 
 void DevTreeWnd::UpdateTreeItem(QString strName, TreeNode::Ptr pNewData)
@@ -885,18 +900,70 @@ void DevTreeWnd::OnDataConfiged(ConfigData::Ptr pData)
         case ConfigType::AddDevice:
         {
              auto pRealData = std::dynamic_pointer_cast<AddDeviceData>(pData);
-             emit AddNewDevice(QString::fromStdString(pRealData->strUID), QString::fromStdString(pRealData->strPwd)
-                 , QString::fromStdString(pRealData->strDevName), pParentItem);
+             emit AddNewDevice(pRealData, pParentItem);
         }
             break;
         case ConfigType::AddGroup:
         {
              auto pRealData = std::dynamic_pointer_cast<AddGroupData>(pData);
-             emit AddNewGroup(QString::fromStdString(pRealData->strGroupName), pParentItem);
+             emit AddNewGroup(pRealData, pParentItem);
         }
             break;
         default:
             break;
+        }
+    }
+}
+
+void DevTreeWnd::OnDataModified(ConfigData::Ptr pData)
+{
+    if (pData)
+    {
+        if (auto pSelItem = GetSelItem())
+        {
+            auto nID = pSelItem->data().toInt();
+            if (nID == TREEROOTID)
+            {
+                LogError("Can't update tree Root");
+                return;
+            }
+            if (auto pNode = GetTreeItemByNodeId(nID))
+            {
+                switch (pNode->GetDataType())
+                {
+                case DevTreeNodeType::Device:
+                {
+                    auto pModDate = std::dynamic_pointer_cast<ModDeviceData>(pData);
+                    auto pDevice = std::dynamic_pointer_cast<DevNode>(pNode);
+                    if (pModDate && pDevice)
+                    {
+                        pDevice->strCustomName = pModDate->strDevName;
+                        if (!pDevice->IsDevLoaded())
+                        {
+                            pDevice->strShortID = pModDate->strShortUID;
+                            pDevice->strUID = pModDate->strUID;
+                            pDevice->strPwd = pModDate->strPwd;
+                            ConectDevice(std::dynamic_pointer_cast<DevNode>(pData));
+                        }
+                        pSelItem->setText(QString::fromStdString(pDevice->GetName()));
+                    }
+                }
+                    break;
+                case DevTreeNodeType::Group:
+                {
+                    auto pModDate = std::dynamic_pointer_cast<ModGroupData>(pData);
+                    auto pGroup = std::dynamic_pointer_cast<GroupNode>(pNode);
+                    if (pModDate && pGroup)
+                    {
+                        pGroup->strGroupName = pModDate->strGroupName;
+                        pSelItem->setText(QString::fromStdString(pGroup->GetName()));
+                    }
+                }
+                    break;
+                default:
+                    break;
+                }
+            }
         }
     }
 }
@@ -916,6 +983,10 @@ void DevTreeWnd::OnClicked()
     else if(pButton == m_pDeleteBtn)
     {
         auto pSelItem = GetSelItem();
+        if (pSelItem->data().toInt() == TREEROOTID)
+        {
+            msg::showInformation(this, "提示", "不能删除控制中心。");
+        }
         if (!pSelItem)
         {
             msg::showInformation(this, QStringLiteral("信息"), QStringLiteral("请选择要删除的设备或分组！"));
@@ -924,6 +995,31 @@ void DevTreeWnd::OnClicked()
         if (msg::showQuestion(this, QStringLiteral("请确认"), QStringLiteral("确认删除吗?")) == QMessageBox::Ok)
         {
             DeleteTreeItem(pSelItem);
+        }
+    }
+    else if (m_pModifyBtn == pButton)
+    {
+        if (auto pSelItem = GetSelItem())
+        {
+            auto nID = pSelItem->data().toInt();
+            if (nID == TREEROOTID)
+            {
+                msg::showInformation(this, "提示", "不能修改控制中心。");
+            }
+            if (auto pNode = GetTreeItemByNodeId(nID))
+            {
+                switch (pNode->GetDataType())
+                {
+                case DevTreeNodeType::Device:
+                    this->CallConfigWnd(ConfigType::ModifyDevice, pNode);
+                    break;
+                case DevTreeNodeType::Group:
+                    this->CallConfigWnd(ConfigType::ModifyGroup, pNode);
+                    break;
+                default:
+                    break;
+                }
+            }
         }
     }
 }
@@ -941,9 +1037,17 @@ void DevTreeWnd::OnTreeDBClicked(const QModelIndex& index)
             case DevTreeNodeType::Device:
             {
                 auto pDevNode = std::dynamic_pointer_cast<DevNode>(pNode);
-                if (pDevNode && (pDevNode->GetStatu() != DevTreeNodeStatu::Default) && (pDevNode->GetStatu() != DevTreeNodeStatu::Connecting))
+                if (pDevNode && pDevNode->IsDevLoaded())
                 {
-                    emit ChannelNodeDBClick(pDevNode);
+                    if (pDevNode->GetStatu() == Pause)
+                    {
+                        emit ChannelNodeDBClick(pDevNode);
+                    }
+                    else if(pDevNode->GetStatu() == Play)
+                    {
+                        msg::showInformation(this, QStringLiteral("提示"), QStringLiteral("当前设备正在预览！"));
+                    }
+                    //(pDevNode->GetStatu() != DevTreeNodeStatu::Default) && (pDevNode->GetStatu() != DevTreeNodeStatu::Connecting)
                 }
                 else
                 {

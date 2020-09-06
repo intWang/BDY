@@ -17,6 +17,13 @@ PtzCtrlWnd::PtzCtrlWnd(QWidget *parent)
     connect(ui.btnZoomIn, &QPushButton::clicked, this, &PtzCtrlWnd::OnBtnClick);
     connect(ui.btnZoomout, &QPushButton::clicked, this, &PtzCtrlWnd::OnBtnClick);
     connect(ui.speedSlider, &QSlider::valueChanged, this, &PtzCtrlWnd::OnSlideChange);
+
+    ui.btnZoomIn->setAutoRepeat(true); //启用长按
+    ui.btnZoomIn->setAutoRepeatDelay(400);//触发长按的时间
+    ui.btnZoomIn->setAutoRepeatInterval(100);//长按时click信号间隔
+    ui.btnZoomout->setAutoRepeat(true); //启用长按
+    ui.btnZoomout->setAutoRepeatDelay(400);//触发长按的时间
+    ui.btnZoomout->setAutoRepeatInterval(100);//长按时click信号间隔
 }
 
 PtzCtrlWnd::~PtzCtrlWnd()

@@ -35,7 +35,6 @@ ConfigDlg::ConfigDlg(DevNode::Ptr pDevNode, QWidget *parent)
  
      pLayout->addWidget(pBtnWnd);
      pLayout->addWidget(m_pStackWidget);
-     pLayout->setContentsMargins(4, 0, 4, 4);
      pMainLayout->addLayout(pLayout);
 
 

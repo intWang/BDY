@@ -7,27 +7,40 @@
 #include <QTime>
 #include <QDesktopServices>
 #include <QProcess>
+#include "LogManager.h"
 DrawWnd::DrawWnd(int index, QWidget *parent)
     :QWidget(parent)
     , m_nIndex(index)
 {
     m_strHint = QStringLiteral("监控点正在预览....");
 
-    connect(this, &DrawWnd::FrameReady, this, [this]() {
-        repaint();
-    }, Qt::QueuedConnection);
+    m_pFrameRateTimer = new QTimer(this);
+    m_pFrameUpdateTimer = new QTimer(this);
+
+    connect(m_pFrameRateTimer, &QTimer::timeout, this, &DrawWnd::OnTimeOut);
+    connect(m_pFrameUpdateTimer, &QTimer::timeout, this, &DrawWnd::OnTimeOut);
+
 }
 
 
 DrawWnd::~DrawWnd()
 {
+    EndFrameRateCheck();
+    EndFrameUpdate();
 }
 
 void DrawWnd::SetPreviewStatu(bool bPreview /*= false*/)
 {
     m_bInPreview = bPreview;
-    if (!bPreview)
+    if (bPreview)
     {
+        StartFrameRateCheck();
+        StartFrameUpdate();
+    }
+    else 
+    {
+        EndFrameRateCheck();
+        EndFrameUpdate();
         m_queWaitRender.swap(std::queue<FrameData::Ptr>());
     }
     m_pLastFrame = nullptr;
@@ -44,16 +57,28 @@ void DrawWnd::InputFrameData(FrameData::Ptr pFrame)
 {
     if (isVisible())
     {
-        SetFrame(pFrame);
-        emit FrameReady();
+       // LogDebug("Frame come %d", pFrame);
+        AddFrame(pFrame);
     }
 }
 
-void DrawWnd::SetFrame(FrameData::Ptr pFrame)
+void DrawWnd::AddFrame(FrameData::Ptr pFrame)
 {
     {
         std::lock_guard<std::mutex> guard(m_mxLockData);
         m_queWaitRender.push(pFrame);
+        if (m_nWndMode.load() == PanelMode::SnapMode)
+        {
+            static DWORD tmLast = 0;
+            DWORD tmNow = GetTickCount();
+            //0.3s 取一帧
+            if (tmNow - tmLast > 300)
+            {
+                m_vcSyncRender.push_back(pFrame);
+                tmLast = tmNow;
+            }
+        }
+        m_nFrameCome++;
     }
 }
 
@@ -164,22 +189,174 @@ bool DrawWnd::SnapShot(const QString& strPicName)
     return false;
 }
 
-void DrawWnd::DrawDefault()
+SnapData::Ptr DrawWnd::SnapShot()
 {
-    QPainter painter(this);
+    switch (m_nWndMode.load())
+    {
+    case PanelMode::PreviewMode:
+    case PanelMode::SnapMode:
+    {
+        if (m_pLastFrame)
+        {
+            return std::make_shared<SnapData>(m_pLastFrame);
+        }
+    }
+        break;
+    case PanelMode::PictureMode:
+    {
+        std::lock_guard<mutex> guard(m_mxCurImageData);
+        if (m_pSnapFrame)
+        {
+            return m_pSnapFrame;
+        }
+    }
+        break;
+    default:
+        break;
+    }
+
+
+    
+    return nullptr;
+}
+
+void DrawWnd::SetWndMode(PanelMode emMode)
+{
+    m_nWndMode.store(emMode);
+    m_pLastFrame = nullptr;
+    m_pSnapFrame = nullptr;
+    update();
+}
+
+void DrawWnd::StartSync(SnapModeParam::Ptr pParam)
+{
+    m_vcSyncRender.clear();
+    m_pSnapModeParam = pParam;
+    SetWndMode(PanelMode::SnapMode);
+}
+
+void DrawWnd::StopSync()
+{
+    SetWndMode(PanelMode::PreviewMode);
+    //m_vcSyncRender.clear();
+    //m_pSnapModeParam = nullptr;
+    m_bInPB = false;
+    if (auto nFrameSize = m_vcSyncRender.size())
+    {
+        emit PBDataReady(nFrameSize);
+    }
+}
+
+int DrawWnd::GetPlayBackSize()
+{
+    return m_vcSyncRender.size();
+}
+
+
+void DrawWnd::ShowFrame(SnapData::Ptr pFrame)
+{
+    {
+        std::lock_guard<mutex> guard(m_mxCurImageData);
+        m_pSnapFrame = pFrame;
+    }
+    repaint();
+}
+
+void DrawWnd::ClearPicture()
+{
+    if (m_pSnapFrame)
+    {
+        m_pSnapFrame = nullptr;
+        update();
+    }
+}
+
+void DrawWnd::OnMouseMove(QPoint curPt)
+{
+    m_mousePos = curPt;
+    update();
+}
+
+void DrawWnd::OnMouseLeave()
+{
+    m_mousePos = { 0,0 };
+    update();
+}
+
+void DrawWnd::OnMouseClicked()
+{
+    FrameData::Ptr pFrame = nullptr;
+
+    if (m_nWndMode.load() == PanelMode::SnapMode)
+    {
+        if (m_pLastFrame)
+        {
+            pFrame = m_pLastFrame;
+        }
+    }
+    else if ((m_nWndMode.load() == PanelMode::PictureMode && m_bInPB))
+    {
+        if (m_pSnapFrame)
+        {
+            pFrame = m_pSnapFrame->pFrame;
+        }
+    }
+
+    if (pFrame && !m_mousePos.isNull() && m_pSnapModeParam)
+    {
+        if (auto pSnapData = std::make_shared<SnapData>(pFrame))
+        {
+            auto rcWnd = rect();
+            pSnapData->x = m_mousePos.x() - (m_pSnapModeParam->nSelRectWidth / 2);
+            pSnapData->y = m_mousePos.y() - (m_pSnapModeParam->nSelRectHeight / 2);
+            pSnapData->nWidth = m_pSnapModeParam->nSelRectWidth;
+            pSnapData->nHeight = m_pSnapModeParam->nSelRectHeight;
+            pSnapData->x = max(pSnapData->x, 0);
+            pSnapData->y = max(pSnapData->y, 0);
+            pSnapData->nWidth = min((pSnapData->x + m_pSnapModeParam->nSelRectWidth), rcWnd.right()) - pSnapData->x;
+            pSnapData->nHeight = min((pSnapData->y + m_pSnapModeParam->nSelRectHeight), rcWnd.bottom()) - pSnapData->y;
+
+            pSnapData->x = pSnapData->x*1.0 / rcWnd.width() * pSnapData->pFrame->nPicWidth;
+            pSnapData->y = pSnapData->y*1.0 / rcWnd.height() * pSnapData->pFrame->nPicHeight;
+            pSnapData->nWidth = (pSnapData->nWidth *1.0) / rcWnd.width() * pSnapData->pFrame->nPicWidth;
+            pSnapData->nHeight = (pSnapData->nHeight *1.0) / rcWnd.height() * pSnapData->pFrame->nPicHeight;
+
+            emit CustomedSnap(pSnapData);
+        }
+    }
+  
+    
+}
+
+void DrawWnd::OnPBCtrl(int nFramIndex)
+{
+    SetWndMode(PictureMode);
+    m_bInPB = true;
+    if (nFramIndex< m_vcSyncRender.size())
+    {
+        SnapData::Ptr pSnapData = std::make_shared<SnapData>(m_vcSyncRender[nFramIndex]);
+        ShowFrame(pSnapData);
+    }
+}
+
+void DrawWnd::DrawDefault(QPainter& painter)
+{
     painter.setRenderHint(QPainter::Antialiasing, true);
 
     QRect rcWnd(rect());
     painter.fillRect(rcWnd, s_qcl292C39);
 
-    DrawText(painter, QVariant::fromValue(m_nIndex).toString());
+    if (m_nIndex>=0)
+    {
+        DrawText(painter, QVariant::fromValue(m_nIndex).toString());
+    }
     Drawborder(painter, rcWnd);
 }
 
 void DrawWnd::DrawText(QPainter& painter, QString& strText)
 {
     QRect rcWnd = rect();
-    QFont font("Arial Unicode MS", 30, 150);
+    QFont font("Arial Unicode MS", 20, 50);
     painter.setFont(font);
     int widthOfText = painter.fontMetrics().width(strText);
     int heightOfText = painter.fontMetrics().height();
@@ -207,104 +384,187 @@ FrameData::Ptr DrawWnd::GetFrame()
             std::lock_guard<std::mutex> guard(m_mxLockData);
             m_queWaitRender.pop();
         }
-        if (m_queWaitRender.size() > 3)
-        {
-            update();
-        }
+
+//         if ((m_nWndMode.load() == PanelMode::PreviewMode)
+//             || ((m_nWndMode.load() == PanelMode::SnapMode) && m_pSnapModeParam && (m_pSnapModeParam->nSyncSpped == SyncSpeed::Sync_1)))
+//         {
+//             if (m_queWaitRender.size() > 1)
+//             {
+//                 update();
+//             }
+//         }
     }
     return pRet;
 }
-// 
-// void DrawWnd::initializeGL()
-// {
-//     m_pReander = std::make_shared<YUV420P_Render>(this);
-//     if (m_pReander)
-//     {
-//         m_pReander->initialize();
-//     }
-// //     auto ret = connect(this, &DrawWnd::FrameReady, this, [this](FrameData::Ptr pFrame) {
-// //         makeCurrent();
-// //         this->SetFrame(pFrame);
-// //         this->paintGL();
-// //         this->update();
-// //         doneCurrent();
-// //     });
-// }
 
-// #include <QFile>
-// void DrawWnd::paintGL()
-// {
-//     if (auto pFrameCurrent = GetFrame())
-//     {
-//         std::string fileName = utils::GetTmpPath() + utils::GetUUID() + ".bmp";
-//         QFile file(QString::fromStdString(fileName));
-//         if (file.open(QFile::WriteOnly | QFile::Truncate))
-//         {
-//             file.write((const char*)pFrameCurrent->pBufData, pFrameCurrent->nBuffLen);
-//             file.close();
-//         }
-// //         QImage tmpImg((uchar *)pFrameCurrent->pBufData, pFrameCurrent->nPicWidth, pFrameCurrent->nPicHeight, QImage::Format_RGB32);
-// //         QPainter paint;
-// //         paint.drawImage(0,0,tmpImg);
-//     }
-// 
-// // 
-// //     if (!m_pReander)
-// //     {
-// //         return;
-// //     }
-// //     if (m_bInPreview)
-// //     {
-// //         auto pFrameCurrent = GetFrame();
-// //         if (pFrameCurrent)
-// //         {
-// //             int yLen = pFrameCurrent->nPicWidth * pFrameCurrent->nPicHeight;
-// //             int uLen = yLen / 4;
-// //             m_pReander->render(pFrameCurrent->pBufData, pFrameCurrent->pBufData + yLen, pFrameCurrent->pBufData + yLen + uLen, pFrameCurrent->nPicWidth, pFrameCurrent->nPicHeight, 0);
-// //             //m_pReander->render(pFrameCurrent->pBufData, pFrameCurrent->nPicWidth, pFrameCurrent->nPicHeight,0);
-// //         }
-// //     }
-// //     else
-// //     {
-// //         m_pReander->renderBK();
-// //     }
-//     
-// }
+void DrawWnd::DrawImage(QPainter& painter, QImage& img)
+{
+    QRect rcDst(0, 0, size().width(), size().height());
+    int nShowPicWidth = img.width()* m_dbCoef;
+    int nShowPicHeight = img.height() * m_dbCoef;
+    int nShowPosX = max(0, m_viewPos.x());
+    int nShowPosY = max(0, m_viewPos.y());
+    nShowPosX = min(img.width() - nShowPicWidth, nShowPosX);
+    nShowPosY = min(img.height() - nShowPicHeight, nShowPosY);
+
+    m_viewPos.setX(nShowPosX);
+    m_viewPos.setY(nShowPosY);
+    QRect rcPic(nShowPosX, nShowPosY, nShowPicWidth, nShowPicHeight);
+    painter.drawImage(rcDst, img, rcPic);
+}
+
+void DrawWnd::DrawSnapRect(QPainter& painter)
+{
+    if (!m_mousePos.isNull() && m_pSnapModeParam)
+    {
+        int x = m_mousePos.x();
+        int y = m_mousePos.y();
+        int nRectWidth = m_pSnapModeParam->nSelRectWidth;
+        int nRectHeight = m_pSnapModeParam->nSelRectHeight;
+        QRect rcArea;
+        rcArea.setLeft(x - nRectWidth / 2);
+        rcArea.setTop(y - nRectHeight / 2);
+        rcArea.setWidth(nRectWidth);
+        rcArea.setHeight(nRectHeight);
+        painter.setPen(QPen(s_qclBorder3, 3));
+        painter.drawRect(rcArea);
+    }
+}
 
 void DrawWnd::paintEvent(QPaintEvent *event)
 {
+    QPainter painter(this);
+
+    switch (m_nWndMode.load())
+    {
+    case PanelMode::PreviewMode:
+        DrawIntimeStream(painter);
+        break;
+    case  PanelMode::PictureMode:
+        Draw4PictureMode(painter);
+        break;
+    case  PanelMode::SnapMode:
+        DrawIntimeStream(painter);
+        //Draw4SnapMode(painter);
+        break;
+    default:
+        break;
+    }
+}
+
+void DrawWnd::DrawIntimeStream(QPainter& painter)
+{
     if (m_bInPreview)
     {
-        QPainter painter(this);
         QRect rcDst(0, 0, size().width(), size().height());
-        if (auto pFrame = GetFrame())
+        if (auto pFrame = m_pCurFrame)
         {
             m_pLastFrame = pFrame;
         }
 
         if (m_pLastFrame)
         {
-            int nShowPicWidth = m_pLastFrame->nPicWidth * m_dbCoef;
-            int nShowPicHeight = m_pLastFrame->nPicHeight * m_dbCoef;
-            int nShowPosX = max(0,m_viewPos.x());
-            int nShowPosY = max(0,m_viewPos.y());
-            nShowPosX = min(m_pLastFrame->nPicWidth - nShowPicWidth, nShowPosX);
-            nShowPosY = min(m_pLastFrame->nPicHeight - nShowPicHeight, nShowPosY);
-
-            m_viewPos.setX(nShowPosX);
-            m_viewPos.setY(nShowPosY);
-            QRect rcPic(nShowPosX, nShowPosY, nShowPicWidth, nShowPicHeight);
             QImage tmpImg((uchar *)m_pLastFrame->pBufData, m_pLastFrame->nPicWidth, m_pLastFrame->nPicHeight, QImage::Format_RGB32);
-            painter.drawImage(rcDst, tmpImg, rcPic);
+            DrawImage(painter, tmpImg);
         }
         else
         {
             DrawText(painter, m_strHint);
         }
         Drawborder(painter, rcDst);
+        DrawSnapRect(painter);
     }
     else
     {
-        DrawDefault();
+        DrawDefault(painter);
+    }
+}
+
+void DrawWnd::Draw4PictureMode(QPainter& painter)
+{
+    std::lock_guard<mutex> guard(m_mxCurImageData);
+    if (m_pSnapFrame)
+    {
+        auto pFrame = m_pSnapFrame->pFrame;
+        QImage Image = QImage((uchar *)pFrame->pBufData, pFrame->nPicWidth, pFrame->nPicHeight, QImage::Format_RGB32);
+        QImage showImg = Image.copy(m_pSnapFrame->x, m_pSnapFrame->y, m_pSnapFrame->nWidth, m_pSnapFrame->nHeight);
+        QRect rcWnd(0,0,size().width(), size().height());
+        DrawImage(painter, showImg);
+        Drawborder(painter, rcWnd);
+        if (m_bInPB)
+        {
+            DrawSnapRect(painter);
+        }
+    }
+    else
+    {
+        DrawDefault(painter);
+    }
+}
+
+void DrawWnd::StartFrameRateCheck()
+{
+    EndFrameRateCheck();
+    if (m_pFrameRateTimer)
+    {
+        m_pFrameRateTimer->start(TIMER_CHECK_FRAME_RATE_INTERVAL);
+    }
+}
+
+void DrawWnd::StartFrameUpdate(int nFrameRate)
+{
+    static int lastSpeed = 1;
+    if (lastSpeed != nFrameRate)
+    {
+        EndFrameUpdate();
+        if (m_pFrameUpdateTimer)
+        {
+            m_pFrameUpdateTimer->start(max(((1000 / nFrameRate) - 25), 1));
+        }
+        lastSpeed = nFrameRate;
+    }
+}
+
+void DrawWnd::EndFrameRateCheck()
+{
+    if (m_pFrameRateTimer && m_pFrameRateTimer->isActive())
+    {
+        m_pFrameRateTimer->stop();
+    }
+}
+
+void DrawWnd::EndFrameUpdate()
+{
+    if (m_pFrameUpdateTimer && m_pFrameUpdateTimer->isActive())
+    {
+        m_pFrameUpdateTimer->stop();
+    }
+}
+
+void DrawWnd::OnTimeOut()
+{
+    auto pTimer = qobject_cast<QTimer*>(sender());
+    if (pTimer == m_pFrameUpdateTimer)
+    {
+        m_pCurFrame = GetFrame();
+        //LogDebug("Frame out %d", m_pCurFrame);
+        repaint();
+    }
+    else if (pTimer == m_pFrameRateTimer)
+    {
+        m_nFrameRate = m_nFrameCome;
+        m_nFrameCome = 0;
+        int nShowFrameRate = m_nFrameRate;
+        if (m_nWndMode == PanelMode::SnapMode && m_pSnapModeParam)
+        {
+            nShowFrameRate = 0.5 + (m_nFrameRate / m_pSnapModeParam->GetSpeedCoe());
+        }
+        
+        nShowFrameRate = max(nShowFrameRate, 1) + 1;
+        if (m_nFrameRate)
+        {
+            LogInfo("Current Frame Rate %d real speed %d ", m_nFrameRate, nShowFrameRate + 1);
+        }
+        StartFrameUpdate(nShowFrameRate);
     }
 }

@@ -14,6 +14,7 @@
 #include <QFormLayout>
 #include <QCheckBox>
 #include <QComboBox>
+#include <QImage>
 #include <string>
 #include <vector>
 using QLabelPtr = QLabel*;
@@ -33,7 +34,7 @@ using QFormLayoutPtr = QFormLayout * ;
 using QCheckBoxPtr = QCheckBox * ;
 using QComboBoxPtr = QComboBox * ;
 
-
+using SPImage = std::shared_ptr<QImage>;
 class PreviewWnd;
 using PreviewWndPtr = PreviewWnd * ;
 using SPreviewWndPtr = std::shared_ptr<PreviewWnd>;
@@ -49,6 +50,7 @@ enum DevideScreen
     Screen_2X2,
     Screen_3X3,
     Screen_3X4,
+    Screen_CUSTOM,
 };
 
 enum DevTreeNodeType
@@ -64,6 +66,22 @@ enum DevTreeNodeStatu
     Connecting,
     Pause,
     Play,
+};
+
+enum PanelMode
+{
+    PreviewMode,
+    PictureMode,
+    SnapMode,
+};
+
+enum SyncSpeed
+{
+    Sync_1 = 0,
+    Sync_2,
+    Sync_4,
+    Sync_8,
+    Sync_16,
 };
 
 enum class PtzCommand
@@ -101,6 +119,7 @@ auto makeQTObject(QObjectPtr pParent = nullptr) -> T*
 #define COLOR_MID_1E2233 30,34,51
 #define COLOR_BORDER 66,172,230
 #define COLOR_BORDER2 0,0,0
+#define COLOR_BORDER3 255,40,40
 #define COLOR_BK 28,32,48
 #define COLOR_TEXT_1 199,202,217 
 #define COLOR_GROUP_BTN_SEL 61,79,114
@@ -110,6 +129,7 @@ static QColor s_qcl292C39(COLOR_TOP_292C39);
 static QColor s_qcl1E2233(COLOR_MID_1E2233);
 static QColor s_qclBorder1(COLOR_BORDER);
 static QColor s_qclBorder2(COLOR_BORDER2);
+static QColor s_qclBorder3(COLOR_BORDER3);
 static QColor s_qclTEXT1(COLOR_TEXT_1);
 static QColor s_qclGroupBtnSel(COLOR_GROUP_BTN_SEL);
 static QColor s_qclBK283248(COLOR_BK);
@@ -127,8 +147,8 @@ static QColor s_qclBK283248(COLOR_BK);
 ///DevID 1001~ 99999
 ///channelID 100101~9999999
 
-#define max(a, b) a>b?a:b
-#define min(a, b) a>b?b:a
+#define max(a, b) ((a)>(b)?(a):(b))
+#define min(a, b) ((a)>(b)?(b):(a))
 
 #define CUSTOMIZED_STATU_BASE 100
 #define CSTATU_RECONNECTED (CUSTOMIZED_STATU_BASE + 1)

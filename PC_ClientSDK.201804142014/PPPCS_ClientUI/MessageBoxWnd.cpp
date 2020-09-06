@@ -11,7 +11,6 @@ MessageBox::MessageBox(QWidget *parent, const QString &title, const QString &tex
     QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton)
     : BaseDialog(parent)
 {
-    setWindowIcon(QIcon(":/Images/logo"));
     setWindowTitle(title);
     setMinimumSize(300, 130);
     setMinimizeVisible(false);
@@ -19,6 +18,7 @@ MessageBox::MessageBox(QWidget *parent, const QString &title, const QString &tex
     setWidgetResizable(false);
     SetAreaBk(s_qcl444858, s_qcl1E2233, s_qcl444858);
     SetArea(30, 0);
+    SetBorder(4);
     SetNoBottomBar();
     m_pButtonBox = new QDialogButtonBox(this);
     m_pButtonBox->setStandardButtons(QDialogButtonBox::StandardButtons(int(buttons)));
@@ -34,7 +34,7 @@ MessageBox::MessageBox(QWidget *parent, const QString &title, const QString &tex
     m_pIconLabel = new QLabel(this);
     m_pLabel = new QLabel(this);
 
-    QPixmap pixmap(":/Images/information");
+    QPixmap pixmap(":/Black/res/info");
     m_pIconLabel->setPixmap(pixmap);
     m_pIconLabel->setFixedSize(35, 35);
     m_pIconLabel->setScaledContents(true);
@@ -80,19 +80,23 @@ void MessageBox::translateUI()
 {
     QPushButton *pYesButton = m_pButtonBox->button(QDialogButtonBox::Yes);
     if (pYesButton != NULL)
-        pYesButton->setText(tr("Yes"));
+        pYesButton->setText(tr("是"));
 
     QPushButton *pNoButton = m_pButtonBox->button(QDialogButtonBox::No);
     if (pNoButton != NULL)
-        pNoButton->setText(tr("No"));
+        pNoButton->setText(tr("否"));
 
     QPushButton *pOkButton = m_pButtonBox->button(QDialogButtonBox::Ok);
     if (pOkButton != NULL)
-        pOkButton->setText(tr("Ok"));
+        pOkButton->setText(tr("确定"));
 
     QPushButton *pCancelButton = m_pButtonBox->button(QDialogButtonBox::Cancel);
     if (pCancelButton != NULL)
-        pCancelButton->setText(tr("Cancel"));
+        pCancelButton->setText(tr("取消"));
+
+    QPushButton *pOpenButton = m_pButtonBox->button(QDialogButtonBox::Open);
+    if (pOpenButton != NULL)
+        pOpenButton->setText(tr("打开"));
 }
 
 QMessageBox::StandardButton MessageBox::standardButton(QAbstractButton *button) const
@@ -159,7 +163,7 @@ namespace msg
         QMessageBox::StandardButton defaultButton)
     {
         MessageBox msgBox(parent, title, text, buttons, defaultButton);
-        msgBox.setIcon(":/Images/information");
+        msgBox.setIcon(":/Black/res/info");
         if (msgBox.exec() == -1)
             return QMessageBox::Cancel;
         return msgBox.standardButton(msgBox.clickedButton());
@@ -170,7 +174,7 @@ namespace msg
         QMessageBox::StandardButton defaultButton)
     {
         MessageBox msgBox(parent, title, text, buttons, defaultButton);
-        msgBox.setIcon(":/Images/error");
+        msgBox.setIcon(":/Black/res/error");
         if (msgBox.exec() == -1)
             return QMessageBox::Cancel;
         return msgBox.standardButton(msgBox.clickedButton());
@@ -181,7 +185,7 @@ namespace msg
         QMessageBox::StandardButton defaultButton)
     {
         MessageBox msgBox(parent, title, text, buttons, defaultButton);
-        msgBox.setIcon(":/Images/success");
+        msgBox.setIcon(":/Black/res/success");
         if (msgBox.exec() == -1)
             return QMessageBox::Cancel;
         return msgBox.standardButton(msgBox.clickedButton());
@@ -192,7 +196,7 @@ namespace msg
         QMessageBox::StandardButton defaultButton)
     {
         MessageBox msgBox(parent, title, text, buttons, defaultButton);
-        msgBox.setIcon(":/Images/question");
+        msgBox.setIcon(":/Black/res/question");
         if (msgBox.exec() == -1)
             return QMessageBox::Cancel;
         return msgBox.standardButton(msgBox.clickedButton());
@@ -203,7 +207,7 @@ namespace msg
         QMessageBox::StandardButton defaultButton)
     {
         MessageBox msgBox(parent, title, text, buttons, defaultButton);
-        msgBox.setIcon(":/images/warning");
+        msgBox.setIcon(":/Black/res/warn");
         if (msgBox.exec() == -1)
             return QMessageBox::Cancel;
         return msgBox.standardButton(msgBox.clickedButton());
@@ -214,7 +218,7 @@ namespace msg
         QMessageBox::StandardButton defaultButton)
     {
         MessageBox msgBox(parent, title, text, buttons, defaultButton);
-        msgBox.setIcon(":/Images/warning");
+        msgBox.setIcon(":/Black/res/warn");
         if (msgBox.exec() == -1)
             return QMessageBox::Cancel;
         return msgBox.standardButton(msgBox.clickedButton());
@@ -225,7 +229,7 @@ namespace msg
         QMessageBox::StandardButton defaultButton)
     {
         MessageBox msgBox(parent, title, text, buttons, defaultButton);
-        msgBox.setIcon(":/Images/question");
+        msgBox.setIcon(":/Black/res/question");
 
         QCheckBox *pCheckBox = new QCheckBox(&msgBox);
         pCheckBox->setText(text);

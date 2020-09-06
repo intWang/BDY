@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>HelpWindow</class>
+ <widget class="QWidget" name="HelpWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>400</width>
+    <height>300</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>HelpWindow</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout_2">
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>抓拍插件使用步骤： 
+1、选择抓拍设备，点击通道，等待打开通道。打开通道后，关闭设备列表。 
+2、设置好显示行列，以及排序方式。 
+3、如果需要抓拍完以后弹窗全屏显示请勾选弹出抓拍预览。 
+4、点击开始同步，同步窗口出现画面后，可以点击抓拍按钮进行抓拍。  
+5、同步时可以设置同步慢放倍速，可以减缓手速过快无法抓拍的问题。 
+6、抓拍可以设置区域截图，区域截图时需要用鼠标截图，可以仅抓拍有效区域。 
+7、停止同步以后，可以对缓存下来的视频进行前播、后播、拖动进度条等操作，可以手工定位进行抓拍。 </string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

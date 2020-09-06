@@ -4,6 +4,7 @@
 #include "MessageBoxWnd.h"
 #include "JSONStructProtocal.h"
 #include "JSONObject.hpp"
+#include "ConfigCenter.h"
 
 #include <QtNetwork/QNetworkRequest>
 #include <QtNetwork/QNetworkReply>
@@ -13,16 +14,21 @@
 #include <QtNetwork/QSslConfiguration>
 #include <QtNetwork/QSslSocket>
 
-static std::map<std::string /*shortCode*/, std::string /*longCode*/> g_transferCode;
-ConfigWidget::ConfigWidget(ConfigType type, QWidget* parent)
-    :MovelabelWidget<AreableWidget<QWidget>>(parent)
+#include <QFileDialog>
+ConfigWidget::ConfigWidget(ConfigType type, QWidget* parent, TreeNode::Ptr pNode)
+    :BaseDialog(parent)
 {
     QVBoxLayoutPtr pLayout = MQ(QVBoxLayout)(this);
     QFormLayoutPtr pCenterLayout = MQ(QFormLayout)(this);
     QHBoxLayoutPtr pReturnLayout = MQ(QHBoxLayout)(this);
-    SetArea(50, 0);
-    SetBorder(4);
+    setMinimizeVisible(false);
+    setMaximizeVisible(false);
+    setWidgetResizable(false);
     SetAreaBk(s_qcl444858, s_qcl1E2233, s_qcl444858);
+    SetArea(30, 0);
+    SetBorder(4);
+    SetNoBottomBar();
+
     auto pTopBar = InitTopBar();
     if (pTopBar)
     {
@@ -34,22 +40,44 @@ ConfigWidget::ConfigWidget(ConfigType type, QWidget* parent)
     case AddDevice:
         m_pCurData = std::make_shared<AddDeviceData>();
         CreateWidget4Device(pCenterLayout);
-        resize(600, 400);
+        setWindowTitle("添加设备");
+        resize(400, 300);
         break;
     case AddGroup:
         m_pCurData = std::make_shared<AddGroupData>();
         CreateWidget4Group(pCenterLayout);
+        setWindowTitle("添加分组");
+        resize(400, 300);
+        break;
+    case StorageConfig:
+        m_pCurData = std::make_shared<StorageData>();
+        CreateWidget4Storage(pCenterLayout);
+        setWindowTitle("存储设置");
         resize(600, 300);
+        break;
+    case ModifyDevice:
+        m_pCurData = std::make_shared<ModDeviceData>(std::dynamic_pointer_cast<DevNode>(pNode));
+        CreateWidget4Device(pCenterLayout, true);
+        setWindowTitle("修改设备");
+        resize(400, 300);
+        break;
+    case ModifyGroup:
+        m_pCurData = std::make_shared<ModGroupData>(std::dynamic_pointer_cast<GroupNode>(pNode));
+        CreateWidget4Group(pCenterLayout, true);
+        setWindowTitle("修改分组");
+        resize(400, 300);
         break;
         default:
         break;
     }
 
+    pCenterLayout->setSpacing(10);
     pLayout->addLayout(pCenterLayout);
     CreateReturnBtn(pReturnLayout);
     pLayout->addLayout(pReturnLayout);
+    pLayout->setContentsMargins(20, 30, 20, 30);
 
-    setLayout(pLayout);
+    GetLayout()->addLayout(pLayout);
 }
 
 
@@ -57,30 +85,7 @@ ConfigWidget::~ConfigWidget()
 {
 }
 
-
-BarWidget::Ptr ConfigWidget::InitTopBar()
-{
-    auto pBarWidget = GetTopWnd();
-    if (pBarWidget)
-    {
-        if (auto pTopLayout = pBarWidget->GetLayout())
-        {
-            auto pBtnClos = MQ(QPushButton)(pBarWidget);
-            pBtnClos->setFixedSize(30, 30);
-            pBtnClos->setObjectName("closeButtonNor");
-            pTopLayout->addStretch();
-            pTopLayout->addWidget(pBtnClos);
-
-            connect(pBtnClos, &QPushButton::clicked, this, [this]() {
-                this->close();
-            });
-        }
-    }
-    return pBarWidget;
-
-}
-
-void ConfigWidget::CreateWidget4Device(QFormLayoutPtr pLayout)
+void ConfigWidget::CreateWidget4Device(QFormLayoutPtr pLayout, bool bModify )
 {
     if (!pLayout)
     {
@@ -109,12 +114,11 @@ void ConfigWidget::CreateWidget4Device(QFormLayoutPtr pLayout)
     pLayoutPwd->addWidget(pinputPwd);
     pLayoutPwd->addWidget(pchkShowPwd);
 
-    pLayout->addRow(pLabelUID, pinputUID);
     pLayout->addRow(pLabelName, pinputDevName);
+    pLayout->addRow(pLabelUID, pinputUID);
     pLayout->addRow(pLabelPwd, pLayoutPwd);
 
-    pLayout->setContentsMargins(40, 40, 40, 20);
-
+    //pLayout->setContentsMargins(40, 40, 40, 20);
     m_pInputUID = pinputUID;
     m_pInputPwd = pinputPwd;
     m_pInputName = pinputDevName;
@@ -124,9 +128,38 @@ void ConfigWidget::CreateWidget4Device(QFormLayoutPtr pLayout)
     {
         connect(m_pManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnHttpReplyFinished(QNetworkReply*)));
     }
+
+    if (bModify)
+    {
+        if (auto pModData = std::dynamic_pointer_cast<ModDeviceData>(m_pCurData))
+        {
+            if (pModData->strShortUID.size())
+            {
+                m_pInputUID->setText(QString::fromStdString(pModData->strShortUID));
+            }
+            else
+            {
+                m_pInputUID->setText(QString::fromStdString(pModData->strUID));
+            }
+            m_pInputPwd->setText(QString::fromStdString(pModData->strPwd));
+            m_pInputName->setText(QString::fromStdString(pModData->strDevName));
+            if (!(pModData->nModLevel & ModDeviceData::MOD_NAME))
+            {
+                m_pInputName->setEnabled(false);
+            }
+            if (!(pModData->nModLevel & ModDeviceData::MOD_UID))
+            {
+                m_pInputUID->setEnabled(false);
+            }
+            if (!(pModData->nModLevel & ModDeviceData::MOD_PWD))
+            {
+                m_pInputPwd->setEnabled(false);
+            }
+        }
+    }
 }
 
-void ConfigWidget::CreateWidget4Group(QFormLayoutPtr pLayout)
+void ConfigWidget::CreateWidget4Group(QFormLayoutPtr pLayout, bool bModify)
 {
     if (!pLayout)
     {
@@ -139,8 +172,73 @@ void ConfigWidget::CreateWidget4Group(QFormLayoutPtr pLayout)
     pLabelGroupName->setText(QStringLiteral("分组名称"));
 
     pLayout->addRow(pLabelGroupName, pinputGroupName);
-    pLayout->setContentsMargins(40, 40, 40, 20);
+    //pLayout->setContentsMargins(40, 40, 40, 20);
     m_pInputGroupName = pinputGroupName;
+
+    if (bModify)
+    {
+        if (auto pModData = std::dynamic_pointer_cast<ModGroupData>(m_pCurData))
+        {
+            m_pInputGroupName->setText(QString::fromStdString(pModData->strGroupName));
+        }
+    }
+}
+
+void ConfigWidget::CreateWidget4Storage(QFormLayoutPtr pLayout)
+{
+    auto pLayoutChooseFile1 = MQ(QHBoxLayout)(this);
+    auto pLayoutChooseFile2 = MQ(QHBoxLayout)(this);
+    auto pInpuDir1 = MQ(QLineEdit)(this);
+    auto pInpuDir2 = MQ(QLineEdit)(this);
+    auto pBtn1 = MQ(QPushButton)(this);
+    auto pBtn2 = MQ(QPushButton)(this);
+    pBtn1->setObjectName("choose_folder");
+    pBtn2->setObjectName("choose_folder");
+
+    pBtn1->setFixedSize({ 40,40 });
+    pBtn2->setFixedSize({ 40,40 });
+
+    pLayoutChooseFile1->addWidget(pInpuDir1);
+    pLayoutChooseFile1->addWidget(pBtn1);
+
+    pLayoutChooseFile2->addWidget(pInpuDir2);
+    pLayoutChooseFile2->addWidget(pBtn2);
+
+    pLayout->addRow("录像保存路径", pLayoutChooseFile1);
+    pLayout->addRow("截图保存路径", pLayoutChooseFile2);
+
+    pInpuDir1->setPlaceholderText("点击按钮选择录像文件保存路径");
+    pInpuDir2->setPlaceholderText("点击按钮选择截图文件保存路径");
+
+    pInpuDir1->setEnabled(false);
+    pInpuDir2->setEnabled(false);
+
+    pInpuDir1->setText(ConfigCenter::GetInstance().GetRecordSavepath());
+    pInpuDir2->setText(ConfigCenter::GetInstance().GetSnapShotSavepath());
+    auto funcChooseFile = [this, pBtn1, pBtn2, pInpuDir1, pInpuDir2]() {
+        auto pBtn = qobject_cast<QPushButtonPtr>(this->sender());
+        if (pBtn == pBtn1)
+        {
+            auto strSel = this->ChooseFilePath(ConfigCenter::GetInstance().GetRecordSavepath());
+            if (!strSel.isEmpty())
+            {
+                ConfigCenter::GetInstance().SetRecordSavepath(strSel);
+                pInpuDir1->setText(strSel + '/');
+            }
+        }
+        else if(pBtn == pBtn2)
+        {
+            auto strSel = this->ChooseFilePath(ConfigCenter::GetInstance().GetSnapShotSavepath());
+            if (!strSel.isEmpty())
+            {
+                ConfigCenter::GetInstance().SetSnapShotSavepath(strSel);
+                pInpuDir2->setText(strSel + '/');
+            }
+        }
+    };
+
+    connect(pBtn1, &QPushButton::clicked, this, funcChooseFile);
+    connect(pBtn2, &QPushButton::clicked, this, funcChooseFile);
 }
 
 void ConfigWidget::CreateReturnBtn(QHBoxLayoutPtr pLayout)
@@ -159,6 +257,7 @@ void ConfigWidget::CreateReturnBtn(QHBoxLayoutPtr pLayout)
     pLayout->addStretch();
     pLayout->addWidget(btnOK);
     pLayout->addWidget(btnCancel);
+    pLayout->setSpacing(10);
 
     m_pbtnOK = btnOK;
     m_pbtnCancel = btnCancel;
@@ -179,23 +278,28 @@ void ConfigWidget::CollectData4Device()
     }
 
     auto pRealData = std::dynamic_pointer_cast<AddDeviceData>(m_pCurData);
-    pRealData->strUID = m_pInputUID->text().toStdString();
+    pRealData->strShortUID = m_pInputUID->text().toStdString();
     pRealData->strPwd = m_pInputPwd->text().toStdString();
     pRealData->strDevName = m_pInputName->text().toStdString();
 
-    if (!pRealData->strUID.size())
+    if (!pRealData->strShortUID.size())
     {
         msg::showError(this, QStringLiteral("警告"), QStringLiteral("设备编号不能为空，请检查输入！"));
     }
 
     if (!pRealData->strDevName.size())
     {
-        msg::showError(this, QStringLiteral("警告"), QStringLiteral("设备名称不能为空，请检查输入！"));
+        m_pInputName->setText(m_pInputUID->text());
+        pRealData->strDevName = pRealData->strShortUID;
     }
 
-    if (pRealData->strUID.size() == 6 && g_transferCode.find(pRealData->strUID) == g_transferCode.end())
+    if (pRealData->strUID.size() <= 6 )
     {
-        RequestLongCode(pRealData->strUID);
+        RequestLongCode(pRealData->strShortUID);
+    }
+    else
+    {
+        pRealData->strUID = pRealData->strShortUID;
     }
 }
 
@@ -225,15 +329,24 @@ void ConfigWidget::OnOk()
         {
             return;
         }
+        emit OnDataConfiged(pData);
         break;
     case ConfigType::AddGroup:
         CollectData4Group();
+        emit OnDataConfiged(pData);
+        break;
+    case ConfigType::ModifyDevice:
+        CollectData4Device();
+        emit OnDataModified(pData);
+        break;
+    case ConfigType::ModifyGroup:
+        CollectData4Group();
+        emit OnDataModified(pData);
         break;
     default:
         break;
     }
-    emit OnDataConfiged(pData);
-    close();
+    done(0);
 }
 
 void ConfigWidget::OnCancel()
@@ -267,6 +380,11 @@ void ConfigWidget::RequestLongCode(std::string& strShortCode)
 
 }
 
+QString ConfigWidget::ChooseFilePath(QString& strDefultPath)
+{
+    return QFileDialog::getExistingDirectory(this, "选择文件夹", strDefultPath);
+}
+
 void ConfigWidget::OnHttpReplyFinished(QNetworkReply* replay)
 {
     m_bRequesting = false;
@@ -294,8 +412,14 @@ void ConfigWidget::OnHttpReplyFinished(QNetworkReply* replay)
         }
         else
         {
-            m_pInputUID->setText(QString::fromStdString(strUid));
-            OnOk();
+            //m_pInputUID->setText(QString::fromStdString(strUid));
+            if (auto pRealData = std::dynamic_pointer_cast<AddDeviceData>(m_pCurData))
+            {
+                pRealData->strUID = strUid;
+            }
+            emit OnDataConfiged(m_pCurData);
+
+            done(0);
         }
     }
     else

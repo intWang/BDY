@@ -389,7 +389,7 @@ QScrollBar#verticalScrollBar:vertical {
 
 /**********下拉列表**********/
 QComboBox {
-        height: 35px;
+        height: 30;
         width: 70px;
         border-radius: 4px;
         background: rgb(77,103,148);
@@ -406,8 +406,7 @@ QComboBox:enabled:hover, QComboBox:enabled:focus {
         background: rgb(57, 83, 128);
 }
 QComboBox::drop-down {
-        width: 20px;
-        border: 4px solid rgb(68, 72, 88);;
+        width: 30px;
         background: transparent;
 }
 QComboBox::drop-down:hover {
@@ -517,6 +516,20 @@ QCheckBox#chkHideAP::indicator:checked {
 QCheckBox#chkHideAP::indicator:unchecked {
         image: url(:/Black/res/Switch-off.png);
 }
+
+QCheckBox#chkLockProportion::indicator{
+        width: 20px;
+        height: 20px;
+}
+
+QCheckBox#chkLockProportion::indicator:checked {
+        image: url(:/Black/res/chain.png);
+}
+
+QCheckBox#chkLockProportion::indicator:unchecked {
+        image: url(:/Black/res/chain-broken.png);
+}
+
 
 QCheckBox#chkClarity::indicator{
         width: 32px;
@@ -680,51 +693,64 @@ QWidget#transparentWidget {
 
 /**********微调器**********/
 QSpinBox {
-        border-radius: 4px;
         height: 24px;
         min-width: 40px;
-        border: 1px solid rgb(100, 100, 100);
-        background: rgb(68, 69, 73);
+        border: 1px solid rgb(77, 103, 148);
+        background: rgb(44, 50, 67);
 }
 QSpinBox:enabled {
-        color: rgb(220, 220, 220);
+		color: rgb(175, 175, 175);
 }
 QSpinBox:enabled:hover, QLineEdit:enabled:focus {
         color: rgb(230, 230, 230);
 }
 QSpinBox:!enabled {
-        color: rgb(65, 65, 65);
         background: transparent;
+		color: rgb(155, 155, 155);
 }
 QSpinBox::up-button {
         width: 18px;
         height: 12px;
         border-top-right-radius: 4px;
         border-left: 1px solid rgb(100, 100, 100);
-        image: url(:/Black/upButton);
+        image: url(:/Black/res/dirb2_t.png);
         background: rgb(50, 50, 50);
 }
 QSpinBox::up-button:!enabled {
         border-left: 1px solid gray;
         background: transparent;
+        image: url(:/Black/res/dirb4_t.png);
 }
 QSpinBox::up-button:enabled:hover {
         background: rgb(255, 255, 255, 30);
+		image: url(:/Black/res/dirb3_t.png);
 }
+QSpinBox::up-button:enabled:pressed {
+        background: rgb(255, 255, 255, 30);
+		image: url(:/Black/res/dirb1_t.png);
+}
+
+
 QSpinBox::down-button {
         width: 18px;
         height: 12px;
         border-bottom-right-radius: 4px;
         border-left: 1px solid rgb(100, 100, 100);
-        image: url(:/Black/downButton);
+        image: url(:/Black/res/dirb2_d.png);
         background: rgb(50, 50, 50);
 }
 QSpinBox::down-button:!enabled {
         border-left: 1px solid gray;
         background: transparent;
+        image: url(:/Black/res/dirb4_d.png);
 }
 QSpinBox::down-button:enabled:hover {
         background: rgb(255, 255, 255, 30);
+		image: url(:/Black/res/dirb3_d.png);
+}
+QSpinBox::down-button:enabled:pressed {
+        background: rgb(255, 255, 255, 30);
+		image: url(:/Black/res/dirb1_d.png);
 }
 
 /**********标签**********/
@@ -819,6 +845,10 @@ QLabel#groupLabel {
         border-top-color: transparent;
         border-right-color: transparent;
         border-left-color: transparent;
+}
+
+QLabel#DevideLine{
+	background-color: rgb(65, 81, 110); 
 }
 
 /**********按钮**********/
@@ -977,7 +1007,7 @@ QPushButton#ListGroupBtn:enabled:pressed{
 QPushButton#minimizeButton {
         border-radius: 0px;
         border-bottom-left-radius: 4px;
-        background: rgb(41, 44, 57);
+        background: transparent;
 		qproperty-icon: url(:/Black/res/minimize);
 		qproperty-iconSize: 20px 20px;
 }
@@ -994,7 +1024,7 @@ QPushButton#minimizeButton:pressed {
 
 QPushButton#maximizeButton[maximizeProperty="maximize"] {
         border-radius: 0px;
-        background: rgb(41, 44, 57);
+        background: transparent;
 		qproperty-icon: url(:/Black/res/maxmize);
 		qproperty-iconSize: 20px 20px;
 }
@@ -1177,7 +1207,7 @@ QPushButton#menuButton::menu-indicator{
 
 QPushButton#AddDevice {
         border-radius: 4px;
-        background: rgb(41, 44, 57);
+        background: transparent;
 		qproperty-icon: url(:/Black/res/add.png);
 		qproperty-iconSize: 20px 20px;
 }
@@ -1192,26 +1222,44 @@ QPushButton#AddDevice:pressed {
 		qproperty-iconSize: 20px 20px;
 }
 
-QPushButton#AddGroup {
+QPushButton#choose_folder {
         border-radius: 4px;
-        background: rgb(41, 44, 57);
+        background: transparent;
 		qproperty-icon: url(:/Black/res/folder.png);
 		qproperty-iconSize: 20px 20px;
 }
-QPushButton#AddGroup:hover {
+QPushButton#choose_folder:hover {
         background: rgb(60, 60, 60);
 		qproperty-icon: url(:/Black/res/folder.png);
 		qproperty-iconSize: 20px 20px;
 }
-QPushButton#AddGroup:pressed {
+QPushButton#choose_folder:pressed {
         background: rgb(55, 55, 55);
 		qproperty-icon: url(:/Black/res/folder.png);
 		qproperty-iconSize: 20px 20px;
 }
 
+
+QPushButton#AddGroup {
+        border-radius: 4px;
+        background: transparent;
+		qproperty-icon: url(:/Black/res/folder-add.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#AddGroup:hover {
+        background: rgb(60, 60, 60);
+		qproperty-icon: url(:/Black/res/folder-add.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#AddGroup:pressed {
+        background: rgb(55, 55, 55);
+		qproperty-icon: url(:/Black/res/folder-add.png);
+		qproperty-iconSize: 20px 20px;
+}
+
 QPushButton#DeleteItem {
         border-radius: 4px;
-        background: rgb(41, 44, 57);
+        background: transparent;
 		qproperty-icon: url(:/Black/res/delete.png);
 		qproperty-iconSize: 20px 20px;
 }
@@ -1225,6 +1273,25 @@ QPushButton#DeleteItem:pressed {
 		qproperty-icon: url(:/Black/res/delete.png);
 		qproperty-iconSize: 20px 20px;
 }
+
+
+QPushButton#Modify {
+        border-radius: 4px;
+        background: transparent;
+		qproperty-icon: url(:/Black/res/modify.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#Modify:hover {
+        background: rgb(60, 60, 60);
+		qproperty-icon: url(:/Black/res/modify.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#Modify:pressed {
+        background: rgb(55, 55, 55);
+		qproperty-icon: url(:/Black/res/modify.png);
+		qproperty-iconSize: 20px 20px;
+}
+
 
 
 

@@ -98,6 +98,15 @@
         <file>res/next.png</file>
         <file>res/record-off.png</file>
         <file>res/control_center.png</file>
+        <file>res/chain.png</file>
+        <file>res/chain-broken.png</file>
+        <file>res/error.png</file>
+        <file>res/info.png</file>
+        <file>res/warn.png</file>
+        <file>res/question.png</file>
+        <file>res/success.png</file>
+        <file>res/folder-add.png</file>
+        <file>res/modify.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>

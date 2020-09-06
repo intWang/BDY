@@ -32,6 +32,7 @@ private:
     QPushButtonPtr m_pAddDeviceBtn = nullptr;
     QPushButtonPtr m_pAddGroupBtn = nullptr;
     QPushButtonPtr m_pDeleteBtn = nullptr;
+    QPushButtonPtr m_pModifyBtn = nullptr;
     QPushButtonPtr m_pSearchBtn = nullptr;
     QPushButtonPtr m_pNextBtn = nullptr;
     QPushButtonPtr m_pLastBtn = nullptr;
@@ -58,7 +59,7 @@ protected:
     void SetSelItem(QStandardItemPtr pItem);
 
     void ClearTree();
-    void CallConfigWnd(ConfigType type);
+    void CallConfigWnd(ConfigType type, TreeNode::Ptr pNode = nullptr);
 
     ////////Tree operate
     void UpdateTreeItem(QString strName, TreeNode::Ptr pNewData);
@@ -83,13 +84,14 @@ protected:
 signals:
     void LoadedDevNumChange(int nNum);
     void TotalDevNumChange(int nNum);
-    void AddNewGroup(const QString& strGooupName, QStandardItemPtr pParent);
-    void AddNewDevice(const QString& strDeviceUid, const QString& strDevicePwd, const QString& strDeviceName, QStandardItemPtr pParent);
+    void AddNewGroup(AddGroupData::Ptr pData, QStandardItemPtr pParent);
+    void AddNewDevice(AddDeviceData::Ptr pData, QStandardItemPtr pParent);
     void ChannelNodeDBClick(DevNode::Ptr pNodeData);
     void DeviceLostConnect(const QString& strDeviceUid);
 
 public slots:
     void OnDataConfiged(ConfigData::Ptr pData);
+    void OnDataModified(ConfigData::Ptr pData);
     void OnClicked();
     void OnTreeDBClicked(const QModelIndex& index);
     void OnPreviewStatuChanged(const QString& strUid, bool bStatu);

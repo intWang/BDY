@@ -24,7 +24,7 @@ int main(int argc, char *argv[])
     time_t now = time(NULL);
     if (now > expired)
     {
-        msg::showError(nullptr, "临时版本已过期", "请联系作者更新版本");
+        msg::showError(nullptr, "版本已过期", "请联系作者更新版本");
         return 0;
     }
 

@@ -3,10 +3,14 @@
 #include "AreableWidget.h"
 #include "MovelabelWidget.h"
 #include "IHttpSupport.h"
+#include "BaseDialog.h"
 enum ConfigType
 {
     AddDevice,
     AddGroup,
+    ModifyDevice,
+    ModifyGroup,
+    StorageConfig,
 };
 
 struct ConfigData
@@ -50,19 +54,91 @@ struct AddGroupData:public ConfigData
     }
 };
 
+struct StorageData :public ConfigData
+{
+    using Ptr = std::shared_ptr<StorageData>;
+    std::string strSnapShotPath;
+    std::string strRecordPath;
+    StorageData()
+        : ConfigData()
+    {
+        emType = ConfigType::StorageConfig;
+    }
+
+    virtual ~StorageData()
+    {
+    }
+};
+
+
+struct ModDeviceData :public AddDeviceData
+{
+    enum MOD
+    {
+        MOD_UID =  0x00000001,
+        MOD_PWD =  0x00000010,
+        MOD_NAME = 0x00000100,
+    };
+
+    using Ptr = std::shared_ptr<ModDeviceData>;
+    int nModLevel = MOD_UID| MOD_PWD| MOD_NAME;
+    ModDeviceData(DevNode::Ptr pData)
+        :AddDeviceData()
+    {
+        emType = ConfigType::ModifyDevice;
+        if (pData)
+        {
+            strUID = pData->strUID;
+            strShortUID = pData->strShortID;
+            strPwd = pData->strPwd;
+            strDevName = pData->strCustomName;
+            if (pData->IsDevLoaded())
+            {
+                nModLevel = MOD_NAME;
+            }
+            else
+            {
+                nModLevel = MOD_UID | MOD_PWD | MOD_NAME;
+            }
+        }
+    }
+    virtual ~ModDeviceData()
+    {
+    }
+};
+
+struct ModGroupData :public AddGroupData
+{
+    using Ptr = std::shared_ptr<ModGroupData>;
+    ModGroupData(GroupNode::Ptr pData)
+        : AddGroupData()
+    {
+        emType = ConfigType::ModifyGroup;
+        if (pData)
+        {
+            strGroupName = pData->strGroupName;
+        }
+    }
+
+    virtual ~ModGroupData()
+    {
+    }
+};
+
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class ConfigWidget:public MovelabelWidget<AreableWidget<QWidget>>
+class ConfigWidget:public BaseDialog
 {
     Q_OBJECT
 public:
-    ConfigWidget(ConfigType type, QWidget* parent = nullptr);
+    ConfigWidget(ConfigType type, QWidget* parent = nullptr, TreeNode::Ptr pNode = nullptr);
     ~ConfigWidget();
     ConfigData::Ptr GetConfigData() {return m_pCurData;}
 
 signals:
     void OnDataConfiged(ConfigData::Ptr pData);
+    void OnDataModified(ConfigData::Ptr pData);
 private:
     ConfigData::Ptr m_pCurData = nullptr;
 
@@ -75,10 +151,10 @@ private:
     QPushButtonPtr m_pbtnCancel = nullptr;
     bool m_bRequesting = false;
 protected:
-    virtual BarWidget::Ptr InitTopBar() override;
 
-    void CreateWidget4Device(QFormLayoutPtr pLayout);
-    void CreateWidget4Group(QFormLayoutPtr pLayout);
+    void CreateWidget4Device(QFormLayoutPtr pLayout, bool bModify = false);
+    void CreateWidget4Group(QFormLayoutPtr pLayout, bool bModify = false);
+    void CreateWidget4Storage(QFormLayoutPtr pLayout);
     void CreateReturnBtn(QHBoxLayoutPtr pLayout);
 
     void CollectData4Device();
@@ -88,6 +164,8 @@ protected:
     void OnCancel();
 
     void RequestLongCode(std::string& strShortCode);
+
+    QString ChooseFilePath(QString& strDefultPath);
 
 protected slots:
     void OnHttpReplyFinished(QNetworkReply* replay);

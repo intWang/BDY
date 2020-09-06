@@ -15,6 +15,8 @@ public:
     void setMaximizeVisible(bool bVisiable);
     void setWidgetResizable(bool bVisiable);
 
+    void FullScreen();
+
 signals:
     void OnCloseBtnClicked();
 private slots:
@@ -29,6 +31,7 @@ private:
     QPushButtonPtr m_pMinimizeButton;
     QPushButtonPtr m_pMaximizeButton;
     QPushButtonPtr m_pCloseButton;
+    bool m_bMax =false;
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;

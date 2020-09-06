@@ -75,7 +75,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <TreatWChar_tAsBuiltInType>true</TreatWChar_tAsBuiltInType>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>./Dependencies/include;.\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -109,6 +109,8 @@
     <ClCompile Include="Dependencies\src\JSONObject.cpp" />
     <ClCompile Include="DevTreeWnd.cpp" />
     <ClCompile Include="DrawWnd.cpp" />
+    <ClCompile Include="FullScreenWnd.cpp" />
+    <ClCompile Include="HelpWindow.cpp" />
     <ClCompile Include="HintServer.cpp" />
     <ClCompile Include="HTTPSupport.cpp" />
     <ClCompile Include="IPCNetServer.cpp" />
@@ -120,6 +122,7 @@
     <ClCompile Include="MovelabelWidget.cpp" />
     <ClCompile Include="OpenGLDrawWnd.cpp" />
     <ClCompile Include="ParamWnd.cpp" />
+    <ClCompile Include="PopUpTreeWnd.cpp" />
     <ClCompile Include="PPPCS_ClientUI.cpp" />
     <ClCompile Include="PreviewPanel.cpp" />
     <ClCompile Include="PreviewRealWnd.cpp" />
@@ -130,7 +133,10 @@
     <ClCompile Include="BarWidget.cpp" />
     <ClCompile Include="ServerCallBackEngine.cpp" />
     <ClCompile Include="ServiceEngine.cpp" />
+    <ClCompile Include="SnapControlWnd.cpp" />
+    <ClCompile Include="SnapCtrlWidget.cpp" />
     <ClCompile Include="StroageManager.cpp" />
+    <ClCompile Include="SubPreviewWnd.cpp" />
     <ClCompile Include="Tasks.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="YUV420P_Render.cpp" />
@@ -148,6 +154,7 @@
     <QtUic Include="ConfigWifiWidget.ui" />
     <QtUic Include="DecodeWnd.ui" />
     <QtUic Include="DevTreeWnd.ui" />
+    <QtUic Include="HelpWindow.ui" />
     <QtUic Include="MainViewWidget.ui" />
     <QtUic Include="MessageBoxWnd.ui" />
     <QtUic Include="ParamWnd.ui" />
@@ -157,6 +164,7 @@
     <QtUic Include="PTZCtrl.ui" />
     <QtUic Include="PtzCtrlWnd.ui" />
     <QtUic Include="QtWidgetsClass.ui" />
+    <QtUic Include="SnapCtrlWidget.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="PPPCS_ClientUI.qrc" />
@@ -179,11 +187,17 @@
     <QtMoc Include="ConfigWifiConfirm.h" />
     <QtMoc Include="ConfigWifiList.h" />
     <ClInclude Include="ContainerWnd.h" />
+    <ClInclude Include="FullScreenWnd.h" />
+    <QtMoc Include="HelpWindow.h" />
     <ClInclude Include="HTTPSupport.h" />
     <ClInclude Include="IHttpSupport.h" />
     <QtMoc Include="PtzCtrlWnd.h" />
     <QtMoc Include="PTZCtrl.h" />
     <QtMoc Include="ParamWnd.h" />
+    <QtMoc Include="SubPreviewWnd.h" />
+    <QtMoc Include="SnapControlWnd.h" />
+    <QtMoc Include="SnapCtrlWidget.h" />
+    <ClInclude Include="PopUpTreeWnd.h" />
     <ClInclude Include="YUV420P_Render.h" />
     <QtMoc Include="PreviewPanel.h" />
     <ClInclude Include="AreableWidget.h" />

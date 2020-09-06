@@ -175,6 +175,24 @@
     <ClCompile Include="ConfigWifiList.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SubPreviewWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SnapControlWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SnapCtrlWidget.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="PopUpTreeWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FullScreenWnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="HelpWindow.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h">
@@ -261,6 +279,18 @@
     <QtMoc Include="ConfigWifiList.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="SubPreviewWnd.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="SnapControlWnd.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="SnapCtrlWidget.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="HelpWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="PPPCS_ClientUI.ui">
@@ -315,6 +345,12 @@
       <Filter>Form Files</Filter>
     </QtUic>
     <QtUic Include="ConfigWifiList.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="SnapCtrlWidget.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="HelpWindow.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -397,6 +433,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ContainerWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="PopUpTreeWnd.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FullScreenWnd.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

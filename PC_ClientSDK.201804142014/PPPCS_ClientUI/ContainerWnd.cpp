@@ -17,7 +17,6 @@ void ContainerWnd::AddLayout(QLayoutPtr pLayout)
 {
     m_pLayout = pLayout;
     setLayout(m_pLayout);
-    
 }
 
 void ContainerWnd::SetBkColor(QColor qclBorder)
