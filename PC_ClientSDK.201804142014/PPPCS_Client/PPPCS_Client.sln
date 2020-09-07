@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.705
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "PPPCS_Client", "PPPCS_Client\PPPCS_Client.vdproj", "{4257A46E-8DD2-408A-8691-C96048F3EAB9}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4257A46E-8DD2-408A-8691-C96048F3EAB9}.Debug|Default.ActiveCfg = Debug
+		{4257A46E-8DD2-408A-8691-C96048F3EAB9}.Debug|Default.Build.0 = Debug
+		{4257A46E-8DD2-408A-8691-C96048F3EAB9}.Release|Default.ActiveCfg = Release
+		{4257A46E-8DD2-408A-8691-C96048F3EAB9}.Release|Default.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {EA33FC42-B905-46D8-A055-EC1C49A82B06}
+	EndGlobalSection
+EndGlobal
