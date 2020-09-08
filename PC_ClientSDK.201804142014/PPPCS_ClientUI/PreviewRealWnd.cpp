@@ -171,7 +171,7 @@ void PreviewRealWnd::StartStream(DevNode::Ptr pChannel)
     if (pIPCServer)
     {
         auto pStreamInfo = m_pChannel->GetStreamData();
-        int nStreamData = pStreamInfo ? pStreamInfo->EncCh : 1;
+        int nStreamData = 0; //默认高清码流
         pIPCServer->VideoControl(pChannel->strUID, true, nStreamData);
     }
 

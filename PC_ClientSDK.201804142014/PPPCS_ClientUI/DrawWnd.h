@@ -65,7 +65,7 @@ private:
     std::atomic<int> m_nFrameCome = 0;
     int m_nFrameRate = 15;
     double m_dbCoef = 1;
-    QPoint m_viewPos = { 0,0 };
+    QPoint m_viewOffset = { 0,0 };
     QPoint m_mousePos = {0,0};
     SnapModeParam::Ptr m_pSnapModeParam = nullptr;
     SnapData::Ptr m_pSnapFrame = nullptr;

@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
+#include <QApplication>
 
 #define CONFIG_FILE_NAME "config.db"
 #define JSON_KEY_OBJ_GOLBAL "Global"
@@ -56,7 +57,7 @@ void ConfigCenter::SetRecordSavepath(const QString& strPath)
 
 void ConfigCenter::LoadConfig()
 {
-    QString strDBFile = CONFIG_FILE_NAME;
+    QString strDBFile = GetDBFilePath() + CONFIG_FILE_NAME;
     QFile dataFile(strDBFile);
     if (!dataFile.open(QIODevice::ReadOnly))
     {
@@ -128,7 +129,7 @@ void ConfigCenter::SaveConfig()
     doc.setObject(root);
     QByteArray byteArray = doc.toJson(QJsonDocument::Compact);
 
-    QString strDBFile = CONFIG_FILE_NAME;
+    QString strDBFile = GetDBFilePath() + CONFIG_FILE_NAME;
     QFile dataFile(strDBFile);
     if (!dataFile.open(QIODevice::Truncate | QIODevice::WriteOnly | QIODevice::Text))
     {
@@ -159,6 +160,12 @@ ConfigCenter::~ConfigCenter()
 QString ConfigCenter::GetSnapShotSavepath()
 {
     return m_strSnapShotSavePath;
+}
+
+QString ConfigCenter::GetDBFilePath()
+{
+    utils::MakePathExist(m_strDBSavePath);
+    return m_strDBSavePath;
 }
 
 QString ConfigCenter::GetRecordSavepath()

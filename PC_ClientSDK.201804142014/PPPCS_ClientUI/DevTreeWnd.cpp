@@ -12,6 +12,7 @@
 #include "ConfigWidget.h"
 #include "MessageBoxWnd.h"
 #include "SEP2P_Error.h"
+#include "ConfigCenter.h"
 DevTreeWnd::DevTreeWnd(QWidget *parent)
     : AreableWidget<QWidget>(parent)
 {
@@ -495,7 +496,7 @@ void DevTreeWnd::SaveTreeData()
     doc.setObject(level1);
     QByteArray byteArray = doc.toJson(QJsonDocument::Compact);
 
-    QString strDBFile = "storage.db";
+    QString strDBFile =  ConfigCenter::GetInstance().GetDBFilePath() + "storage.db";
     QFile dataFile(strDBFile);
     if (!dataFile.open(QIODevice::Truncate |QIODevice::WriteOnly | QIODevice::Text))
     {
@@ -514,7 +515,7 @@ void DevTreeWnd::SaveTreeData()
 
 void DevTreeWnd::LoadTreeData()
 {
-    QString strDBFile = "storage.db";
+    QString strDBFile = ConfigCenter::GetInstance().GetDBFilePath() + "storage.db";
     QFile dataFile(strDBFile);
     if (!dataFile.open(QIODevice::ReadOnly))
     {

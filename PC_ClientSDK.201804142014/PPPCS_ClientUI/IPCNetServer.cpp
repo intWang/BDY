@@ -11,7 +11,6 @@
 #include <QDateTime>
 namespace ls
 {
-    std::string strTmpPath = utils::GetTmpPath();
     std::string strUID = utils::GetUUID();
 
     void SaveBuf(const unsigned char* pData, int len, const char* filename)

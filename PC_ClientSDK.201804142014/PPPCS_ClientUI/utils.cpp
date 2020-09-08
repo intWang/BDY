@@ -64,10 +64,4 @@ namespace utils
 
         return std::move(std::string(buf));
     }
-
-    std::string GetTmpPath()
-    {
-        return "C:\\Users\\xiaohwa2\\AppData\\Local\\Temp\\PPCS_Client\\Pic\\";
-    }
-
 }

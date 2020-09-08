@@ -1,4 +1,5 @@
 #include "DecodeWnd.h"
+#include "MessageBoxWnd.h"
 
 DecodeWnd::DecodeWnd(QWidget *parent)
     : QWidget(parent)
@@ -64,13 +65,32 @@ void DecodeWnd::OnVideoEncodeData(const std::string& strUid, const IPCNetStreamI
     }
 }
 
-void DecodeWnd::OnClicked()
+void DecodeWnd::OnClicked(bool bChecked)
 {
     if (!m_pDevNode)
     {
         return;
     }
+
     auto pChk = qobject_cast<QCheckBoxPtr>(sender());
+
+    auto tmNow = time(NULL);
+    int tmSpace = tmNow - m_tmLastOperate;
+    if (tmSpace <= 5)
+    {
+        if (pChk)
+        {
+            pChk->setChecked(!bChecked);
+        }
+
+        QString strWarn = "您操作的太快了，请 %1 秒后再试";
+        strWarn = strWarn.arg(5 - tmSpace);
+        msg::showWarning(this, "警告", strWarn);
+        
+        return;
+    }
+    m_tmLastOperate = tmNow;
+
     if (pChk == ui.chkClarity)
     {
         m_pDevNode->SetClarity(pChk->isChecked());
@@ -85,4 +105,5 @@ void DecodeWnd::OnClicked()
         m_pDevNode->SetFlipMirror(0, 1);
         //m_pDevNode->GetFlipMirror();
     }
+   
 }

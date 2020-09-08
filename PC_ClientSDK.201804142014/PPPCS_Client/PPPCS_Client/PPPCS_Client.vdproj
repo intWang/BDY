@@ -249,6 +249,12 @@
         }
         "Entry"
         {
+        "MsmKey" = "8:_9A48C509E80C46E198B145D9502A99EC"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
         "MsmKey" = "8:_9BC2CA1C8AF5404683E79334293F4323"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
@@ -303,13 +309,13 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_BCFA0F0E495343F9B570FDB038EAA352"
+        "MsmKey" = "8:_C1F10FE714D243A89034478042DC9530"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_C1F10FE714D243A89034478042DC9530"
+        "MsmKey" = "8:_CDC03B70F3714805BADC83FA79A1DCF9"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -416,6 +422,14 @@
             "PrerequisitesLocation" = "2:1"
             "Url" = "8:"
             "ComponentsUrl" = "8:"
+                "Items"
+                {
+                    "{EDC2488A-8267-493A-A98E-7D9C3B36CDF3}:.NETFramework,Version=v4.6.1"
+                    {
+                    "Name" = "8:Microsoft .NET Framework 4.6.1 (x86 and x64)"
+                    "ProductCode" = "8:.NETFramework,Version=v4.6.1"
+                    }
+                }
             }
         }
         "Release"
@@ -455,6 +469,20 @@
     {
         "CustomAction"
         {
+            "{4AA51A2D-7D85-4A59-BA75-B0809FC8B380}:_E8B45CBFFEBA406EAF97E9067E5DE3A4"
+            {
+            "Name" = "8:rm.vbs"
+            "Condition" = "8:"
+            "Object" = "8:_CDC03B70F3714805BADC83FA79A1DCF9"
+            "FileType" = "3:4"
+            "InstallAction" = "3:4"
+            "Arguments" = "8:"
+            "EntryPoint" = "8:"
+            "Sequence" = "3:1"
+            "Identifier" = "8:_32B0AE4F_23E7_46D4_B066_8670C64A294A"
+            "InstallerClass" = "11:FALSE"
+            "CustomActionData" = "8:"
+            }
         }
         "DefaultFeature"
         {
@@ -1250,6 +1278,26 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9A48C509E80C46E198B145D9502A99EC"
+            {
+            "SourcePath" = "8:..\\..\\Release\\北斗鹰PC.exe"
+            "TargetName" = "8:北斗鹰PC.exe"
+            "Tag" = "8:"
+            "Folder" = "8:_CB4E46EA7CFA479687959CD307DD82EE"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_9BC2CA1C8AF5404683E79334293F4323"
             {
             "SourcePath" = "8:..\\..\\Release\\swresample-3.dll"
@@ -1430,12 +1478,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_BCFA0F0E495343F9B570FDB038EAA352"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C1F10FE714D243A89034478042DC9530"
             {
-            "SourcePath" = "8:..\\..\\Release\\PPPCS_ClientUI.exe"
-            "TargetName" = "8:PPPCS_ClientUI.exe"
+            "SourcePath" = "8:..\\..\\Release\\translations\\qt_da.qm"
+            "TargetName" = "8:qt_da.qm"
             "Tag" = "8:"
-            "Folder" = "8:_CB4E46EA7CFA479687959CD307DD82EE"
+            "Folder" = "8:_18B21AFE706C42318DA8CCCC5B389845"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1450,12 +1498,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_C1F10FE714D243A89034478042DC9530"
+            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CDC03B70F3714805BADC83FA79A1DCF9"
             {
-            "SourcePath" = "8:..\\..\\Release\\translations\\qt_da.qm"
-            "TargetName" = "8:qt_da.qm"
+            "SourcePath" = "8:..\\..\\Release\\rm.vbs"
+            "TargetName" = "8:rm.vbs"
             "Tag" = "8:"
-            "Folder" = "8:_18B21AFE706C42318DA8CCCC5B389845"
+            "Folder" = "8:_CB4E46EA7CFA479687959CD307DD82EE"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -1852,19 +1900,19 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:PPPCS_Client"
-        "ProductCode" = "8:{7811F7D6-1AE4-4D39-B44E-22533C09B2CE}"
-        "PackageCode" = "8:{9E8957D2-5E78-4542-8401-A6072B7891EB}"
+        "ProductCode" = "8:{42CE364F-65A0-40B7-A959-FF4E018F44EB}"
+        "PackageCode" = "8:{2CA24F7B-24AF-40A3-88C9-E206553E70EB}"
         "UpgradeCode" = "8:{E5965374-4DDE-48E5-B581-1F6D3CB0452C}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:FALSE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:AceSoftware"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:PPPCS_Client"
+        "Title" = "8:北斗鹰PC"
         "Subject" = "8:"
         "ARPCONTACT" = "8:ACE"
         "Keywords" = "8:"
@@ -1975,43 +2023,43 @@
         {
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_00BB725B3AB647ACA4F094CC78E256BA"
             {
-            "Name" = "8:PPPCS_ClientUI.exe"
+            "Name" = "8:北斗鹰PC.exe"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
-            "Target" = "8:_BCFA0F0E495343F9B570FDB038EAA352"
+            "Target" = "8:_9A48C509E80C46E198B145D9502A99EC"
             "Folder" = "8:_485F8E6167BF48C9AE26E420BEB4CA3B"
-            "WorkingFolder" = "8:"
+            "WorkingFolder" = "8:_CB4E46EA7CFA479687959CD307DD82EE"
             "Icon" = "8:_B6EC574117464C4E8418C197B2D5771E"
             "Feature" = "8:"
             }
-            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_073FD9A8BE704910924807EA4647D6D9"
+            "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_59F6B49D58C14693996017AC7BF9E797"
             {
-            "Name" = "8:uninstall_PPPCS.exe"
-            "Arguments" = "8:/x  {7811F7D6-1AE4-4D39-B44E-22533C09B2CE}"
+            "Name" = "8:卸载北斗鹰PC.exe"
+            "Arguments" = "8:/x {42CE364F-65A0-40B7-A959-FF4E018F44EB}"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
             "Transitive" = "11:FALSE"
             "Target" = "8:_B78311E3160C49289841F9DA8781353C"
             "Folder" = "8:_485F8E6167BF48C9AE26E420BEB4CA3B"
-            "WorkingFolder" = "8:"
+            "WorkingFolder" = "8:_CB4E46EA7CFA479687959CD307DD82EE"
             "Icon" = "8:_37640656553B4234B778B00DE9EAC23C"
             "Feature" = "8:"
             }
             "{970C0BB2-C7D0-45D7-ABFA-7EC378858BC0}:_739843B44FCE40DE887FC124B6D89AD5"
             {
-            "Name" = "8:PPPCS_ClientUI.exe"
+            "Name" = "8:北斗鹰PC.exe"
             "Arguments" = "8:"
             "Description" = "8:"
             "ShowCmd" = "3:1"
             "IconIndex" = "3:0"
-            "Transitive" = "11:FALSE"
-            "Target" = "8:_BCFA0F0E495343F9B570FDB038EAA352"
+            "Transitive" = "11:TRUE"
+            "Target" = "8:_9A48C509E80C46E198B145D9502A99EC"
             "Folder" = "8:_410A22CDB99B441590141E040EFC5D39"
-            "WorkingFolder" = "8:"
+            "WorkingFolder" = "8:_CB4E46EA7CFA479687959CD307DD82EE"
             "Icon" = "8:_B6EC574117464C4E8418C197B2D5771E"
             "Feature" = "8:"
             }

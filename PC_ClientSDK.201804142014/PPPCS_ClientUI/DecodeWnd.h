@@ -20,10 +20,11 @@ public:
     void OnVideoEncodeData(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData);
 
 public slots:
-    void OnClicked();
+    void OnClicked(bool bChecked);
 
 private:
     Ui::DecodeWnd ui;
     DevNode::Ptr m_pDevNode = nullptr;
     std::mutex m_mxLockDevNode;
+    time_t m_tmLastOperate = 0;
 };

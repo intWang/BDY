@@ -5,6 +5,7 @@
 #include <QFile>
 #include <QDir>
 #include <process.h>
+#include "QtDefine.h"
 
 #define MAX_LOG_FILE_SIZE 2
 void outputMessage(QtMsgType type, const QMessageLogContext &context, const QString &msg)
@@ -55,7 +56,7 @@ void LogManager::CheckHistoryFiles()
 
 bool LogManager::Init()
 {
-    m_logFilePath = QDir::tempPath() + "/PPCS_Client/";
+    m_logFilePath = QDir::tempPath() + TMPDATA_FOLDER;
     CheckHistoryFiles();
     InstallHandler();
     return true;

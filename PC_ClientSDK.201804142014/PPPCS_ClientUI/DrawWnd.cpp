@@ -134,8 +134,8 @@ void DrawWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
         break;
     case PtzCommand::Restore:
         m_nZoom = 1;
-        nMoveX = m_viewPos.x() * -1;
-        nMoveY = m_viewPos.y() * -1;
+        nMoveX = m_viewOffset.x() * -1;
+        nMoveY = m_viewOffset.y() * -1;
         break;
     case PtzCommand::SetSpeed:
         m_nPtzSpeed = nParam;
@@ -145,8 +145,8 @@ void DrawWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
     }
 
     m_dbCoef = 1 - (m_nZoom - 1) * 0.1;
-    m_viewPos.setX(m_viewPos.x() + nMoveX);
-    m_viewPos.setY(m_viewPos.y() + nMoveY);
+    m_viewOffset.setX(m_viewOffset.x() + nMoveX);
+    m_viewOffset.setY(m_viewOffset.y() + nMoveY);
     
     update();
 }
@@ -402,13 +402,15 @@ void DrawWnd::DrawImage(QPainter& painter, QImage& img)
     QRect rcDst(0, 0, size().width(), size().height());
     int nShowPicWidth = img.width()* m_dbCoef;
     int nShowPicHeight = img.height() * m_dbCoef;
-    int nShowPosX = max(0, m_viewPos.x());
-    int nShowPosY = max(0, m_viewPos.y());
+    int nZoomedX = (img.width() - nShowPicWidth) / 2;
+    int nZoomedY = (img.height() - nShowPicHeight) / 2;
+    int nShowPosX = max(0, nZoomedX + m_viewOffset.x());
+    int nShowPosY = max(0, nZoomedY + m_viewOffset.y());
     nShowPosX = min(img.width() - nShowPicWidth, nShowPosX);
     nShowPosY = min(img.height() - nShowPicHeight, nShowPosY);
 
-    m_viewPos.setX(nShowPosX);
-    m_viewPos.setY(nShowPosY);
+    m_viewOffset.setX(nShowPosX - nZoomedX);
+    m_viewOffset.setY(nShowPosY - nZoomedY);
     QRect rcPic(nShowPosX, nShowPosY, nShowPicWidth, nShowPicHeight);
     painter.drawImage(rcDst, img, rcPic);
 }

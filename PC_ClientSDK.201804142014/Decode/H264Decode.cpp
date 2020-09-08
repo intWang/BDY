@@ -105,7 +105,6 @@ void pgm_save(unsigned char *buf, int wrap, int xsize, int ysize,
     fclose(f);
 }
 
-std::string strTmpPath = "C:\\Users\\xiaohwa2\\AppData\\Local\\Temp\\PPCS_Client\\Pic\\";
 std::string strUID = generate();
 
 

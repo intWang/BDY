@@ -543,17 +543,28 @@ void PreviewPanel::OnPreveiwWndSelFull(int nFull)
 {
     auto pSelWnd = qobject_cast<PreviewRealWnd::Ptr>(sender());
     int nRealFullLevel = nFull;
-    if (pSelWnd && m_pRealWnds)
+    if (pSelWnd && m_pRealWnds && m_pFullScrren)
     {
-//         if (nFull == 1 && m_curScreenMode == Screen_1X1)
-//         {
-//             nRealFullLevel = 2;
-//         }
+        if (m_curScreenMode == Screen_1X1)
+        {
+            if (m_bFull)
+            {
+                nRealFullLevel = 0;
+            }
+            else
+            {
+                nRealFullLevel = 2;
+            }
+        }
 
         switch (nRealFullLevel)
         {
         case 0:
         {
+            if (m_bFull)
+            {
+                emit m_pFullScrren->clicked();
+            }
             OnScreenDevideChange(m_curScreenMode);
             SetSelectWnd(pSelWnd, true);
         }
@@ -580,12 +591,8 @@ void PreviewPanel::OnPreveiwWndSelFull(int nFull)
             }
             else
             {
-                if (m_pFullScrren)
-                {
-                    emit m_pFullScrren->clicked();
-                }
+                emit m_pFullScrren->clicked();
             }
-           
         }
             break;
         default:

@@ -15,10 +15,14 @@ public:
     void SetRecordSavepath(const QString& strPath);
 
     QString GetSnapShotSavepath();
+    QString GetDBFilePath();
     QString GetRecordSavepath();
     QString GetRecordSaveFileName(std::string& strName);
 
     SnapModeParam::Ptr GetSnapModeParam();
+
+signals:
+    void InstanceCreated();
 
 protected:
     void LoadConfig();
@@ -30,8 +34,9 @@ protected:
 
 protected:
 
-    QString m_strSnapShotSavePath = QDir::tempPath() + "/PPCS_Client/SnapShot/";
-    QString m_strRecordSavePath = QDir::tempPath() + "/PPCS_Client/Record/";
+    QString m_strSnapShotSavePath = QDir::tempPath() + TMPDATA_FOLDER  + "SnapShot/";
+    QString m_strRecordSavePath = QDir::tempPath() + TMPDATA_FOLDER + "Record/";
+    QString m_strDBSavePath = QDir::tempPath() + TMPDATA_FOLDER + "UserData/";
 
     SnapModeParam::Ptr m_pSnapModeParam = std::make_shared<SnapModeParam>();
 };
