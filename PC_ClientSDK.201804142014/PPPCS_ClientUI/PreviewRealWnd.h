@@ -26,6 +26,7 @@ public:
 
     struct StageInfo
     {
+        bool bValied = false;
         DevNode::Ptr pChannel = nullptr;
         bool bSelected = false;
 
@@ -33,6 +34,7 @@ public:
         {
             pChannel = nullptr;
             bSelected = false;
+            bValied = false;
         }
     };
 
@@ -123,6 +125,7 @@ private:
     QSlider* m_pSliderPB = nullptr;
     QTimer* m_pTimerAutoPlay = nullptr;
     QTimer* m_pTimerHideBottom = nullptr;
+    QTimer* m_pTimerApplyStage = nullptr;
     int m_nTotalFrame = 0;
     int m_nCurIndex = 0;
     int m_nCurDir = 1;

@@ -21,15 +21,17 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
     SetAreaBk(s_qcl292C39, s_qcl292C39, s_qcl292C39);
 
     m_mapIcon = {
-        {"group_b", QIcon(QStringLiteral(":/Black/res/group_b.png"))},
-        {"group_g", QIcon(QStringLiteral(":/Black/res/group_g.png"))},
-        {"play_b", QIcon(QStringLiteral(":/Black/res/play_b.png"))},
-        {"play_g", QIcon(QStringLiteral(":/Black/res/play_g.png"))},
-        {"pause_b", QIcon(QStringLiteral(":/Black/res/pause_b.png"))},
-        {"pause_g", QIcon(QStringLiteral(":/Black/res/pause_g.png"))},
-        {"connecting_b", QIcon(QStringLiteral(":/Black/res/connecting_b.png"))},
-        {"connecting_g", QIcon(QStringLiteral(":/Black/res/connecting_g.png"))},
+        {"group", QIcon(QStringLiteral(":/Black/res/group.png"))},
+        {"play", QIcon(QStringLiteral(":/Black/res/play.png"))},
+        {"pause", QIcon(QStringLiteral(":/Black/res/pause.png"))},
+        {"connecting", QIcon(QStringLiteral(":/Black/res/connecting.png"))},
         {"control_center", QIcon(QStringLiteral(":/Black/res/control_center.png"))},
+    };
+
+    m_mapClBrush = {
+        {"normal", QBrush(QColor(240, 240, 240))},
+        {"connecting", QBrush(QColor(255, 166, 0))},
+        {"connected", QBrush(QColor(41, 178, 134))},
     };
 
     auto pTopWnd = InitTopBar();
@@ -205,7 +207,7 @@ BarWidget::Ptr  DevTreeWnd::InitBottomBar()
             auto pBtnDelete = MQ(QPushButton)(this);
             auto pBtnModify = MQ(QPushButton)(this);
 
-            pBtnAddDevice->setFixedSize({40,40});
+            pBtnAddDevice->setFixedSize({90,40});
             pBtnAddGroup->setFixedSize({ 40,40 });
             pBtnDelete->setFixedSize({ 40,40 });
             pBtnModify->setFixedSize({ 40,40 });
@@ -216,6 +218,7 @@ BarWidget::Ptr  DevTreeWnd::InitBottomBar()
             pBtnModify->setObjectName("Modify");
 
             pBtnAddDevice->setToolTip("添加设备");
+            pBtnAddDevice->setText("添加设备");
             pBtnAddGroup->setToolTip("新建分组");
             pBtnDelete->setToolTip("删除");
             pBtnModify->setToolTip("修改");
@@ -282,6 +285,11 @@ QLayoutPtr DevTreeWnd::InitCenterCtl()
     m_pTree->setAutoFillBackground(true);
     BuildTree(model);
 
+    if (m_pRootItem)
+    {
+        m_pTree->expand(m_pRootItem->index());
+    }
+
     return pCenterLayout;
 }
 
@@ -296,6 +304,7 @@ void DevTreeWnd::BuildTree(QStandardItemModelPtr pParent)
         {
             pRootItem->setIcon(m_mapIcon["control_center"]);
             pRootItem->setData(QVariant::fromValue(nRootID));
+            pRootItem->setForeground(m_mapClBrush["normal"]);
             pParent->appendRow(pRootItem);
             m_pRootItem = pRootItem;
             BuildSubTree(pRootItem);
@@ -315,14 +324,19 @@ void DevTreeWnd::BuildSubTree(QStandardItemPtr pParent)
         pParent->appendRow(pSubItem);
         if (pSubData->GetDataType() == DevTreeNodeType::Device)
         {
-            pSubItem->setIcon(m_mapIcon["connecting_g"]);
+            pSubData->SetStatu(DevTreeNodeStatu::Connecting);
+            pSubItem->setIcon(m_mapIcon["connecting"]);
+            pSubItem->setForeground(m_mapClBrush["connecting"]);
             ConectDevice(std::dynamic_pointer_cast<DevNode>(pSubData));
             ++m_nTotalDevNum;
         }
         else
         {
-            pSubItem->setIcon(m_mapIcon["group_g"]);
+            pSubItem->setIcon(m_mapIcon["group"]);
+            pSubItem->setForeground(m_mapClBrush["normal"]);
         }
+
+        SetItemStatuTip(pSubItem, pSubData);
     }
     emit this->TotalDevNumChange(m_nTotalDevNum);
 }
@@ -336,12 +350,13 @@ void DevTreeWnd::AddItemToTree(TreeNode::Ptr pNew, QStandardItemPtr pParent /*= 
         {
             if (pNew->GetDataType() == DevTreeNodeType::Group)
             {
-                pNewItem = new QStandardItem(m_mapIcon["group_g"], QString::fromStdString(pNew->GetName()));
+                pNewItem = new QStandardItem(m_mapIcon["group"], QString::fromStdString(pNew->GetName()));
                 pParent->insertRow(0, pNewItem);
             }
             else
             {
-                pNewItem = new QStandardItem(m_mapIcon["connecting_g"], QString::fromStdString(pNew->GetName()));
+                pNewItem = new QStandardItem(m_mapIcon["connecting"], QString::fromStdString(pNew->GetName()));
+                pNewItem->setForeground(m_mapClBrush["connecting"]);
                 pParent->appendRow(pNewItem);
             }
         }
@@ -349,7 +364,8 @@ void DevTreeWnd::AddItemToTree(TreeNode::Ptr pNew, QStandardItemPtr pParent /*= 
         {
             if (QStandardItemModel* treeModel = dynamic_cast<QStandardItemModel*>(m_pTree->model()))
             {
-                pNewItem = new QStandardItem(m_mapIcon["group_g"], QString::fromStdString(pNew->GetName()));
+                pNewItem = new QStandardItem(m_mapIcon["group"], QString::fromStdString(pNew->GetName()));
+                pNewItem->setForeground(m_mapClBrush["normal"]);
                 treeModel->appendRow(pNewItem);
             }
         }
@@ -358,8 +374,8 @@ void DevTreeWnd::AddItemToTree(TreeNode::Ptr pNew, QStandardItemPtr pParent /*= 
         {
             SetSelItem(pNewItem);
             pNewItem->setData(QVariant::fromValue(pNew->GetNodeID()));
+            SetItemStatuTip(pNewItem, pNew);
             AddTreeData(pNew);
-
         }
     }
 }
@@ -644,17 +660,21 @@ void DevTreeWnd::UpdateTreeItem(QString strName, TreeNode::Ptr pNewData)
                     //////update tree ui
                     if (pNewData->GetStatu() == DevTreeNodeStatu::Pause)
                     {
-                        item->setIcon(m_mapIcon["play_g"]);
+                        item->setIcon(m_mapIcon["play"]);
+                        item->setForeground(m_mapClBrush["connected"]);
                     }
                     else if(pNewData->GetStatu() == DevTreeNodeStatu::Play)
                     {
-                        item->setIcon(m_mapIcon["pause_g"]);
+                        item->setIcon(m_mapIcon["pause"]);
+                        item->setForeground(m_mapClBrush["connected"]);
                     }
                     else if (pNewData->GetStatu() == DevTreeNodeStatu::Connecting)
                     {
-                        item->setIcon(m_mapIcon["connecting_g"]);
+                        item->setIcon(m_mapIcon["connecting"]);
+                        item->setForeground(m_mapClBrush["connecting"]);
                     }
 
+                    SetItemStatuTip(item, pNewData);
                     m_pTree->update();
                 }
             }
@@ -716,6 +736,40 @@ void DevTreeWnd::SelNext(bool bLastest /*= false*/)
         m_pTree->expand(pCurItem->index());
         SetSelItem(pCurItem);
     }
+}
+
+void DevTreeWnd::SetItemStatuTip(QStandardItemPtr pItem, TreeNode::Ptr pNode)
+{
+    if (!pItem || !pNode)
+    {
+        return;
+    }
+    QString strStatu;
+    switch (pNode->GetStatu())
+    {
+    case Default:
+        break;
+    case Connecting:
+        strStatu = "连接中";
+        break;
+    case Pause:
+        strStatu = "空闲";
+        break;
+    case Play:
+        strStatu = "播放中";
+        break;
+    default:
+        break;
+    }
+
+
+    QString strTip = QString::fromStdString(pNode->GetName());
+  
+    if (strStatu.length())
+    {
+        strTip = strTip +"[" + strStatu + "]";
+    }
+    pItem->setToolTip(strTip);
 }
 
 std::vector<TreeNode::Ptr> DevTreeWnd::GetTreeIteByGroup(int nGroupID)
@@ -944,7 +998,7 @@ void DevTreeWnd::OnDataModified(ConfigData::Ptr pData)
                             pDevice->strShortID = pModDate->strShortUID;
                             pDevice->strUID = pModDate->strUID;
                             pDevice->strPwd = pModDate->strPwd;
-                            ConectDevice(std::dynamic_pointer_cast<DevNode>(pData));
+                            ConectDevice(std::dynamic_pointer_cast<DevNode>(pNode));
                         }
                         pSelItem->setText(QString::fromStdString(pDevice->GetName()));
                     }

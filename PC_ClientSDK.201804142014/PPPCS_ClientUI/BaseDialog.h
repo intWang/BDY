@@ -17,7 +17,7 @@ public:
     void SetBorder(int nBorderWidth);
     void FullScreen();
 public slots:
-    void OnCloseCmd();
+    virtual void OnCloseCmd();
 private:
     CmdBar::Ptr m_pTitleBar = nullptr;
     HintBar::Ptr m_pBottomBar = nullptr;
@@ -28,6 +28,7 @@ protected:
     void setWidgetResizable(bool bVisiable);
 
     virtual void keyPressEvent(QKeyEvent *) override;
+
 
 };
 

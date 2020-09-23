@@ -15,8 +15,10 @@ PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
     m_DrawWnd = new DrawWnd(nIndex, this);
     m_pTimerAutoPlay = new QTimer(this);
     m_pTimerHideBottom = new QTimer(this);
+    m_pTimerApplyStage = new QTimer(this);
     connect(m_pTimerAutoPlay, &QTimer::timeout, this, &PreviewRealWnd::OnTimeout);
     connect(m_pTimerHideBottom, &QTimer::timeout, this, &PreviewRealWnd::OnTimeout);
+    connect(m_pTimerApplyStage, &QTimer::timeout, this, &PreviewRealWnd::OnTimeout);
     if (m_DrawWnd)
     {
         pMainLayout->addWidget(m_DrawWnd);
@@ -495,12 +497,14 @@ void PreviewRealWnd::SetWndMode(PanelMode emMode)
     switch (emMode)
     {
     case PreviewMode:
-        StartPreview(m_stageInfo.pChannel);
-        SetSelectStatu(m_stageInfo.bSelected);
-        m_stageInfo.Clear();
+        if (m_pTimerApplyStage)
+        {
+            m_pTimerApplyStage->start(2000);
+        }
         ShowFrame(nullptr);
         break;
     case PictureMode:
+        m_stageInfo.bValied = true;
         m_stageInfo.pChannel = m_pChannel;
         m_stageInfo.bSelected = m_bSelected;
         StopPreview();
@@ -563,6 +567,16 @@ void PreviewRealWnd::OnTimeout()
         {
             HideBottom(true);
         }
+    }
+    if (pTimer == m_pTimerApplyStage)
+    {
+        if (m_stageInfo.bValied)
+        {
+            StartPreview(m_stageInfo.pChannel);
+            SetSelectStatu(m_stageInfo.bSelected);
+            m_stageInfo.Clear();
+        }
+        m_pTimerApplyStage->stop();
     }
 }
 

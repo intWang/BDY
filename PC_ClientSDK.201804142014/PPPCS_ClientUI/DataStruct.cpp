@@ -114,7 +114,7 @@ void DevNode::UpdateDevData(const DeviceData& data)
 
 bool DevNode::IsDevLoaded()
 {
-    return stDevice.video_input.size();
+    return !stDevice.video_input.empty();
 }
 
 bool DevNode::CheckPwd(std::string strInputPwd)

@@ -1,5 +1,6 @@
 #include "MainFrame.h"
 #include <QHBoxLayout>
+#include "MessageBoxWnd.h"
 #include <QDesktopWidget>
 ls::IServiceEngine::Ptr g_pEngine = ls::CreateServiceEngine();
 ls::ICallBackEngin::Ptr g_pCallBack = ls::CreateCallbackEngine();
@@ -7,7 +8,7 @@ ls::ICallBackEngin::Ptr g_pCallBack = ls::CreateCallbackEngine();
 MainFrame::MainFrame(QWidget *parent)
     :BaseDialog(parent)
 {
-    setWindowTitle("视频监控系统V1.0Bate 2020-09-30 过期");
+    setWindowTitle("视频监控系统V1.1Bate 2020-09-30 过期");
 
     QDesktopWidget* desktopWidget = QApplication::desktop();
     setMaximumSize(desktopWidget->width(), desktopWidget->height());
@@ -34,5 +35,13 @@ MainFrame::~MainFrame()
     {
         g_pEngine->destroy();
         g_pEngine = nullptr;
+    }
+}
+
+void MainFrame::OnCloseCmd()
+{
+    if (msg::showQuestion(this, "退出", "退出北斗鹰?") == QMessageBox::Ok)
+    {
+        BaseDialog::OnCloseCmd();
     }
 }

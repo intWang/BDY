@@ -108,4 +108,3 @@ void BaseDialog::keyPressEvent(QKeyEvent * event)
     AreableWidget<QDialog>::keyPressEvent(event);
 
 }
-

@@ -2,10 +2,13 @@
 
 #include "AreableWidget.h"
 #include "ui_MainViewWidget.h"
+#include "DataStruct.h"
+#include <QTimer>
 
 class PopUpTreeWnd;
 class DevTreeWnd;
 class SubPreviewWnd;
+
 class MainViewWidget : public AreableWidget<QWidget>
 {
     Q_OBJECT
@@ -21,9 +24,10 @@ signals:
     void LeaveSnapMode();
 
 protected slots:
-    void OnPageModeChanged(PanelMode nMode);
+    void OnPageModeChanged(PanelMode nMode, DevNode::Ptr pNode);
     void OnCallPopUpTreeWnd();
     void OnPanelFullScreen(bool bFull);
+    void OnTimeOut();
 
 protected:
 
@@ -37,4 +41,6 @@ protected:
     PopUpTreeWnd* m_pPopTreeWnd = nullptr;
     DevTreeWnd* m_pTreeWnd = nullptr;
     SubPreviewWnd* m_pSubPreview = nullptr;
+    QTimer* m_pTimer = nullptr;
+    DevNode::Ptr m_pSnapInitDevNode = nullptr;
 };

@@ -40,8 +40,6 @@ PreviewPanel::PreviewPanel(QWidget *parent)
     ui.mainLayout->addWidget(pViewWndWidget);
     ui.mainLayout->setStretch(1, 1);
     InitPreviewRealWnds();
-    SetSelectWnd(nullptr);
-
 }
 
 PreviewPanel::~PreviewPanel()
@@ -117,6 +115,11 @@ void PreviewPanel::OnScreenDevideChange(DevideScreen newMode)
             }
         }
         m_pRealWnds->update();
+    }
+
+    if (!m_pCurSelWnd ||( m_pCurSelWnd && !m_pCurSelWnd->isVisible()))
+    {
+        SetSelectWnd(m_vcPreviewRealWnds[0]);
     }
 }
 
@@ -365,6 +368,9 @@ void PreviewPanel::SetCurrentMode(PanelMode emMode)
             return false;
         });
     }
+
+    
+    auto pLastPreviewDev = m_pCurSelWnd ? m_pCurSelWnd->GetDevNode() : nullptr;
     switch (emMode)
     {
     case PanelMode::PreviewMode:
@@ -389,7 +395,7 @@ void PreviewPanel::SetCurrentMode(PanelMode emMode)
     }
     SetPreviewWndMode(emMode);
   
-    emit PanelModeChanged(emMode);
+    emit PanelModeChanged(emMode, pLastPreviewDev);
 }
 
 void PreviewPanel::SetPreviewWndMode(PanelMode nModetype)
@@ -632,7 +638,7 @@ void PreviewPanel::OnStreamSnapShot(SnapData::Ptr pFrame)
                         if (pixMap.save(strFileName, "JPG", 100))
                         {
                             QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
-                            ClearAllWnd();
+                            //ClearAllWnd();
                         }
                     }
                 }

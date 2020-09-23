@@ -311,10 +311,27 @@ void DrawWnd::OnMouseClicked()
             pSnapData->y = m_mousePos.y() - (m_pSnapModeParam->nSelRectHeight / 2);
             pSnapData->nWidth = m_pSnapModeParam->nSelRectWidth;
             pSnapData->nHeight = m_pSnapModeParam->nSelRectHeight;
+
+            if (pSnapData->x > 0)
+            {
+                pSnapData->nWidth = min(m_pSnapModeParam->nSelRectWidth, rcWnd.right() - pSnapData->x);
+            }
+            else
+            {
+                pSnapData->nWidth = min((pSnapData->x + m_pSnapModeParam->nSelRectWidth), rcWnd.right());
+            }
+
+            if (pSnapData->y > 0)
+            {
+                pSnapData->nHeight = min(m_pSnapModeParam->nSelRectHeight, rcWnd.bottom() - pSnapData->y);
+            }
+            else
+            {
+                pSnapData->nHeight = min((pSnapData->y + m_pSnapModeParam->nSelRectHeight), rcWnd.bottom());
+            }
+
             pSnapData->x = max(pSnapData->x, 0);
             pSnapData->y = max(pSnapData->y, 0);
-            pSnapData->nWidth = min((pSnapData->x + m_pSnapModeParam->nSelRectWidth), rcWnd.right()) - pSnapData->x;
-            pSnapData->nHeight = min((pSnapData->y + m_pSnapModeParam->nSelRectHeight), rcWnd.bottom()) - pSnapData->y;
 
             pSnapData->x = pSnapData->x*1.0 / rcWnd.width() * pSnapData->pFrame->nPicWidth;
             pSnapData->y = pSnapData->y*1.0 / rcWnd.height() * pSnapData->pFrame->nPicHeight;

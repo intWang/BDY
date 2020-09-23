@@ -343,15 +343,17 @@ void H264Decode::RunDecodeThread()
             width = m_pCodecContext->width;
             height = m_pCodecContext->height;
             //crash 在 sws_scale的问题，改一下av_image_fill_arrays 最后一个参数，对齐顺序就可以解决了。
-            av_image_fill_arrays(m_pFrameRGB->data, m_pFrameRGB->linesize, m_pRGBBuffer, AV_PIX_FMT_RGB32, width, height, 32);
-            sws_scale(m_pImgConvertCtx,
-                (uint8_t const * const *)pFrameYUV->data,
-                pFrameYUV->linesize, 0, height, m_pFrameRGB->data,
-                m_pFrameRGB->linesize);
-
-            if (m_pRGBBuffer)
+            if (auto nsize = av_image_fill_arrays(m_pFrameRGB->data, m_pFrameRGB->linesize, m_pRGBBuffer, AV_PIX_FMT_RGB32, width, height, 32))
             {
-                DataCallBack(m_pRGBBuffer, width, height, height*m_pFrameRGB->linesize[0]);
+                sws_scale(m_pImgConvertCtx,
+                    (uint8_t const * const *)pFrameYUV->data,
+                    pFrameYUV->linesize, 0, height, m_pFrameRGB->data,
+                    m_pFrameRGB->linesize);
+
+                if (m_pRGBBuffer)
+                {
+                    DataCallBack(m_pRGBBuffer, width, height, height*m_pFrameRGB->linesize[0]);
+                }
             }
         }
     }

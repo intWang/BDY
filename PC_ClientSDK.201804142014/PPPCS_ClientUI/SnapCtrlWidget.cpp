@@ -42,6 +42,7 @@ SnapCtrlWidget::SnapCtrlWidget(QWidget *parent)
     connect(ui.chkColumnLayout, &QCheckBox::stateChanged, this, &SnapCtrlWidget::OnBtnChecked);
     connect(ui.chkPopSnap, &QCheckBox::stateChanged, this, &SnapCtrlWidget::OnBtnChecked);
     connect(ui.chkLockProportion, &QCheckBox::stateChanged, this, &SnapCtrlWidget::OnBtnChecked);
+
     LoadConfig();
 }
 

@@ -19,6 +19,9 @@ SnapControlWnd::SnapControlWnd(QWidget *parent)
     pMainLayout->addWidget(pDevideLine);
     pMainLayout->addWidget(pSnapWidget);
     pMainLayout->setContentsMargins(0, 0, 0, 0);
+    pMainLayout->setStretch(0, 4);
+    pMainLayout->setStretch(1, 2);
+
     pViewWnd->SetNoBottom();
     pViewWnd->SetWndMode(PanelMode::SnapMode);
     //setEnabled(false);

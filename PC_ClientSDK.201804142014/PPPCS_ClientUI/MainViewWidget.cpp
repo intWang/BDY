@@ -53,7 +53,7 @@ MainViewWidget::MainViewWidget(QWidget *parent)
     connect(pSnapControlWnd, &SnapControlWnd::StreamSnapShot, pPreviewPanel, &PreviewPanel::OnStreamSnapShot);
     connect(pSnapControlWnd, &SnapControlWnd::CustomWndLayout, pPreviewPanel, &PreviewPanel::SetCustomWndLayout);
     connect(pSnapControlWnd, &SnapControlWnd::LayoutDirChanged, pPreviewPanel, &PreviewPanel::OnLayoutDirChanged);
-
+   
     m_pSubPreview = pSubPreviewWnd;
     ////End Init widget
     pLeftLayout->addWidget(pPreviewPanel);
@@ -65,8 +65,12 @@ MainViewWidget::MainViewWidget(QWidget *parent)
     m_mapModeWidget[PanelMode::PreviewMode] = { pTabWnd ,pTreeView };
     m_mapModeWidget[PanelMode::PictureMode] = { pSubPreviewWnd ,pSnapControlWnd };
 
-    OnPageModeChanged(PanelMode::PreviewMode);
+    OnPageModeChanged(PanelMode::PreviewMode, nullptr);
     m_pPopTreeWnd->hide();
+
+    m_pTimer = new QTimer(this);
+    connect(m_pTimer, &QTimer::timeout, this, &MainViewWidget::OnTimeOut);
+
     LogInfo("MainViewWidget Created!");
 }
 
@@ -74,7 +78,7 @@ MainViewWidget::~MainViewWidget()
 {
 }
 
-void MainViewWidget::OnPageModeChanged(PanelMode nMode)
+void MainViewWidget::OnPageModeChanged(PanelMode nMode, DevNode::Ptr pNode)
 {
     if (m_pPopTreeWnd)
     {
@@ -116,14 +120,25 @@ void MainViewWidget::OnPageModeChanged(PanelMode nMode)
     {
         pRightLayout->setStretch(0, 2);
         pRightLayout->setStretch(1, 3);
+        ui.horizontalLayout->setStretch(0, 7);
+        ui.horizontalLayout->setStretch(1, 2);
         emit LeaveSnapMode();
     }
         break;
     case PictureMode:
     {
-        pRightLayout->setStretch(2, 3);
+        pRightLayout->setStretch(2, 4);
         pRightLayout->setStretch(3, 5);
+
+        ui.horizontalLayout->setStretch(0, 9);
+        ui.horizontalLayout->setStretch(1, 4);
         emit EnterSnapMode();
+
+        if (pNode && m_pTimer)
+        {
+            m_pSnapInitDevNode = pNode;
+            m_pTimer->start(1000);
+        }
     }
         break;
     default:
@@ -165,6 +180,20 @@ void MainViewWidget::OnPanelFullScreen(bool bFull)
             auto pLeftLayout = ui.leftLayout;
             pLeftLayout->addWidget(pWidget);
         }
+    }
+}
+
+void MainViewWidget::OnTimeOut()
+{
+    auto pTimer = qobject_cast<QTimer*>(sender());
+    if (pTimer == m_pTimer)
+    {
+        if (m_pSnapInitDevNode)
+        {
+            emit m_pTreeWnd->ChannelNodeDBClick(m_pSnapInitDevNode);
+            m_pSnapInitDevNode = nullptr;
+        }
+        m_pTimer->stop();
     }
 }
 

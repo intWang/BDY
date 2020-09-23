@@ -19,7 +19,7 @@ public:
 signals:
     void PreviewStatuChanged(const QString& strUid, bool bStatu);
     void SelectPreviewWnd(PreviewRealWnd::Ptr pWnd);
-    void PanelModeChanged(PanelMode emMode);
+    void PanelModeChanged(PanelMode emMode, DevNode::Ptr pNode);
     void CallPopUpTreeWnd();
     void FullScreen(bool bFull);
 protected:

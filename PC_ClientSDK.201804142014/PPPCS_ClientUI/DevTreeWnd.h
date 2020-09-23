@@ -23,6 +23,7 @@ private:
     int m_nTotalDevNum = 0;
 
     std::map<std::string, QIcon> m_mapIcon;
+    std::map<std::string, QBrush> m_mapClBrush;
     std::map<int, std::vector<int>> m_Group;
     std::mutex m_mxTreeData;
     std::vector<TreeNode::Ptr> m_TreeData;
@@ -65,7 +66,7 @@ protected:
     void UpdateTreeItem(QString strName, TreeNode::Ptr pNewData);
     void DoSearch(const QString& stKeyWords);
     void SelNext(bool bLastest = false);
-
+    void SetItemStatuTip(QStandardItemPtr pItem, TreeNode::Ptr pNode);
     ////////data operate
     std::vector<TreeNode::Ptr> GetTreeIteByGroup(int nGroupID);
     TreeNode::Ptr GetTreeItemByUid(const std::string& strUid);

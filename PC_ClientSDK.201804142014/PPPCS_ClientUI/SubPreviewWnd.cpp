@@ -132,6 +132,7 @@ BarWidget::Ptr SubPreviewWnd::InitBottomBar()
 
             std::vector<QPushButtonPtr> vcBtns = { m_pBtnZoomIn , m_pBtnZoomOut, m_pBtnLeft, m_pBtnRight, m_pBtnUp, m_pBtnDown };
             std::vector<QString> vcBtnNames = { "放大", "缩小", "左移", "右移", "上移", "下移" };
+            pLayout->addStretch();
             for (int i = 0; i < vcBtns.size(); i++)
             {
                 vcBtns[i]->setText(vcBtnNames[i]);
@@ -144,7 +145,8 @@ BarWidget::Ptr SubPreviewWnd::InitBottomBar()
                 connect(vcBtns[i], &QPushButton::clicked, this, &SubPreviewWnd::OnBtnClicked);
                 pLayout->addWidget(vcBtns[i]);
             }
-            pLayout->setContentsMargins(5,0,5,0);
+            pLayout->setContentsMargins(5, 0, 5, 0);
+            pLayout->setSpacing(5);
         }
     }
 

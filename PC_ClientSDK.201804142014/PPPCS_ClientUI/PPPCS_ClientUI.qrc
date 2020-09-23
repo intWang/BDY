@@ -107,6 +107,9 @@
         <file>res/success.png</file>
         <file>res/folder-add.png</file>
         <file>res/modify.png</file>
+        <file>res/play.png</file>
+        <file>res/connecting.png</file>
+        <file>res/pause.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>

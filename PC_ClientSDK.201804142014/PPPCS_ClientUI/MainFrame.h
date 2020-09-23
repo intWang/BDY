@@ -9,6 +9,8 @@ public:
     MainFrame(QWidget *parent = Q_NULLPTR);
     ~MainFrame();
 
+    virtual void OnCloseCmd();
+
 private:
     MainViewWidget::Ptr m_pMainViewWiget = nullptr;
 };

@@ -222,7 +222,7 @@ struct SnapModeParam
     std::atomic<int> nWndRows = 2;
     std::atomic<int> nWndColumns = 2;
     std::atomic<int> nAutoStop = 120;
-    std::atomic<int> nMaxAutoStop = 120;
+    std::atomic<int> nMaxAutoStop = 180;
     std::atomic<bool> bLockProp = false;
     std::atomic<bool> bRowFirst = false;
     std::atomic<bool> bPopFull = false;

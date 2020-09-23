@@ -187,13 +187,13 @@ QTreeView{
 QTreeView {
     show-decoration-selected: 1;
 }
- 
+/*
 QTreeView::item {
 	color: rgb(199, 202, 217);
 	min-height: 30px;
 	font-size: 24px;
 	border: transparent;
-}
+}*/
 
 QTreeView::item:hover {
 	color: rgb(62, 153, 205);
@@ -894,7 +894,7 @@ QPushButton:enabled {
 }
 QPushButton:!enabled {
         background: rgb(107, 133, 178);
-        color: rgb(200, 200, 200);
+		color: white;
 }
 QPushButton:enabled:hover{
         background: rgb(57, 83, 128);
