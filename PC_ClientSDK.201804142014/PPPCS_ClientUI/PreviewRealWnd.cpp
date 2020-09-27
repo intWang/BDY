@@ -400,9 +400,12 @@ void PreviewRealWnd::DoRecord()
 
 void PreviewRealWnd::ActiveDev()
 {
-    if (m_pChannel)
+    if (msg::showQuestion(this, QStringLiteral("请确认"), QStringLiteral("是否激活设备？")) == QMessageBox::Ok)
     {
-        RequestActiveDev(m_pChannel->GetDevUid());
+        if (m_pChannel)
+        {
+            RequestActiveDev(m_pChannel->GetDevUid());
+        }
     }
 }
 
@@ -700,7 +703,8 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
 
             pActive->setObjectName("btn_active");
             pActive->setToolTip(QStringLiteral("激活"));
-            pActive->setFixedWidth(32);
+            pActive->setText(QStringLiteral("激活"));
+            pActive->setFixedWidth(63);
             pActive->hide();
 
             pLayout->addStretch();
