@@ -141,6 +141,7 @@ void PreviewRealWnd::StartPreview(DevNode::Ptr pChannel)
         pChannel->StartPreview();
         emit PreviewWndStartPreview(QString::fromStdString(m_pChannel->GetDevUid()), this);
         StartHideBottomTimer();
+        UpdateBottomBtn();
     }
 }
 
@@ -164,6 +165,43 @@ void PreviewRealWnd::StopPreview()
     }
     StopHideBottomTimer();
     SetRuningStatu(Status::Empty);
+}
+
+void PreviewRealWnd::UpdateBottomBtn()
+{
+    if (!m_pChannel)
+    {
+        return;
+    }
+
+    if (m_pActiveBtn)
+    {
+        if (m_pChannel->IsActivated())
+        {
+            m_pActiveBtn->hide();
+        }
+        else
+        {
+            m_pActiveBtn->show();
+        }
+    }
+
+    if (m_DrawWnd)
+    {
+        m_DrawWnd->SetWaterMark(QString(""));
+
+        if (m_pChannel->IsLocked())
+        {
+            QString strWndHint = "北斗鹰:设备[" + QString::fromStdString(m_pChannel->GetName()) + "]已锁定";
+            m_DrawWnd->SetWaterMark(strWndHint);
+        }
+        else if (!m_pChannel->IsActivated())
+        {
+            m_DrawWnd->SetWaterMark(QString("北斗鹰:设备未激活"));
+        }
+       
+        m_DrawWnd->SetLock(m_pChannel->IsLocked());
+    }
 }
 
 void PreviewRealWnd::StartStream(DevNode::Ptr pChannel)
@@ -357,6 +395,14 @@ void PreviewRealWnd::DoRecord()
         {
             m_pChannel->StartRecord();
         }
+    }
+}
+
+void PreviewRealWnd::ActiveDev()
+{
+    if (m_pChannel)
+    {
+        RequestActiveDev(m_pChannel->GetDevUid());
     }
 }
 
@@ -593,7 +639,7 @@ void PreviewRealWnd::ShowFrame(SnapData::Ptr pFrame)
         {
             ClearPicture();
         }
-    }\
+    }
 }
 
 void PreviewRealWnd::ResetFullLevel(int nLevel)
@@ -634,6 +680,7 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
             auto pBtnRecord = MQ(QPushButton)(pBottomBar);
             auto pBtnSnap = MQ(QPushButton)(pBottomBar);
             auto pBtnConfig = MQ(QPushButton)(pBottomBar);
+            auto pActive = MQ(QPushButton)(pBottomBar);
 
             pBtnClose->setObjectName("btn_stop_preview");
             pBtnClose->setToolTip(QStringLiteral("停止预览"));
@@ -651,14 +698,21 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
             pBtnConfig->setToolTip(QStringLiteral("配置"));
             pBtnConfig->setFixedWidth(32);
 
+            pActive->setObjectName("btn_active");
+            pActive->setToolTip(QStringLiteral("激活"));
+            pActive->setFixedWidth(32);
+            pActive->hide();
+
             pLayout->addStretch();
             pLayout->setSpacing(5);
+            pLayout->addWidget(pActive);
             pLayout->addWidget(pBtnRecord);
             pLayout->addWidget(pBtnSnap);
             pLayout->addWidget(pBtnClose);
             pLayout->addWidget(pBtnConfig);
             pLayout->setContentsMargins(0,1,0,0);
 
+            m_pActiveBtn = pActive;
             m_pRecordBtn = pBtnRecord;
             //pBtnRecord->setEnabled(false);
 
@@ -673,10 +727,9 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
             });
 
             connect(pBtnSnap, &QPushButton::clicked, this, &PreviewRealWnd::SnapShot);
-            
             connect(pBtnConfig, &QPushButton::clicked, this, &PreviewRealWnd::CallConfig);
-
             connect(pBtnRecord, &QPushButton::clicked, this, &PreviewRealWnd::DoRecord);
+            connect(m_pActiveBtn, &QPushButton::clicked, this, &PreviewRealWnd::ActiveDev);
             //pBtnRecord->hide();
         }
     }

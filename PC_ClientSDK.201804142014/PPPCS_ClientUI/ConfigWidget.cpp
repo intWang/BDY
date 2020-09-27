@@ -5,14 +5,7 @@
 #include "JSONStructProtocal.h"
 #include "JSONObject.hpp"
 #include "ConfigCenter.h"
-
-#include <QtNetwork/QNetworkRequest>
-#include <QtNetwork/QNetworkReply>
-#include <QtNetwork/QNetworkAccessManager>
-
-#include <QtNetwork/QSsl>
-#include <QtNetwork/QSslConfiguration>
-#include <QtNetwork/QSslSocket>
+#include "HttpHelper.h"
 
 #include <QFileDialog>
 ConfigWidget::ConfigWidget(ConfigType type, QWidget* parent, TreeNode::Ptr pNode)
@@ -123,10 +116,11 @@ void ConfigWidget::CreateWidget4Device(QFormLayoutPtr pLayout, bool bModify )
     m_pInputPwd = pinputPwd;
     m_pInputName = pinputDevName;
 
-    m_pManager = new QNetworkAccessManager(this);
-    if (m_pManager)
+    m_pHttpHelper = new HttpHelper(this);
+    if (m_pHttpHelper)
     {
-        connect(m_pManager, SIGNAL(finished(QNetworkReply*)), this, SLOT(OnHttpReplyFinished(QNetworkReply*)));
+        connect(m_pHttpHelper, &HttpHelper::HttpReplyFinished, this, &ConfigWidget::OnHttpReplyFinished);
+        connect(m_pHttpHelper, &HttpHelper::RequestTimeout, this, &ConfigWidget::OnHttpTimeour);
     }
 
     if (bModify)
@@ -293,7 +287,7 @@ void ConfigWidget::CollectData4Device()
         pRealData->strDevName = pRealData->strShortUID;
     }
 
-    if (pRealData->strUID.size() <= 6 )
+    if (pRealData->strShortUID.size() <= 6 )
     {
         RequestLongCode(pRealData->strShortUID);
     }
@@ -356,28 +350,24 @@ void ConfigWidget::OnCancel()
 
 void ConfigWidget::RequestLongCode(std::string& strShortCode)
 {
-    if (m_pManager && !m_bRequesting)
+    if (m_pHttpHelper && !m_bRequesting)
     {
-        QString strUrl = "https://lyzb.hubanpay.com/huban-camera/api/device/infoByUid/";
-        strUrl += QString::fromStdString(strShortCode);
-        QNetworkRequest request;
-        QSslConfiguration config;
-
-        config.setPeerVerifyMode(QSslSocket::VerifyNone);
-        config.setProtocol(QSsl::TlsV1SslV3);
-        request.setSslConfiguration(config);
-
-        request.setHeader(QNetworkRequest::UserAgentHeader
-            , "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.97 Safari/537.36");
-
-        request.setUrl(QUrl(strUrl));
-        auto replay = m_pManager->get(request);
+        m_pHttpHelper->RequestLongCode(strShortCode);
         m_bRequesting = true;
 
         m_pbtnOK->setEnabled(false);
         m_pbtnCancel->setEnabled(false);
     }
+}
 
+void ConfigWidget::keyPressEvent(QKeyEvent *event)
+{
+    if (event->key() == Qt::Key_Enter)
+    {
+        OnOk();
+        return;
+    }
+    BaseDialog::keyPressEvent(event);
 }
 
 QString ConfigWidget::ChooseFilePath(QString& strDefultPath)
@@ -426,8 +416,16 @@ void ConfigWidget::OnHttpReplyFinished(QNetworkReply* replay)
     {
         QString strTitle = QStringLiteral("错误") + "  " + QVariant::fromValue(replay->error()).toString();
         msg::showError(this, strTitle,QStringLiteral("输入的设备ID无效，请检查后重新输入！"));
-        m_pbtnOK->setEnabled(true);
-        m_pbtnCancel->setEnabled(true);
     }
+    m_pbtnOK->setEnabled(true);
+    m_pbtnCancel->setEnabled(true);
+}
+
+void ConfigWidget::OnHttpTimeour()
+{
+    msg::showWarning(this, "超时", QStringLiteral("连接超时，请稍后再试！"));
+    m_pbtnOK->setEnabled(true);
+    m_pbtnCancel->setEnabled(true);
+    m_bRequesting = false;
 }
 

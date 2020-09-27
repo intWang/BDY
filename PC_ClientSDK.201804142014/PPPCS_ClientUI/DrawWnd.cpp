@@ -19,7 +19,6 @@ DrawWnd::DrawWnd(int index, QWidget *parent)
 
     connect(m_pFrameRateTimer, &QTimer::timeout, this, &DrawWnd::OnTimeOut);
     connect(m_pFrameUpdateTimer, &QTimer::timeout, this, &DrawWnd::OnTimeOut);
-
 }
 
 
@@ -64,6 +63,10 @@ void DrawWnd::InputFrameData(FrameData::Ptr pFrame)
 
 void DrawWnd::AddFrame(FrameData::Ptr pFrame)
 {
+    if (m_bLock)
+    {
+        return;
+    }
     {
         std::lock_guard<std::mutex> guard(m_mxLockData);
         m_queWaitRender.push(pFrame);
@@ -86,6 +89,12 @@ void DrawWnd::SetHintString(const QString& strHint)
 {
     m_pLastFrame = nullptr;
     m_strHint = strHint;
+}
+
+void DrawWnd::SetWaterMark(const QString& strWaterMark)
+{
+    m_strWaterMark = strWaterMark;
+    repaint();
 }
 
 void DrawWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
@@ -247,6 +256,12 @@ void DrawWnd::StopSync()
     }
 }
 
+void DrawWnd::SetLock(bool bLock)
+{
+    m_bLock = bLock;
+    repaint();
+}
+
 int DrawWnd::GetPlayBackSize()
 {
     return m_vcSyncRender.size();
@@ -341,8 +356,6 @@ void DrawWnd::OnMouseClicked()
             emit CustomedSnap(pSnapData);
         }
     }
-  
-    
 }
 
 void DrawWnd::OnPBCtrl(int nFramIndex)
@@ -379,7 +392,6 @@ void DrawWnd::DrawText(QPainter& painter, QString& strText)
     int heightOfText = painter.fontMetrics().height();
     painter.setPen(s_qclTEXT1);
     painter.drawText(rcWnd.left() + ((rcWnd.width() - widthOfText) / 2), rcWnd.top() + ((rcWnd.height() - heightOfText) / 2), strText);
-
 }
 
 void DrawWnd::Drawborder(QPainter& painter, QRect& rcArea)
@@ -454,6 +466,7 @@ void DrawWnd::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
 
+
     switch (m_nWndMode.load())
     {
     case PanelMode::PreviewMode:
@@ -476,22 +489,35 @@ void DrawWnd::DrawIntimeStream(QPainter& painter)
     if (m_bInPreview)
     {
         QRect rcDst(0, 0, size().width(), size().height());
-        if (auto pFrame = m_pCurFrame)
+        if (m_bLock)
         {
-            m_pLastFrame = pFrame;
-        }
-
-        if (m_pLastFrame)
-        {
-            QImage tmpImg((uchar *)m_pLastFrame->pBufData, m_pLastFrame->nPicWidth, m_pLastFrame->nPicHeight, QImage::Format_RGB32);
-            DrawImage(painter, tmpImg);
+            DrawText(painter, m_strWaterMark);
+            Drawborder(painter, rcDst);
         }
         else
         {
-            DrawText(painter, m_strHint);
+            if (auto pFrame = m_pCurFrame)
+            {
+                m_pLastFrame = pFrame;
+            }
+
+            if (m_pLastFrame)
+            {
+                QImage tmpImg((uchar *)m_pLastFrame->pBufData, m_pLastFrame->nPicWidth, m_pLastFrame->nPicHeight, QImage::Format_RGB32);
+                DrawImage(painter, tmpImg);
+
+                if (!m_strWaterMark.isEmpty())
+                {
+                    DrawText(painter, m_strWaterMark);
+                }
+            }
+            else
+            {
+                DrawText(painter, m_strHint);
+            }
+            Drawborder(painter, rcDst);
+            DrawSnapRect(painter);
         }
-        Drawborder(painter, rcDst);
-        DrawSnapRect(painter);
     }
     else
     {
@@ -513,6 +539,10 @@ void DrawWnd::Draw4PictureMode(QPainter& painter)
         if (m_bInPB)
         {
             DrawSnapRect(painter);
+        }
+        if (!m_strWaterMark.isEmpty())
+        {
+            DrawText(painter, m_strWaterMark);
         }
     }
     else

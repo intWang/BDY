@@ -9,6 +9,8 @@
 #include <mutex>
 #include "DataStruct.h"
 
+class HttpHelper;
+
 class DevTreeWnd : public AreableWidget<QWidget>
 {
     Q_OBJECT
@@ -40,6 +42,8 @@ private:
     QStandardItemPtr m_pRootItem = nullptr;
     QList<QStandardItem*> m_FindResult;
     int m_nSearchIndex = 0;
+
+    HttpHelper* m_pHttpHelper = nullptr;
 protected:
     virtual BarWidget::Ptr InitTopBar() override;
     virtual BarWidget::Ptr InitBottomBar() override;
@@ -81,6 +85,8 @@ protected:
     void OnDeviceConnectedCB(const DeviceData& devData);
     void OnDeviceStatuChanged(const std::string& strUid, int nStatus);
     void OnStreamInfo(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData);
+    void CheckDevActiveAndLockStatu(std::string& strShortCode);
+
 
 signals:
     void LoadedDevNumChange(int nNum);
@@ -88,12 +94,15 @@ signals:
     void AddNewGroup(AddGroupData::Ptr pData, QStandardItemPtr pParent);
     void AddNewDevice(AddDeviceData::Ptr pData, QStandardItemPtr pParent);
     void ChannelNodeDBClick(DevNode::Ptr pNodeData);
+    void ChannelNodeUpdated(DevNode::Ptr pNodeData);
     void DeviceLostConnect(const QString& strDeviceUid);
-
+    void DevConnected(const QString& strShortID);
 public slots:
     void OnDataConfiged(ConfigData::Ptr pData);
     void OnDataModified(ConfigData::Ptr pData);
     void OnClicked();
     void OnTreeDBClicked(const QModelIndex& index);
     void OnPreviewStatuChanged(const QString& strUid, bool bStatu);
+    void OnHttpReplyFinished(QNetworkReply* replay);
+    void OnRequestActiveDev(std::string& strUid);
 };

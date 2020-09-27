@@ -110,6 +110,7 @@
         <file>res/play.png</file>
         <file>res/connecting.png</file>
         <file>res/pause.png</file>
+        <file>res/active.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>

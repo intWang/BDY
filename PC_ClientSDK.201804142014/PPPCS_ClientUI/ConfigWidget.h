@@ -125,7 +125,8 @@ struct ModGroupData :public AddGroupData
     }
 };
 
-class QNetworkAccessManager;
+
+class HttpHelper;
 class QNetworkReply;
 
 class ConfigWidget:public BaseDialog
@@ -163,13 +164,16 @@ protected:
     void OnOk();
     void OnCancel();
 
+    QString ChooseFilePath(QString& strDefultPath);
     void RequestLongCode(std::string& strShortCode);
 
-    QString ChooseFilePath(QString& strDefultPath);
+
+    virtual void keyPressEvent(QKeyEvent *) override;
 
 protected slots:
     void OnHttpReplyFinished(QNetworkReply* replay);
+    void OnHttpTimeour();
 protected:
-    QNetworkAccessManager *m_pManager = nullptr;
+    HttpHelper* m_pHttpHelper = nullptr;
 };
 

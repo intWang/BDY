@@ -23,6 +23,7 @@ public:
     void InputFrameData(FrameData::Ptr pFrame);
     void AddFrame(FrameData::Ptr pFrame);
     void SetHintString(const QString& strHint);
+    void SetWaterMark(const QString& strWaterMark);
     void OnPtzCtrl(PtzCommand emCmd, int nParam);
     int GetPtzSpeed();
     bool SnapShot(const QString& strPicName);
@@ -31,6 +32,8 @@ public:
 
     void StartSync(SnapModeParam::Ptr pParam);
     void StopSync();
+
+    void SetLock(bool bLock);
 
     int GetPlayBackSize();
     void ShowFrame(SnapData::Ptr pFrame);
@@ -47,6 +50,7 @@ signals:
     void CustomedSnap(SnapData::Ptr pSnap);
 
 private:
+    std::atomic<int> m_bLock = 0;
     bool m_bInPreview = false;
     int m_nIndex = 0;
     bool m_bSelected = false;
@@ -55,6 +59,7 @@ private:
     std::queue<FrameData::Ptr> m_queWaitRender;
     std::vector<FrameData::Ptr> m_vcSyncRender;
     QString m_strHint;
+    QString m_strWaterMark;
     FrameData::Ptr m_pLastFrame = nullptr;
     FrameData::Ptr m_pCurFrame = nullptr; // 抓屏模式当前显示的帧
     std::atomic<PanelMode> m_nWndMode = { PanelMode::PreviewMode };

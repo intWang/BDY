@@ -320,6 +320,7 @@ void PreviewPanel::PraperPreviewRealWnds(int nNums)
         connect(pWnd, &PreviewRealWnd::PreviewWndUserDBClick, this, &PreviewPanel::OnPreveiwWndSelFull);
         connect(pWnd, &PreviewRealWnd::PreviewWndStopPreview, this, &PreviewPanel::OnPreviewStopped);
         connect(pWnd, &PreviewRealWnd::PreviewWndStartPreview, this, &PreviewPanel::OnPreviewStarted);
+        connect(pWnd, &PreviewRealWnd::RequestActiveDev, this, &PreviewPanel::OnRequestActiveDev);
         pWnd->hide();
     }
 }
@@ -486,6 +487,14 @@ void PreviewPanel::ClearAllWnd()
     });
 }
 
+void PreviewPanel::UpdateBottomBtn()
+{
+    utils::TravelVector(m_vcPreviewRealWnds, [](auto pWnd) {
+        pWnd->UpdateBottomBtn();
+        return false;
+    });
+}
+
 void PreviewPanel::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape)
@@ -520,6 +529,11 @@ void PreviewPanel::OnStartPreview(DevNode::Ptr pChannel)
     }
 }
 
+void PreviewPanel::OnDevNodeUpdated(DevNode::Ptr pChannel)
+{
+    UpdateBottomBtn();
+}
+
 void PreviewPanel::OnPreviewStopped(const QString& strUid, PreviewRealWnd::Ptr pWnd)
 {
     emit PreviewStatuChanged(strUid, false);
@@ -528,6 +542,11 @@ void PreviewPanel::OnPreviewStopped(const QString& strUid, PreviewRealWnd::Ptr p
 void PreviewPanel::OnPreviewStarted(const QString& strUid, PreviewRealWnd::Ptr pWnd)
 {
     emit PreviewStatuChanged(strUid, true);
+}
+
+void PreviewPanel::OnRequestActiveDev(std::string& strUid)
+{
+    emit RequestActiveDev(strUid);
 }
 
 void PreviewPanel::OnDeviceLostConnect(const QString& strUID)

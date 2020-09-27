@@ -30,12 +30,14 @@ MainViewWidget::MainViewWidget(QWidget *parent)
         LogError("Error param  %d %d ", pLeftLayout, pPreviewPanel);
     }
     connect(pTreeView, &DevTreeWnd::ChannelNodeDBClick, pPreviewPanel, &PreviewPanel::OnStartPreview);
+    connect(pTreeView, &DevTreeWnd::ChannelNodeUpdated, pPreviewPanel, &PreviewPanel::OnDevNodeUpdated);
     connect(pTreeView, &DevTreeWnd::DeviceLostConnect, pPreviewPanel, &PreviewPanel::OnDeviceLostConnect, Qt::QueuedConnection);
     connect(pPreviewPanel, &PreviewPanel::SelectPreviewWnd, pTabWnd, &ChannelCtrlWidget::BindPreviewWnd);
     connect(pPreviewPanel, &PreviewPanel::PreviewStatuChanged, pTreeView, &DevTreeWnd::OnPreviewStatuChanged);
     connect(pPreviewPanel, &PreviewPanel::PanelModeChanged, this, &MainViewWidget::OnPageModeChanged);
     connect(pPreviewPanel, &PreviewPanel::CallPopUpTreeWnd, this, &MainViewWidget::OnCallPopUpTreeWnd);
     connect(pPreviewPanel, &PreviewPanel::FullScreen, this, &MainViewWidget::OnPanelFullScreen);
+    connect(pPreviewPanel, &PreviewPanel::RequestActiveDev, pTreeView, &DevTreeWnd::OnRequestActiveDev);
     
     m_pTreeWnd = pTreeView;
     /////Snap Mode wnds

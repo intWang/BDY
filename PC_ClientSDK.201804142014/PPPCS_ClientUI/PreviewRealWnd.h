@@ -48,6 +48,8 @@ public:
     void StartPreview(DevNode::Ptr pChannel);
     void StopPreview();
 
+    void UpdateBottomBtn();
+
     void StartStream(DevNode::Ptr pChannel);
     void StopStream();
     
@@ -86,6 +88,7 @@ public slots:
     void CallConfig();
     void SnapShot();
     void DoRecord();
+    void ActiveDev();
     void UpdateRecordStatu(bool bStart);
     void StartPlayBack(bool bPre = false);
     void StopPlayBack();
@@ -101,6 +104,7 @@ signals:
     void PreviewWndUserDBClick(int nFull); // 0-normal 1-full 2-fullscreen
     void PreviewWndStopPreview(const QString& strUid, PreviewRealWnd::Ptr pWnd);
     void PreviewWndStartPreview(const QString& strUid, PreviewRealWnd::Ptr pWnd);
+    void RequestActiveDev(std::string& strUid);
     void RecordStatuChanged(bool bStart);
     void PBDataReady(int nDataSize);
     void CustomedSnap(SnapData::Ptr pSnap);
@@ -117,6 +121,7 @@ private:
     VideoParamData m_stVideParam = { 0 };
 
     QPushButtonPtr m_pRecordBtn = nullptr;
+    QPushButtonPtr m_pActiveBtn = nullptr;
     QIcon m_iconRecordOff;
     QIcon m_iconRecordOn;
     StageInfo m_stageInfo;

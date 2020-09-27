@@ -113,6 +113,7 @@
     <ClCompile Include="FullScreenWnd.cpp" />
     <ClCompile Include="HelpWindow.cpp" />
     <ClCompile Include="HintServer.cpp" />
+    <ClCompile Include="HttpHelper.cpp" />
     <ClCompile Include="HTTPSupport.cpp" />
     <ClCompile Include="IPCNetServer.cpp" />
     <ClCompile Include="LogManager.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="ContainerWnd.h" />
     <ClInclude Include="FullScreenWnd.h" />
     <QtMoc Include="HelpWindow.h" />
+    <QtMoc Include="HttpHelper.h" />
     <ClInclude Include="HTTPSupport.h" />
     <ClInclude Include="IHttpSupport.h" />
     <QtMoc Include="PtzCtrlWnd.h" />

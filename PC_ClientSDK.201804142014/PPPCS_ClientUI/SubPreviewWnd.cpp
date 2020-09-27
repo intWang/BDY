@@ -48,7 +48,6 @@ void SubPreviewWnd::OnStartPreview(DevNode::Ptr pChannel)
             m_pPreviewWnd->StartPreview(pChannel);
         }
     }
-    
 }
 
 void SubPreviewWnd::OnEnterSnapMode()

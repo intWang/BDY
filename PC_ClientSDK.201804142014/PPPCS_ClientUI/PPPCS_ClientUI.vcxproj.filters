@@ -193,6 +193,9 @@
     <ClCompile Include="HelpWindow.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="HttpHelper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="PPPCS_ClientUI.h">
@@ -289,6 +292,9 @@
       <Filter>Header Files</Filter>
     </QtMoc>
     <QtMoc Include="HelpWindow.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
+    <QtMoc Include="HttpHelper.h">
       <Filter>Header Files</Filter>
     </QtMoc>
   </ItemGroup>

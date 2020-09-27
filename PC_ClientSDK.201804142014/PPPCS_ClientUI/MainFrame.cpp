@@ -8,7 +8,7 @@ ls::ICallBackEngin::Ptr g_pCallBack = ls::CreateCallbackEngine();
 MainFrame::MainFrame(QWidget *parent)
     :BaseDialog(parent)
 {
-    setWindowTitle("视频监控系统V1.1Bate 2020-09-30 过期");
+    setWindowTitle("北斗鹰V1.0");
 
     QDesktopWidget* desktopWidget = QApplication::desktop();
     setMaximumSize(desktopWidget->width(), desktopWidget->height());

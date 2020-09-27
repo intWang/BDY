@@ -1523,6 +1523,23 @@ QPushButton#btn_config:pressed {
 		qproperty-iconSize: 20px 20px;
 }
 
+QPushButton#btn_active {
+        border-radius: 4px;
+        background: rgb(68,72,88);
+		qproperty-icon: url(:/Black/res/active.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#btn_active:hover {
+        background: rgb(60, 60, 60);
+		qproperty-icon: url(:/Black/res/active.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#btn_active:pressed {
+        background: rgb(55, 55, 55);
+		qproperty-icon: url(:/Black/res/active.png);
+		qproperty-iconSize: 20px 20px;
+}
+
 
 QPushButton#btn_record {
         border-radius: 4px;

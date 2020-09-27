@@ -87,11 +87,15 @@ struct DevNode :public TreeNode
     DeviceData stDevice;
     std::string strUID;
     std::string strShortID;
+    std::string strDevID;
     std::string strCustomName;
     std::string strPwd;
     static int s_nDevCount;
     int nPreviewCount;
     VideoParamData stVideoParam;
+
+    volatile bool bActivation = 0;
+    volatile bool bLockType = 0;
 
     IPCNetWifiAplist::Ptr pWifiList = nullptr;
     IPCNetWiFiAPInfo_t::Ptr pHotSpot = nullptr;
@@ -153,6 +157,10 @@ struct DevNode :public TreeNode
     bool SetFlipMirror(int nFilp, int nMirror);
 
     bool SwitchStream(int nStream);
+
+    bool IsActivated();
+    bool IsLocked();
+    void Activate(bool bValue);
 };
 
 struct GroupNode :public TreeNode

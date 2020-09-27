@@ -22,6 +22,7 @@ signals:
     void PanelModeChanged(PanelMode emMode, DevNode::Ptr pNode);
     void CallPopUpTreeWnd();
     void FullScreen(bool bFull);
+    void RequestActiveDev(std::string& strUid);
 protected:
     virtual BarWidget::Ptr InitTopBar();
     virtual BarWidget::Ptr InitBottomBar();
@@ -36,14 +37,17 @@ protected:
     void StartTopBarCheck();
     void StopTopBarCheck();
     void ClearAllWnd();
+    void UpdateBottomBtn();
 
     virtual void keyPressEvent(QKeyEvent *event) override;
 
 
 public slots:
     void OnStartPreview(DevNode::Ptr pChannel);
+    void OnDevNodeUpdated(DevNode::Ptr pChannel);
     void OnPreviewStopped(const QString& strUid, PreviewRealWnd::Ptr pWnd);
     void OnPreviewStarted(const QString& strUid, PreviewRealWnd::Ptr pWnd);
+    void OnRequestActiveDev(std::string& strUid);
     void OnDeviceLostConnect(const QString& strUID);
     void OnPreveiwWndSelChange();
     void OnPreveiwWndSelFull(int nFull);

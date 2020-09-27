@@ -18,15 +18,15 @@ int main(int argc, char *argv[])
         qss.close();
     }
   
-    QString str = "2020-09-30 12:00:01";
-    QDateTime expired_time = QDateTime::fromString(str, "yyyy-MM-dd hh:mm:ss");
-    time_t expired = expired_time.toTime_t();
-    time_t now = time(NULL);
-    if (now > expired)
-    {
-        msg::showError(nullptr, "版本已过期", "请联系作者更新版本");
-        return 0;
-    }
+//     QString str = "2020-09-30 12:00:01";
+//     QDateTime expired_time = QDateTime::fromString(str, "yyyy-MM-dd hh:mm:ss");
+//     time_t expired = expired_time.toTime_t();
+//     time_t now = time(NULL);
+//     if (now > expired)
+//     {
+//         msg::showError(nullptr, "版本已过期", "请联系作者更新版本");
+//         return 0;
+//     }
 
     if (auto pLogManager = LogManager::GetInstance())
     {

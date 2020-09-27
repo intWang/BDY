@@ -293,6 +293,21 @@ bool DevNode::SwitchStream(int nStream)
     return false;
 }
 
+bool DevNode::IsActivated()
+{
+    return bActivation;
+}
+
+bool DevNode::IsLocked()
+{
+    return bLockType;
+}
+
+void DevNode::Activate(bool bValue)
+{
+    bActivation = bValue;
+}
+
 VideoParamData DevNode::GetVideoParam()
 {
     return stVideoParam;

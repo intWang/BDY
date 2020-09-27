@@ -12,6 +12,7 @@
 #include "ConfigWidget.h"
 #include "MessageBoxWnd.h"
 #include "SEP2P_Error.h"
+#include "HttpHelper.h"
 #include "ConfigCenter.h"
 DevTreeWnd::DevTreeWnd(QWidget *parent)
     : AreableWidget<QWidget>(parent)
@@ -101,8 +102,17 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
     });
 
     connect(m_pTree, &QTreeView::doubleClicked, this, &DevTreeWnd::OnTreeDBClicked);
-
     emit LoadedDevNumChange(0);
+
+    if (m_pHttpHelper = MQ(HttpHelper)(this))
+    {
+        connect(m_pHttpHelper, &HttpHelper::HttpReplyFinished, this, &DevTreeWnd::OnHttpReplyFinished);
+    }
+    connect(this, &DevTreeWnd::DevConnected, this, [this](const QString& strShortID) {
+            this->CheckDevActiveAndLockStatu(strShortID.toStdString());
+    });
+
+
 }
 
 DevTreeWnd::~DevTreeWnd()
@@ -872,7 +882,10 @@ void DevTreeWnd::RemoveTreeData(TreeNode::Ptr pData)
 
 void DevTreeWnd::ConectDevice(DevNode::Ptr pNode)
 {
-    pNode->Conect();
+    if (pNode)
+    {
+        pNode->Conect();
+    }
 }
 
 void DevTreeWnd::OnDeviceConnectedCB(const DeviceData& devData)
@@ -888,6 +901,7 @@ void DevTreeWnd::OnDeviceConnectedCB(const DeviceData& devData)
             pDevNode->SetStatu(Pause);
             UpdateTreeItem(QString::fromStdString(strOldName), pDevNode);
             emit LoadedDevNumChange(++m_nLoadedDevNum);
+            emit DevConnected(QString::fromStdString(pDevNode->GetLabelUid()));
         }
     }
 }
@@ -932,6 +946,15 @@ void DevTreeWnd::OnStreamInfo(const std::string& strUid, const IPCNetStreamInfo:
         pDevNode->SetStreamData(pData);
     }
 }
+
+void DevTreeWnd::CheckDevActiveAndLockStatu(std::string& strShortCode)
+{
+    if (m_pHttpHelper)
+    {
+        m_pHttpHelper->RequestLongCode(strShortCode);
+    }
+}
+
 
 void DevTreeWnd::OnDataConfiged(ConfigData::Ptr pData)
 {
@@ -1094,13 +1117,20 @@ void DevTreeWnd::OnTreeDBClicked(const QModelIndex& index)
                 auto pDevNode = std::dynamic_pointer_cast<DevNode>(pNode);
                 if (pDevNode && pDevNode->IsDevLoaded())
                 {
-                    if (pDevNode->GetStatu() == Pause)
+                    if (pDevNode->IsLocked())
                     {
-                        emit ChannelNodeDBClick(pDevNode);
+                        msg::showWarning(this, QStringLiteral("警告"), QStringLiteral("设备已锁定，不可预览！"));
                     }
-                    else if(pDevNode->GetStatu() == Play)
+                    else
                     {
-                        msg::showInformation(this, QStringLiteral("提示"), QStringLiteral("当前设备正在预览！"));
+                        if (pDevNode->GetStatu() == Pause)
+                        {
+                            emit ChannelNodeDBClick(pDevNode);
+                        }
+                        else if (pDevNode->GetStatu() == Play)
+                        {
+                            msg::showInformation(this, QStringLiteral("提示"), QStringLiteral("当前设备正在预览！"));
+                        }
                     }
                     //(pDevNode->GetStatu() != DevTreeNodeStatu::Default) && (pDevNode->GetStatu() != DevTreeNodeStatu::Connecting)
                 }
@@ -1122,5 +1152,80 @@ void DevTreeWnd::OnPreviewStatuChanged(const QString& strUid, bool bStatu)
     if (auto pTreeItem = GetTreeItemByUid(strUid.toStdString()))
     {
         UpdateTreeItem(QString::fromStdString(pTreeItem->GetName()), pTreeItem);
+    }
+}
+
+void DevTreeWnd::OnHttpReplyFinished(QNetworkReply* replay)
+{
+    if (replay->error() == QNetworkReply::NoError)
+    {
+        std::string strUid = "";
+        std::string strDevid = "";
+        int bActivation = 0;
+        int bLockType = 0;
+        QByteArray bytes = replay->readAll();
+
+        PJson::JSONObject jsdata(bytes.toStdString().c_str());
+        if (jsdata.isValid())
+        {
+            PJson::JSONObject *jsdevice = jsdata.getJSONObject("device");
+            if (jsdevice && jsdevice->isValid())
+            {
+                jsdevice->getString("uid", strUid);
+                jsdevice->getString("id", strDevid);
+                jsdevice->getInt("activation", bActivation);
+                jsdevice->getInt("locktype", bLockType);
+
+                delete jsdevice;
+                jsdevice = nullptr;
+            }
+            else
+            {
+                std::string strMsg;
+                jsdata.getString("msg", strMsg);
+
+                if (strMsg == "success")
+                {
+                    if (g_pEngine)
+                    {
+                        auto pHintServer = g_pEngine->GetHintServer();
+                        if (pHintServer)
+                        {
+                            pHintServer->OnUserOperateHint("设备成功激活！", ls::HintLevel::Info);
+                        }
+                    }
+                }
+            }
+        }
+
+        if (!strUid.empty())
+        {
+            if (auto pDevItem = std::dynamic_pointer_cast<DevNode>(GetTreeItemByUid(strUid)))
+            {
+                pDevItem->bActivation = bActivation;
+                pDevItem->bLockType = bLockType;
+                pDevItem->strDevID = strDevid;
+                emit ChannelNodeUpdated(pDevItem);
+            }
+        }
+    }
+}
+
+void DevTreeWnd::OnRequestActiveDev(std::string& strUid)
+{
+    if (m_pHttpHelper)
+    {
+        if (auto pDevNode = std::dynamic_pointer_cast<DevNode>(GetTreeItemByUid(strUid)))
+        {
+            if (!pDevNode->strDevID.empty())
+            {
+                m_pHttpHelper->RequestActiveDev(pDevNode->strDevID);
+                std::thread thDelay([this, pDevNode]() {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                    emit this->DevConnected(QString::fromStdString(pDevNode->GetLabelUid()));
+                });
+                thDelay.detach();
+            }
+        }
     }
 }
