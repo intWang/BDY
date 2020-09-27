@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/Clean">
+        <file>res/logo_b.ico</file>
+    </qresource>
+</RCC>
