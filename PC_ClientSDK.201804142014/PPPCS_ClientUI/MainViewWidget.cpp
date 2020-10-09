@@ -51,6 +51,8 @@ MainViewWidget::MainViewWidget(QWidget *parent)
     connect(this, &MainViewWidget::EnterSnapMode, pSnapControlWnd, &SnapControlWnd::OnEnterSnapMode);
     connect(this, &MainViewWidget::LeaveSnapMode, pSnapControlWnd, &SnapControlWnd::OnLeaveSnapMode);
     connect(pSubPreviewWnd, &SubPreviewWnd::PreviewStatuChanged, pTreeView, &DevTreeWnd::OnPreviewStatuChanged);
+    connect(pSubPreviewWnd, &SubPreviewWnd::SelectPreviewWnd, pTabWnd, &ChannelCtrlWidget::BindPreviewWnd);
+
     connect(pSnapControlWnd, &SnapControlWnd::PreviewStatuChanged, pTreeView, &DevTreeWnd::OnPreviewStatuChanged);
     connect(pSnapControlWnd, &SnapControlWnd::StreamSnapShot, pPreviewPanel, &PreviewPanel::OnStreamSnapShot);
     connect(pSnapControlWnd, &SnapControlWnd::CustomWndLayout, pPreviewPanel, &PreviewPanel::SetCustomWndLayout);

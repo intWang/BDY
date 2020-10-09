@@ -8,7 +8,7 @@ ls::ICallBackEngin::Ptr g_pCallBack = ls::CreateCallbackEngine();
 MainFrame::MainFrame(QWidget *parent)
     :BaseDialog(parent)
 {
-    setWindowTitle("北斗鹰V1.0");
+    setWindowTitle("北斗鹰V1.1");
 
     QDesktopWidget* desktopWidget = QApplication::desktop();
     setMaximumSize(desktopWidget->width(), desktopWidget->height());

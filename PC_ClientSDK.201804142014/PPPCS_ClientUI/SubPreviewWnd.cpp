@@ -36,6 +36,7 @@ void SubPreviewWnd::StopPreview()
     if (m_pPreviewWnd)
     {
         m_pPreviewWnd->StopPreview();
+        emit SelectPreviewWnd(nullptr);
     }
 }
 
@@ -46,6 +47,7 @@ void SubPreviewWnd::OnStartPreview(DevNode::Ptr pChannel)
         if (m_pPreviewWnd)
         {
             m_pPreviewWnd->StartPreview(pChannel);
+            emit SelectPreviewWnd(m_pPreviewWnd);
         }
     }
 }

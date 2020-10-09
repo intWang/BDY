@@ -9,7 +9,6 @@
         <file>res/connecting_b.png</file>
         <file>res/connecting_g.png</file>
         <file>res/group_b.png</file>
-        <file>res/group_g.png</file>
         <file>res/pause_b.png</file>
         <file>res/pause_g.png</file>
         <file>res/play_b.png</file>
@@ -111,6 +110,7 @@
         <file>res/connecting.png</file>
         <file>res/pause.png</file>
         <file>res/active.png</file>
+        <file>res/group.png</file>
     </qresource>
     <qresource prefix="/qss">
         <file>style_blk.qss</file>

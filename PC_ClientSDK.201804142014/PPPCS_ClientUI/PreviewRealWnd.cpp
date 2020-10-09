@@ -11,6 +11,12 @@ PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
     m_iconRecordOff = QIcon(":/Black/res/record-off.png");
     m_iconRecordOn = QIcon(":/Black/res/recorder.png");
     auto pMainLayout = MQ(QVBoxLayout)(this);
+
+    if (auto pTopBar = InitTopBar())
+    {
+        pMainLayout->addWidget(pTopBar);
+    }
+
     m_pSliderPB = MQ(QSlider)(this);
     m_DrawWnd = new DrawWnd(nIndex, this);
     m_pTimerAutoPlay = new QTimer(this);
@@ -46,17 +52,13 @@ PreviewRealWnd::PreviewRealWnd(int nIndex, QWidget *parent)
         }
     }
 
+
     if (auto pBottomBar = InitBottomBar())
     {
-        //pBottomBar->hide();
         pMainLayout->addWidget(pBottomBar);
-        //pBottomBar->setAttribute(Qt::WA_TransparentForMouseEvents);
-        //pBottomBar->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
     }
     pMainLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(pMainLayout);
-    //setSizePolicy(QSizePolicy::Policy::Fixed, QSizePolicy::Policy::Fixed);
-
 
     m_CallBackFunc = std::make_shared<ls::IIPCNetServerCallBack::CallBackFunc>();
     if (m_CallBackFunc)
@@ -210,7 +212,6 @@ void PreviewRealWnd::StartStream(DevNode::Ptr pChannel)
     auto pIPCServer = g_pEngine ? g_pEngine->GetIPCNetServer() : nullptr;
     if (pIPCServer)
     {
-        auto pStreamInfo = m_pChannel->GetStreamData();
         int nStreamData = 0; //默认高清码流
         pIPCServer->VideoControl(pChannel->strUID, true, nStreamData);
     }
@@ -650,6 +651,37 @@ void PreviewRealWnd::ResetFullLevel(int nLevel)
     m_nfullLevel = nLevel;
 }
 
+void PreviewRealWnd::UpdateTitle(int nStreamType, int nWidth, int nHeight)
+{
+    if (m_pTitle)
+    {
+        QString strTitle;
+        if (m_pChannel)
+        {
+            strTitle = QString("%1 %2")
+                .arg(QString::fromStdString(m_pChannel->GetName()), nStreamType == 0 ? "高清" : "标清");
+            if (nWidth != -1 && nHeight != -1)
+            {
+                strTitle += QString(" [ 宽:%1 X 长:%2 ]").arg(nWidth).arg(nHeight);
+            }
+        }
+        else
+        {
+            strTitle = "空闲";
+        }
+
+        m_pTitle->setText(strTitle);
+    }
+}
+
+void PreviewRealWnd::UpdateEncodeInfo(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData)
+{
+    if (pData && m_pChannel && m_pChannel->GetDevUid() == strUid)
+    {
+        UpdateTitle(pData->EncCh, pData->Width, pData->Height);
+    }
+}
+
 void PreviewRealWnd::OnPtzCtrl(PtzCommand emCmd, int nParam)
 {
     if(m_DrawWnd)
@@ -687,24 +719,28 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
 
             pBtnClose->setObjectName("btn_stop_preview");
             pBtnClose->setToolTip(QStringLiteral("停止预览"));
-            pBtnClose->setFixedWidth(32);
+            pBtnClose->setText(QStringLiteral("停止"));
+            pBtnClose->setFixedWidth(64);
 
             pBtnRecord->setObjectName("btn_record");
             pBtnRecord->setToolTip(QStringLiteral("录像"));
-            pBtnRecord->setFixedWidth(32);
+            pBtnRecord->setText(QStringLiteral("录像"));
+            pBtnRecord->setFixedWidth(64);
 
             pBtnSnap->setObjectName("btn_snapshot");
             pBtnSnap->setToolTip(QStringLiteral("截图"));
-            pBtnSnap->setFixedWidth(32);
+            pBtnSnap->setText(QStringLiteral("截图"));
+            pBtnSnap->setFixedWidth(64);
 
             pBtnConfig->setObjectName("btn_config");
             pBtnConfig->setToolTip(QStringLiteral("配置"));
-            pBtnConfig->setFixedWidth(32);
+            pBtnConfig->setText(QStringLiteral("配置"));
+            pBtnConfig->setFixedWidth(64);
 
             pActive->setObjectName("btn_active");
             pActive->setToolTip(QStringLiteral("激活"));
             pActive->setText(QStringLiteral("激活"));
-            pActive->setFixedWidth(63);
+            pActive->setFixedWidth(64);
             pActive->hide();
 
             pLayout->addStretch();
@@ -741,9 +777,33 @@ BarWidget::Ptr PreviewRealWnd::InitBottomBar()
 }
 
 
+BarWidget::Ptr PreviewRealWnd::InitTopBar()
+{
+    if (auto pTopBar = GetTopWnd())
+    {
+        if (auto pLayout = pTopBar->GetLayout())
+        {
+            auto pLabel = MQ(QLabel)(pTopBar);
+            pLayout->addWidget(pLabel);
+            m_pTitle = pLabel;
+            pLayout->setContentsMargins(10, 5, 10, 5);
+        }
+        UpdateTitle(0);
+        return pTopBar;
+    }
+    return nullptr;
+}
+
 void PreviewRealWnd::mouseDoubleClickEvent(QMouseEvent *event)
 {
-    m_nfullLevel = (++m_nfullLevel) % 3;
+    if (m_nWndMode.load() == PanelMode::PreviewMode)
+    {
+        m_nfullLevel = (++m_nfullLevel) % 3;
+    }
+    else
+    {
+        m_nfullLevel = (++m_nfullLevel) % 2;
+    }
     emit PreviewWndUserDBClick(m_nfullLevel);
 }
 
@@ -812,12 +872,12 @@ void PreviewRealWnd::HideBottom(bool bHide)
 {
     if (bHide && !m_bHideBottom)
     {
-        SetArea(0, 1);
+        SetArea(1, 1);
         m_bHideBottom = bHide;
     }
     else if(!bHide && m_bHideBottom)
     {
-        SetArea(0, 30);
+        SetArea(30, 30);
         m_bHideBottom = false;
     }
 }

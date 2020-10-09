@@ -23,6 +23,7 @@ public slots:
     void OnBtnClicked();
 signals:
     void PreviewStatuChanged(const QString& strUid, bool bStatu);
+    void SelectPreviewWnd(PreviewRealWnd::Ptr pWnd);
 
 private:
     virtual BarWidget::Ptr InitBottomBar();

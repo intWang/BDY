@@ -381,6 +381,7 @@ void ConfigWidget::OnHttpReplyFinished(QNetworkReply* replay)
     if (replay->error() == QNetworkReply::NoError)
     {
         std::string strUid = "";
+        std::string strPwd = "";
         QByteArray bytes = replay->readAll();
 
         PJson::JSONObject jsdata(bytes.toStdString().c_str());
@@ -390,6 +391,7 @@ void ConfigWidget::OnHttpReplyFinished(QNetworkReply* replay)
             if (jsdevice && jsdevice->isValid())
             {
                 jsdevice->getString("uid", strUid);
+                jsdevice->getString("password", strPwd);
 
                 delete jsdevice;
                 jsdevice = nullptr;
@@ -402,14 +404,20 @@ void ConfigWidget::OnHttpReplyFinished(QNetworkReply* replay)
         }
         else
         {
-            //m_pInputUID->setText(QString::fromStdString(strUid));
-            if (auto pRealData = std::dynamic_pointer_cast<AddDeviceData>(m_pCurData))
+            if (m_pInputPwd && m_pInputPwd->text() != QString::fromStdString(strPwd))
             {
-                pRealData->strUID = strUid;
+                msg::showError(this, QStringLiteral("错误"), "密码错误，请检查");
             }
-            emit OnDataConfiged(m_pCurData);
+            else
+            {
+                if (auto pRealData = std::dynamic_pointer_cast<AddDeviceData>(m_pCurData))
+                {
+                    pRealData->strUID = strUid;
+                }
+                emit OnDataConfiged(m_pCurData);
 
-            done(0);
+                done(0);
+            }
         }
     }
     else

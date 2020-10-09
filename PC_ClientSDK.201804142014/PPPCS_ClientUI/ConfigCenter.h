@@ -15,6 +15,7 @@ public:
     void SetRecordSavepath(const QString& strPath);
 
     QString GetSnapShotSavepath();
+    QString GetDumpSavepath();
     QString GetDBFilePath();
     QString GetRecordSavepath();
     QString GetRecordSaveFileName(std::string& strName);
@@ -34,7 +35,8 @@ protected:
 
 protected:
 
-    QString m_strSnapShotSavePath = QDir::tempPath() + TMPDATA_FOLDER  + "SnapShot/";
+    QString m_strSnapShotSavePath = QDir::tempPath() + TMPDATA_FOLDER + "SnapShot/";
+    QString m_strDumpSavePath = QDir::tempPath() + TMPDATA_FOLDER + "Dumps/";
     QString m_strRecordSavePath = QDir::tempPath() + TMPDATA_FOLDER + "Record/";
     QString m_strDBSavePath = QDir::tempPath() + TMPDATA_FOLDER + "UserData/";
 

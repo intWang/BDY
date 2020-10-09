@@ -80,6 +80,15 @@ std::string DevNode::GetName()
     return labelName;
 }
 
+std::string DevNode::GetStatuStr()
+{
+    if (IsDevLoaded())
+    {
+        return "在线";
+    }
+    return "离线";
+}
+
 QJsonObject DevNode::GenerateJsonObj()
 {
     QJsonObject obj;
@@ -443,6 +452,11 @@ GroupNode::GroupNode(const std::string& strGroupName, int nGroupId, int nId /*= 
 std::string GroupNode::GetName()
 {
     return strGroupName;
+}
+
+std::string GroupNode::GetStatuStr()
+{
+    return "";
 }
 
 QJsonObject GroupNode::GenerateJsonObj()

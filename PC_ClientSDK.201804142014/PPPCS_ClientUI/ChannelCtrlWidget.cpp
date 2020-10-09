@@ -83,6 +83,11 @@ void ChannelCtrlWidget::OnVideoEncodeData(const std::string& strUid, const IPCNe
     {
         m_pDecodeWnd->OnVideoEncodeData(strUid, pData);
     }
+
+    if (m_pPreviewpWnd)
+    {
+        m_pPreviewpWnd->UpdateEncodeInfo(strUid, pData);
+    }
 }
 
 void ChannelCtrlWidget::BindPreviewWnd(PreviewRealWnd::Ptr pWnd)

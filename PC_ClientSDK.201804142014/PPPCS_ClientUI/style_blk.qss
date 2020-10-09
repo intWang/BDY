@@ -182,18 +182,16 @@ QTreeView{
 	background: transparent;
 	border: transparent;
 	border-bottom: 1px solid rgb(65, 81, 110);
+	font-size: 15px;
 }
 
 QTreeView {
     show-decoration-selected: 1;
 }
-/*
+
 QTreeView::item {
-	color: rgb(199, 202, 217);
-	min-height: 30px;
-	font-size: 24px;
 	border: transparent;
-}*/
+}
 
 QTreeView::item:hover {
 	color: rgb(62, 153, 205);
@@ -1222,6 +1220,27 @@ QPushButton#AddDevice:pressed {
 		qproperty-iconSize: 20px 20px;
 }
 
+QPushButton#Refresh {
+        border-radius: 4px;
+        background: transparent;
+		qproperty-icon: url(:/Black/res/refresh.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#Refresh:hover {
+        background: rgb(60, 60, 60);
+		qproperty-icon: url(:/Black/res/refresh.png);
+		qproperty-iconSize: 20px 20px;
+}
+QPushButton#Refresh:pressed {
+        background: rgb(55, 55, 55);
+		qproperty-icon: url(:/Black/res/refresh.png);
+		qproperty-iconSize: 20px 20px;
+}
+
+
+
+
+
 QPushButton#choose_folder {
         border-radius: 4px;
         background: transparent;
@@ -1525,7 +1544,7 @@ QPushButton#btn_config:pressed {
 
 QPushButton#btn_active {
         border-radius: 4px;
-        background: rgb(68,72,88);
+        background: rgb(159,69,47);
 		qproperty-icon: url(:/Black/res/active.png);
 		qproperty-iconSize: 20px 20px;
 }

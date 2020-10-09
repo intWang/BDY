@@ -35,6 +35,7 @@ private:
     QPushButtonPtr m_pAddDeviceBtn = nullptr;
     QPushButtonPtr m_pAddGroupBtn = nullptr;
     QPushButtonPtr m_pDeleteBtn = nullptr;
+    QPushButtonPtr m_pRefreshBtn = nullptr;
     QPushButtonPtr m_pModifyBtn = nullptr;
     QPushButtonPtr m_pSearchBtn = nullptr;
     QPushButtonPtr m_pNextBtn = nullptr;
@@ -51,7 +52,7 @@ protected:
     void BuildTree(QStandardItemModelPtr pParent);
     void BuildSubTree(QStandardItemPtr pParent);
     //void BuildDevTree(QStandardItemPtr pParent);
-    void AddItemToTree(TreeNode::Ptr pNew, QStandardItemPtr pParent = nullptr);
+    QStandardItemPtr AddItemToTree(TreeNode::Ptr pNew, QStandardItemPtr pParent = nullptr);
     void DeleteTreeItem(QStandardItemPtr pItem);
     bool HasChildRunDev(QStandardItemPtr pItem);
     void DeleteGroup(QStandardItemPtr pParent, QStandardItemPtr pItem);

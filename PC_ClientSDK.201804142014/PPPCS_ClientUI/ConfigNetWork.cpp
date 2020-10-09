@@ -34,7 +34,20 @@ void ConfigNetWork::RefreshUI()
 {
     if (m_pNetStrategy)
     {
-        ui.lblCurrent->setText(QString::fromStdString(m_pNetStrategy->CurNetwork));
+        QString strCurNetLabel = "";
+        if (m_pNetStrategy->CurNetwork == PORI_MOBILE)
+        {
+            strCurNetLabel = "移动网络";
+        }
+        else if(m_pNetStrategy->CurNetwork == PORI_WIRED)
+        {
+            strCurNetLabel = "有线网络";
+        }
+        else
+        {
+            strCurNetLabel = "Wifi网络";
+        }
+        ui.lblCurrent->setText(strCurNetLabel);
         for (int i = 0 ;i< m_pNetStrategy->PrioSeqNum; i++)
         {
             if (m_pNetStrategy->PrioSeq[i] == PORI_WIFI)

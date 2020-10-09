@@ -33,7 +33,7 @@ void ConfigHotSpot::RefreshUI()
     {
         ui.lineEdit_2->setText(QString::fromStdString(m_pData->Ssid));
         ui.lineEdit->setText(QString::fromStdString(m_pData->Pwd));
-        ui.chkHideAP->setChecked(m_pData->HideSSID);
+        ui.chkHideAP->setChecked(!m_pData->HideSSID); //HideSSID":true的话就是关  false 就是开
         setEnabled(true);
     }
 }

@@ -11,7 +11,7 @@ namespace utils
     std::string GetUUID();
     QJsonValue GetValueFromJsonObj(const QJsonObject& obj, const QString& param);
     void MakePathExist(QString strPath);
-
+    void RegisterWER(QString strPath, unsigned long nDumpType, unsigned long nDumpCount);
     template<typename T>
     void TravelQJsonArray(QJsonArray arrayData, T& func)
     {

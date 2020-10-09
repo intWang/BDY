@@ -83,6 +83,9 @@ public:
     void ShowFrame(SnapData::Ptr  pFrame);
 
     void ResetFullLevel(int nLevel);
+    void UpdateTitle(int nStreamType, int nWidth = -1, int nHeight = -1);
+
+    void UpdateEncodeInfo(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData);
 public slots:
     void OnPtzCtrl(PtzCommand emCmd, int nParam);
     void CallConfig();
@@ -122,6 +125,7 @@ private:
 
     QPushButtonPtr m_pRecordBtn = nullptr;
     QPushButtonPtr m_pActiveBtn = nullptr;
+    QLabelPtr m_pTitle = nullptr;
     QIcon m_iconRecordOff;
     QIcon m_iconRecordOn;
     StageInfo m_stageInfo;
@@ -140,6 +144,7 @@ private:
 protected:
     virtual void mousePressEvent(QMouseEvent *event) override;
     virtual BarWidget::Ptr InitBottomBar() override;
+    virtual BarWidget::Ptr InitTopBar() override;
     virtual void mouseDoubleClickEvent(QMouseEvent *event) override;
     virtual void enterEvent(QEvent *event) override;
     virtual void leaveEvent(QEvent *event) override;

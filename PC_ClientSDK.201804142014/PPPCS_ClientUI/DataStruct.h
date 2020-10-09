@@ -68,6 +68,7 @@ struct TreeNode
     DevTreeNodeStatu emStatu = Default;
     TreeNode() = default;
     virtual std::string GetName() = 0;
+    virtual std::string GetStatuStr()=0;
     virtual QJsonObject GenerateJsonObj() = 0;
     virtual void ReadDataJsonObj(QJsonObject& obj) = 0;
     virtual ~TreeNode() {}
@@ -106,6 +107,7 @@ struct DevNode :public TreeNode
         
     virtual ~DevNode();
     virtual std::string GetName() override;
+    virtual std::string GetStatuStr() override;
     virtual  QJsonObject GenerateJsonObj() override;
     virtual void ReadDataJsonObj(QJsonObject& obj) override;
     void UpdateDevData(const DeviceData& data);
@@ -175,6 +177,7 @@ struct GroupNode :public TreeNode
     virtual ~GroupNode() {}
 
     virtual std::string GetName() override;
+    virtual std::string GetStatuStr() override;
 
     virtual QJsonObject GenerateJsonObj() override;
 

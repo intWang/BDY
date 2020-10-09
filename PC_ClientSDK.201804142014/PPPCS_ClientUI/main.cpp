@@ -7,6 +7,9 @@
 #include "IServer.h"
 #include <QDateTime>
 #include "MessageBoxWnd.h"
+#include <QSettings>
+#include "utils.h"
+#include "ConfigCenter.h"
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
@@ -17,8 +20,16 @@ int main(int argc, char *argv[])
         a.setStyleSheet(style);
         qss.close();
     }
-  
-//     QString str = "2020-09-30 12:00:01";
+    
+    if (auto pLogManager = LogManager::GetInstance())
+    {
+        pLogManager->Init();
+    }
+
+    utils::MakePathExist(ConfigCenter::GetInstance().GetDumpSavepath());
+    utils::RegisterWER(ConfigCenter::GetInstance().GetDumpSavepath(), 2, 5);
+
+    //     QString str = "2020-09-30 12:00:01";
 //     QDateTime expired_time = QDateTime::fromString(str, "yyyy-MM-dd hh:mm:ss");
 //     time_t expired = expired_time.toTime_t();
 //     time_t now = time(NULL);
@@ -27,11 +38,6 @@ int main(int argc, char *argv[])
 //         msg::showError(nullptr, "版本已过期", "请联系作者更新版本");
 //         return 0;
 //     }
-
-    if (auto pLogManager = LogManager::GetInstance())
-    {
-        pLogManager->Init();
-    }
 
     int processid = getpid();
     LogInfo("Start Process %d", processid);

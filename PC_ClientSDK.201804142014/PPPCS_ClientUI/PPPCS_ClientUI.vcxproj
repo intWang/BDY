@@ -108,6 +108,7 @@
     <ClCompile Include="DecodeWnd.cpp" />
     <ClCompile Include="Dependencies\src\cJSON.c" />
     <ClCompile Include="Dependencies\src\JSONObject.cpp" />
+    <ClCompile Include="DevTreeModel.cpp" />
     <ClCompile Include="DevTreeWnd.cpp" />
     <ClCompile Include="DrawWnd.cpp" />
     <ClCompile Include="FullScreenWnd.cpp" />
@@ -189,6 +190,7 @@
     <QtMoc Include="ConfigWifiConfirm.h" />
     <QtMoc Include="ConfigWifiList.h" />
     <ClInclude Include="ContainerWnd.h" />
+    <QtMoc Include="DevTreeModel.h" />
     <ClInclude Include="FullScreenWnd.h" />
     <QtMoc Include="HelpWindow.h" />
     <QtMoc Include="HttpHelper.h" />

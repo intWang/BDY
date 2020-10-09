@@ -143,7 +143,7 @@ void ConfigCenter::SaveConfig()
     dataFile.close();
 
     QString strJson(byteArray);
-    LogDebug("Save Data %s", strJson.toStdString().c_str());
+    LogDebug("Save Data %d", strJson.length());
 }
 
 ConfigCenter::ConfigCenter(QObject *parent)
@@ -160,6 +160,11 @@ ConfigCenter::~ConfigCenter()
 QString ConfigCenter::GetSnapShotSavepath()
 {
     return m_strSnapShotSavePath;
+}
+
+QString ConfigCenter::GetDumpSavepath()
+{
+    return m_strDumpSavePath;
 }
 
 QString ConfigCenter::GetDBFilePath()

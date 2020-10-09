@@ -45,6 +45,48 @@ namespace utils
         }
     }
 
+    void RegisterWER(QString strPath, unsigned long nDumpType, unsigned long nDumpCount)
+    {
+        using BYTE = unsigned char;
+        using DWORD = unsigned long;
+        HKEY hKey = NULL;
+        if (ERROR_SUCCESS == RegCreateKeyExA(HKEY_LOCAL_MACHINE, R"(SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\北斗鹰PC.exe)", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WOW64_64KEY | KEY_WRITE, NULL, &hKey, NULL))
+        {
+            if (ERROR_SUCCESS != RegSetValueExA(hKey, "DumpFolder", 0, REG_EXPAND_SZ, (BYTE*)strPath.toStdString().c_str(), strPath.size()))
+            {
+                LogError("write DumpFolder failed");
+            }
+            if (ERROR_SUCCESS != RegSetValueExA(hKey, "DumpType", 0, REG_DWORD, (BYTE*)&nDumpType, sizeof(DWORD)))
+            {
+                LogError("write DumpType failed");
+            }
+            if (ERROR_SUCCESS != RegSetValueExA(hKey, "DumpCount", 0, REG_DWORD, (BYTE*)&nDumpCount, sizeof(DWORD)))
+            {
+                LogError("write DumpType failed");
+            }
+            RegCloseKey(hKey);
+            hKey = NULL;
+        }
+
+        if (ERROR_SUCCESS == RegCreateKeyExA(HKEY_LOCAL_MACHINE, R"(SOFTWARE\Microsoft\Windows\Windows Error Reporting\LocalDumps\北斗鹰PC.exe)", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_WOW64_32KEY | KEY_WRITE, NULL, &hKey, NULL))
+        {
+            if (ERROR_SUCCESS != RegSetValueExA(hKey, "DumpFolder", 0, REG_EXPAND_SZ, (BYTE*)strPath.toStdString().c_str(), strPath.size()))
+            {
+                LogError("write DumpFolder failed");
+            }
+            if (ERROR_SUCCESS != RegSetValueExA(hKey, "DumpType", 0, REG_DWORD, (BYTE*)&nDumpType, sizeof(DWORD)))
+            {
+                LogError("write DumpType failed");
+            }
+            if (ERROR_SUCCESS != RegSetValueExA(hKey, "DumpCount", 0, REG_DWORD, (BYTE*)&nDumpCount, sizeof(DWORD)))
+            {
+                LogError("write DumpType failed");
+            }
+            RegCloseKey(hKey);
+            hKey = NULL;
+        }
+    }
+
     std::string GetUUID()
     {
         char buf[GUID_LEN] = { 0 };
