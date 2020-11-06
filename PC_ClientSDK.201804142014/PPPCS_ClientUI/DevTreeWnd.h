@@ -86,6 +86,7 @@ protected:
     void OnDeviceConnectedCB(const DeviceData& devData);
     void OnDeviceStatuChanged(const std::string& strUid, int nStatus);
     void OnStreamInfo(const std::string& strUid, const IPCNetStreamInfo::Ptr& pData);
+    void OnCmdResult(const std::string& strUid, int nCmd, int nResult);
     void CheckDevActiveAndLockStatu(std::string& strShortCode);
 
 

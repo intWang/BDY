@@ -330,6 +330,11 @@ namespace ls
         }
     }
 
+    void IPCNetServer::OnIPCCmdResult(std::string& strUid, int nCmd, int nResult)
+    {
+        fireNotification(std::bind(&IIPCNetServerCallBack::OnIPCCmdResult, std::placeholders::_1, strUid, nCmd, nResult));
+    }
+
     void IPCNetServer::OnNetOperteResult(int cmd, const char*uuid, const char*json)
     {
         PJson::JSONObject jsdata(json);
@@ -443,6 +448,7 @@ namespace ls
                     std::string strResult = (result.ret == 0?"成功！":"失败！");
                     OnHintMsg(strHintMsg + strResult);
                 }
+                OnIPCCmdResult(strUid, cmd, result.ret);
             }
         }
         break;
@@ -885,6 +891,17 @@ namespace ls
             if (func && func->funcOnRecordNotify)
             {
                 func->funcOnRecordNotify(strUid, bStart);
+            }
+            return false;
+        });
+    }
+
+    void IPCNetServerCallBack::OnIPCCmdResult(const std::string& strUid, int nCmd, int nResult)
+    {
+        utils::TravelVector(m_CBFunc, [&strUid, nCmd, nResult](auto func) {
+            if (func && func->funcOnIPCCmdResult)
+            {
+                func->funcOnIPCCmdResult(strUid, nCmd, nResult);
             }
             return false;
         });

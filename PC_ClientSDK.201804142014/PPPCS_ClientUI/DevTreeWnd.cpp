@@ -7,6 +7,7 @@
 #include <QStandardItemModel>
 #include <QStandardItem>
 #include <queue>
+#include <type_traits>
 #include "utils.h"
 #include "IServer.h"
 #include "ConfigWidget.h"
@@ -51,6 +52,9 @@ DevTreeWnd::DevTreeWnd(QWidget *parent)
         m_CallBackFunc->funcOnDeviceConnected = std::bind(&DevTreeWnd::OnDeviceConnectedCB, this, std::placeholders::_1);
         m_CallBackFunc->funcOnDeviceStatuChanged = std::bind(&DevTreeWnd::OnDeviceStatuChanged, this, std::placeholders::_1, std::placeholders::_2);
         m_CallBackFunc->funconGetClarityData = std::bind(&DevTreeWnd::OnStreamInfo, this, std::placeholders::_1, std::placeholders::_2);
+        m_CallBackFunc->funcOnIPCCmdResult = std::bind(&DevTreeWnd::OnCmdResult, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3);
+
+        
         auto pIPCCallBack = g_pCallBack ? g_pCallBack->GetIPCNetCallBack() : nullptr;
         if (pIPCCallBack)
         {
@@ -978,6 +982,27 @@ void DevTreeWnd::OnStreamInfo(const std::string& strUid, const IPCNetStreamInfo:
     }
 }
 
+void DevTreeWnd::OnCmdResult(const std::string& strUid, int nCmd, int nResult)
+{
+    auto pDevNode = std::dynamic_pointer_cast<DevNode>(GetTreeItemByUid(strUid));
+    if (pDevNode)
+    {
+        switch (nCmd)
+        {
+        case IPCNET_USER_SET_RESP:
+        {
+            if (m_pHttpHelper)
+            {
+                m_pHttpHelper->RequestChangePwd(pDevNode->strUID, pDevNode->strOldPwd, pDevNode->strPwd);
+            }
+        }
+            break;
+        default:
+            break;
+        }
+    }
+}
+
 void DevTreeWnd::CheckDevActiveAndLockStatu(std::string& strShortCode)
 {
     if (m_pHttpHelper)
@@ -1242,16 +1267,27 @@ void DevTreeWnd::OnHttpReplyFinished(QNetworkReply* replay)
                 std::string strMsg;
                 jsdata.getString("msg", strMsg);
 
-                if (strMsg == "success")
-                {
+                auto HintMsg = [](std::string&& strHint, ls::HintLevel nLevel) {
                     if (g_pEngine)
                     {
                         auto pHintServer = g_pEngine->GetHintServer();
                         if (pHintServer)
                         {
-                            pHintServer->OnUserOperateHint("设备成功激活！", ls::HintLevel::Info);
+                            pHintServer->OnUserOperateHint(strHint, nLevel);
                         }
                     }
+                };
+
+                if (strMsg == "success")
+                {
+                    if (m_pHttpHelper && m_pHttpHelper->IsActiveDevReply(replay))
+                    {
+                        HintMsg("设备成功激活！", ls::HintLevel::Info);
+                    }
+                }
+                else
+                {
+                    //HintMsg(std::forward(strMsg), ls::HintLevel::Error);
                 }
             }
         }

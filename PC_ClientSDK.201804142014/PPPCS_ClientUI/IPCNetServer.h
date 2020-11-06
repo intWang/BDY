@@ -61,6 +61,7 @@ namespace ls
         void onGetClarityCmd(std::string& strUid, IPCNetStreamInfo::Ptr& pData);
         void onGetFlipMirrorCmd(std::string& strUid, IPCNetPicOverTurn::Ptr& pData);
         void OnHintMsg(std::string& strHint, ls::HintLevel emLevel = HintLevel::Info);
+        void OnIPCCmdResult(std::string& strUid, int nCmd, int nResult);
         void AddTask(ITask::Ptr ptask);
         ITask::Ptr PopTask();
         void Work();
@@ -97,6 +98,7 @@ namespace ls
         virtual void onGetClarityCmd(std::string& strUid, const IPCNetStreamInfo::Ptr& pData) override;
         virtual void onGetFlipMirrorCmd(std::string& strUid, const IPCNetPicOverTurn::Ptr& pData) override;
         virtual void OnRecordStatuNotify(const std::string& strUid, bool bStart) override;
+        virtual void OnIPCCmdResult(const std::string& strUid, int nCmd, int nResult) override;
 
     protected:
         void DispatchVideoData(const std::string& strUid, const unsigned char*data, int width, int height, int len);

@@ -75,6 +75,7 @@ namespace ls
             std::function<void(const std::string&, const IPCNetStreamInfo::Ptr&)> funconGetClarityData = nullptr;
             std::function<void(const std::string&, const IPCNetPicOverTurn::Ptr&)> funconGetFlipMirrorData = nullptr;
             std::function<void(const std::string&, bool)> funcOnRecordNotify = nullptr;
+            std::function<void(const std::string&, int, int)> funcOnIPCCmdResult = nullptr;
 
             
             virtual ~CallBackFunc() {};
@@ -95,6 +96,7 @@ namespace ls
         virtual void onGetClarityCmd(std::string& strUid, const IPCNetStreamInfo::Ptr& pData) = 0;
         virtual void onGetFlipMirrorCmd(std::string& strUid, const IPCNetPicOverTurn::Ptr& pData) = 0;
         virtual void OnRecordStatuNotify(const std::string& strUid, bool bRecord) = 0;
+        virtual void OnIPCCmdResult(const std::string& strUid, int nCmd, int nResult) = 0;
     private:
     };
 

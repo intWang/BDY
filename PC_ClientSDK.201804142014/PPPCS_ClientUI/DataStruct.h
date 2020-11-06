@@ -91,6 +91,7 @@ struct DevNode :public TreeNode
     std::string strDevID;
     std::string strCustomName;
     std::string strPwd;
+    std::string strOldPwd;
     static int s_nDevCount;
     int nPreviewCount;
     VideoParamData stVideoParam;

@@ -203,6 +203,7 @@ bool DevNode::ChangePwd(std::string strNewPwd)
     if (pICPServer)
     {
         pICPServer->ChangeDevPwd(strUID,strNewPwd);
+        strOldPwd = strPwd;
         strPwd = strNewPwd;
         return true;
     }
